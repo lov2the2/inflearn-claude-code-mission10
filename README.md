@@ -5,12 +5,38 @@ A production-ready monorepo starter kit featuring Go backend with Clean Architec
 ## Features
 
 - 🔐 JWT Authentication with RBAC (Admin/User roles)
-- 🔄 Refresh Token Implementation
-- 📊 CSV Import/Export
+- 🔄 Refresh Token Implementation with Auto-Refresh
+- 📊 CSV Import/Export (Backend + Frontend UI)
 - 📄 Pagination Support
 - 📚 Swagger API Documentation
+- 👥 Admin Panel UI (User Management)
+- 🚀 Server Management Scripts
 - 🐳 Docker Compose Orchestration
 - 🔥 Live Reload (Air + Next.js)
+
+## Authentication Flow
+
+**Token Management:**
+- Access tokens (15 minutes expiry) for API authentication
+- Refresh tokens (7 days expiry) for obtaining new access tokens
+- Automatic token refresh on 401 responses (frontend)
+
+**Token Refresh:**
+```bash
+POST /api/v1/auth/refresh
+{
+  "refresh_token": "your_refresh_token"
+}
+```
+
+Response:
+```json
+{
+  "access_token": "new_access_token",
+  "refresh_token": "new_refresh_token",
+  "user": {...}
+}
+```
 
 ## Tech Stack
 
@@ -160,11 +186,57 @@ make dev-frontend     # Start frontend (Next.js)
 make clean            # Clean up containers and build artifacts
 ```
 
+## Server Management
+
+**Start All Services:**
+```bash
+make start          # Start all servers (DB → Backend → Frontend)
+make status         # Check server status
+make logs           # View recent logs
+make stop           # Stop all servers
+```
+
+**Individual Control:**
+```bash
+make start-db       # Start PostgreSQL only
+make start-backend  # Start backend only
+make start-frontend # Start frontend only
+make stop-db        # Stop PostgreSQL
+make stop-backend   # Stop backend
+make stop-frontend  # Stop frontend
+```
+
+**Legacy (requires 3 terminals):**
+```bash
+make dev-db         # Terminal 1
+make dev-backend    # Terminal 2
+make dev-frontend   # Terminal 3
+```
+
 ## API Documentation
 
 API documentation is available via Swagger UI:
 - **URL**: http://localhost:8080/swagger/index.html
 - **Generate docs**: `cd backend && swag init -g cmd/api/main.go`
+
+## Admin Features
+
+Admins can manage users through dedicated endpoints and UI:
+
+**User Management:**
+- List all users with pagination: `GET /api/v1/admin/users?page=1&limit=10`
+- Get user details: `GET /api/v1/admin/users/{id}`
+- Update user role: `PATCH /api/v1/admin/users/{id}/role`
+- Delete user: `DELETE /api/v1/admin/users/{id}`
+
+**Bulk Operations:**
+- Export users to CSV: `GET /api/v1/admin/users/export`
+- Import users from CSV: `POST /api/v1/admin/users/import`
+
+**Frontend Admin Panel:**
+- Access at: `http://localhost:3000/admin/users`
+- Features: user list, role management, delete, CSV import/export
+- Protected route (admin role required)
 
 ## Development Workflow
 
@@ -207,19 +279,24 @@ make migrate-force
 - Project structure (Clean Architecture)
 - Docker Compose configuration
 - Makefile automation
-- Basic health check endpoint
-
-### 🚧 In Progress
+- Health check endpoints
 - User authentication (JWT)
-- Database models and migrations
+- Refresh token mechanism with auto-refresh
+- Role-based access control (RBAC)
+- Admin user management endpoints
+- Admin Panel UI (user list, role management, delete)
+- Pagination support
+- CSV import/export (backend + frontend)
+- Swagger/OpenAPI documentation
 - Frontend authentication flow
+- Database models and migrations
+- Server management scripts (start/stop/status/logs)
 
 ### 📋 Planned
-- Refresh token implementation
-- Role-based access control (RBAC)
-- CSV import/export
-- Pagination
-- Comprehensive tests
+- Comprehensive unit tests
+- Integration tests
+- E2E tests
+- Deployment documentation
 
 ## Contributing
 
