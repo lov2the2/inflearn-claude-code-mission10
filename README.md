@@ -182,8 +182,22 @@ npm run dev  # Hot reload enabled
 
 ### Database Migrations
 ```bash
-# Run migrations (TODO: Add migration tool)
-# Example: migrate -path backend/migrations -database $DATABASE_URL up
+# Create new migration
+make migrate-create
+# Enter migration name when prompted (e.g., "add_users_table")
+
+# Run all pending migrations
+make migrate-up
+
+# Rollback last migration
+make migrate-down
+
+# Check current migration version
+make migrate-version
+
+# Force specific version (if migration fails)
+make migrate-force
+# Enter version number when prompted
 ```
 
 ## Project Status

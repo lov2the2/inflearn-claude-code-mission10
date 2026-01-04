@@ -72,3 +72,56 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
     c.JSON(http.StatusOK, dto.NewSuccessResponse(authResp, "Login successful"))
 }
+
+// Refresh godoc
+// @Summary Refresh access token
+// @Description Generate new access token using refresh token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.RefreshTokenRequest true "Refresh token request"
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Router /api/v1/auth/refresh [post]
+func (h *AuthHandler) Refresh(c *gin.Context) {
+    var req dto.RefreshTokenRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, dto.NewErrorResponse(err.Error()))
+        return
+    }
+
+    authResp, err := h.authService.Refresh(req.RefreshToken)
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, dto.NewErrorResponse(err.Error()))
+        return
+    }
+
+    c.JSON(http.StatusOK, dto.NewSuccessResponse(authResp, "Token refreshed successfully"))
+}
+
+// Logout godoc
+// @Summary Logout user
+// @Description Revoke refresh token and logout user
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.RefreshTokenRequest true "Refresh token request"
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/v1/auth/logout [post]
+func (h *AuthHandler) Logout(c *gin.Context) {
+    var req dto.RefreshTokenRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, dto.NewErrorResponse(err.Error()))
+        return
+    }
+
+    if err := h.authService.Logout(req.RefreshToken); err != nil {
+        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        return
+    }
+
+    c.JSON(http.StatusOK, dto.NewSuccessResponse(nil, "Logout successful"))
+}

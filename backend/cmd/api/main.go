@@ -41,19 +41,24 @@ func main() {
     }
 
     // Auto-migrate models
-    if err := db.AutoMigrate(&model.User{}); err != nil {
+    if err := db.AutoMigrate(&model.User{}, &model.RefreshToken{}); err != nil {
         log.Fatalf("Failed to migrate database: %v", err)
     }
 
-    // Parse JWT expiry duration
+    // Parse JWT expiry durations
     jwtExpiry, err := time.ParseDuration(cfg.JWT.AccessExpiry)
     if err != nil {
-        log.Fatalf("Invalid JWT expiry duration: %v", err)
+        log.Fatalf("Invalid JWT access expiry duration: %v", err)
+    }
+
+    refreshTokenExpiry, err := time.ParseDuration(cfg.JWT.RefreshExpiry)
+    if err != nil {
+        log.Fatalf("Invalid JWT refresh expiry duration: %v", err)
     }
 
     // Initialize layers
     repo := repository.NewRepository(db)
-    svc := service.NewService(repo, cfg.JWT.Secret, jwtExpiry)
+    svc := service.NewService(repo, cfg.JWT.Secret, jwtExpiry, refreshTokenExpiry)
     h := handler.NewHandler(svc, db)
 
     // Initialize Gin router
@@ -74,6 +79,8 @@ func main() {
         {
             auth.POST("/register", h.Auth.Register)
             auth.POST("/login", h.Auth.Login)
+            auth.POST("/refresh", h.Auth.Refresh)
+            auth.POST("/logout", h.Auth.Logout)
         }
     }
 
