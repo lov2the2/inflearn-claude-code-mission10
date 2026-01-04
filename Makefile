@@ -1,18 +1,40 @@
-.PHONY: help install-backend install-frontend install dev-db dev-backend dev-frontend dev clean migrate-create migrate-up migrate-down migrate-force migrate-version
+.PHONY: help install-backend install-frontend install dev-db dev-backend dev-frontend dev clean migrate-create migrate-up migrate-down migrate-force migrate-version start stop start-db stop-db start-backend stop-backend start-frontend stop-frontend status logs
 
 help:
 	@echo "Available commands:"
-	@echo " make install - Install all dependencies"
-	@echo " make install-backend - Install backend dependencies"
-	@echo " make install-frontend - Install frontend dependencies"
-	@echo " make dev-db - Start PostgreSQL"
-	@echo " make dev-backend - Start backend dev server"
-	@echo " make dev-frontend - Start frontend dev server"
-	@echo " make clean - Clean Docker volumes"
-	@echo " make migrate-create - Create new migration file"
-	@echo " make migrate-up - Run all pending migrations"
-	@echo " make migrate-down - Rollback last migration"
-	@echo " make migrate-version - Show current migration version"
+	@echo ""
+	@echo "Development:"
+	@echo "  make start              - Start all servers (DB → Backend → Frontend)"
+	@echo "  make stop               - Stop all servers"
+	@echo "  make status             - Show server status"
+	@echo "  make logs               - Show recent logs"
+	@echo ""
+	@echo "Individual servers:"
+	@echo "  make start-db           - Start PostgreSQL"
+	@echo "  make stop-db            - Stop PostgreSQL"
+	@echo "  make start-backend      - Start backend dev server"
+	@echo "  make stop-backend       - Stop backend dev server"
+	@echo "  make start-frontend     - Start frontend dev server"
+	@echo "  make stop-frontend      - Stop frontend dev server"
+	@echo ""
+	@echo "Legacy (foreground, requires terminal):"
+	@echo "  make dev-db             - Start PostgreSQL (foreground)"
+	@echo "  make dev-backend        - Start backend (foreground with Air)"
+	@echo "  make dev-frontend       - Start frontend (foreground)"
+	@echo ""
+	@echo "Dependencies:"
+	@echo "  make install            - Install all dependencies"
+	@echo "  make install-backend    - Install backend dependencies"
+	@echo "  make install-frontend   - Install frontend dependencies"
+	@echo ""
+	@echo "Database:"
+	@echo "  make migrate-create     - Create new migration file"
+	@echo "  make migrate-up         - Run all pending migrations"
+	@echo "  make migrate-down       - Rollback last migration"
+	@echo "  make migrate-version    - Show current migration version"
+	@echo ""
+	@echo "Cleanup:"
+	@echo "  make clean              - Clean Docker volumes and temp files"
 
 install: install-backend install-frontend
 
@@ -52,3 +74,41 @@ clean:
 	docker-compose down -v
 	rm -rf backend/tmp
 	rm -rf frontend/.next
+
+# New server management commands
+start:
+	@bash scripts/start-all.sh
+
+stop:
+	@bash scripts/stop-all.sh
+
+start-db:
+	@bash scripts/start-db.sh
+
+stop-db:
+	@bash scripts/stop-db.sh
+
+start-backend:
+	@bash scripts/start-backend.sh
+
+stop-backend:
+	@bash scripts/stop-backend.sh
+
+start-frontend:
+	@bash scripts/start-frontend.sh
+
+stop-frontend:
+	@bash scripts/stop-frontend.sh
+
+status:
+	@echo "Server Status:"
+	@echo "  Database:  $$(docker ps | grep -q starter-kit-db && echo '✓ Running' || echo '✗ Stopped')"
+	@echo "  Backend:   $$([ -f .pids/backend.pid ] && kill -0 $$(cat .pids/backend.pid) 2>/dev/null && echo '✓ Running (PID: '$$(cat .pids/backend.pid)')' || echo '✗ Stopped')"
+	@echo "  Frontend:  $$([ -f .pids/frontend.pid ] && kill -0 $$(cat .pids/frontend.pid) 2>/dev/null && echo '✓ Running (PID: '$$(cat .pids/frontend.pid)')' || echo '✗ Stopped')"
+
+logs:
+	@echo "=== Backend Logs ==="
+	@tail -n 50 logs/backend.log 2>/dev/null || echo "No backend logs"
+	@echo ""
+	@echo "=== Frontend Logs ==="
+	@tail -n 50 logs/frontend.log 2>/dev/null || echo "No frontend logs"

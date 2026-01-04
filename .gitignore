@@ -21,4 +21,9 @@ Thumbs.db
 
 # Misc
 *.log
+logs/
+
+# Process management
+.pids/
+*.pid
 
