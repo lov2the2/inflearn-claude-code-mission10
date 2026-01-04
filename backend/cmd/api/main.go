@@ -13,6 +13,10 @@ import (
     "start-kit-backend/pkg/database"
 
     "github.com/gin-gonic/gin"
+
+    swaggerFiles "github.com/swaggo/files"
+    ginSwagger "github.com/swaggo/gin-swagger"
+    _ "start-kit-backend/docs"  // Import generated docs
 )
 
 // @title Go + Next.js Starter Kit API
@@ -20,6 +24,11 @@ import (
 // @description API documentation for Go + Next.js Full-stack Starter Kit
 // @host localhost:8080
 // @BasePath /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func main() {
     // Load configuration
     cfg := config.Load()
@@ -70,6 +79,9 @@ func main() {
     // Health check routes
     router.GET("/health", h.Health.Health)
     router.GET("/ready", h.Health.Ready)
+
+    // Swagger documentation route
+    router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
     // API v1 routes
     v1 := router.Group("/api/v1")
