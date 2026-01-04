@@ -4,13 +4,13 @@ import (
     "log"
     "time"
 
-    "starter-kit-backend/internal/config"
-    "starter-kit-backend/internal/handler"
-    "starter-kit-backend/internal/middleware"
-    "starter-kit-backend/internal/model"
-    "starter-kit-backend/internal/repository"
-    "starter-kit-backend/internal/service"
-    "starter-kit-backend/pkg/database"
+    "start-kit-backend/internal/config"
+    "start-kit-backend/internal/handler"
+    "start-kit-backend/internal/middleware"
+    "start-kit-backend/internal/model"
+    "start-kit-backend/internal/repository"
+    "start-kit-backend/internal/service"
+    "start-kit-backend/pkg/database"
 
     "github.com/gin-gonic/gin"
 )
@@ -81,6 +81,21 @@ func main() {
             auth.POST("/login", h.Auth.Login)
             auth.POST("/refresh", h.Auth.Refresh)
             auth.POST("/logout", h.Auth.Logout)
+        }
+
+        // Admin routes (protected)
+        admin := v1.Group("/admin")
+        admin.Use(middleware.AuthRequired(cfg.JWT.Secret))
+        admin.Use(middleware.RequireAdmin())
+        {
+            admin.GET("/users", h.Admin.ListUsers)
+            admin.GET("/users/:id", h.Admin.GetUser)
+            admin.PATCH("/users/:id/role", h.Admin.UpdateUserRole)
+            admin.DELETE("/users/:id", h.Admin.DeleteUser)
+
+            // CSV import/export routes
+            admin.GET("/users/export", h.CSV.ExportUsersCSV)
+            admin.POST("/users/import", h.CSV.ImportUsersCSV)
         }
     }
 

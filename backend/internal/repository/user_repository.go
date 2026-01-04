@@ -1,7 +1,7 @@
 package repository
 
 import (
-    "starter-kit-backend/internal/model"
+    "start-kit-backend/internal/model"
 
     "gorm.io/gorm"
 )

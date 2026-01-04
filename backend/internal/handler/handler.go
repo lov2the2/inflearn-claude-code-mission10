@@ -1,7 +1,7 @@
 package handler
 
 import (
-    "starter-kit-backend/internal/service"
+    "start-kit-backend/internal/service"
 
     "gorm.io/gorm"
 )
@@ -9,6 +9,7 @@ import (
 type Handler struct {
     Auth   *AuthHandler
     Admin  *AdminHandler
+    CSV    *CSVHandler
     Health *HealthHandler
 }
 
@@ -16,6 +17,7 @@ func NewHandler(service *service.Service, db *gorm.DB) *Handler {
     return &Handler{
         Auth:   NewAuthHandler(service.Auth),
         Admin:  NewAdminHandler(service.Admin),
+        CSV:    NewCSVHandler(service.CSV),
         Health: NewHealthHandler(db),
     }
 }

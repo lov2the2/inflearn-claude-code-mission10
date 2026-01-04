@@ -3,8 +3,8 @@ package handler
 import (
     "net/http"
 
-    "starter-kit-backend/internal/dto"
-    "starter-kit-backend/internal/service"
+    "start-kit-backend/internal/dto"
+    "start-kit-backend/internal/service"
 
     "github.com/gin-gonic/gin"
 )

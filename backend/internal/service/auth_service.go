@@ -4,10 +4,10 @@ import (
     "errors"
     "time"
 
-    "starter-kit-backend/internal/dto"
-    "starter-kit-backend/internal/model"
-    "starter-kit-backend/internal/repository"
-    "starter-kit-backend/internal/util"
+    "start-kit-backend/internal/dto"
+    "start-kit-backend/internal/model"
+    "start-kit-backend/internal/repository"
+    "start-kit-backend/internal/util"
 
     "gorm.io/gorm"
 )

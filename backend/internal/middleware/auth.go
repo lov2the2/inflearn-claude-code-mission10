@@ -4,8 +4,8 @@ import (
     "net/http"
     "strings"
 
-    "starter-kit-backend/internal/dto"
-    "starter-kit-backend/internal/util"
+    "start-kit-backend/internal/dto"
+    "start-kit-backend/internal/util"
 
     "github.com/gin-gonic/gin"
 )
