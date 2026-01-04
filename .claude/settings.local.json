@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Bash(node --version:*)",
+      "Bash(docker:*)"
+    ]
+  }
+}
