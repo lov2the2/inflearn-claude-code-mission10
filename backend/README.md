@@ -88,6 +88,32 @@ ALLOWED_ORIGINS=http://localhost:3000  # CORS allowed origins
 | POST | `/api/v1/auth/refresh` | Refresh access token | No |
 | POST | `/api/v1/auth/logout` | Logout (revoke refresh token) | Yes |
 
+### Users (Requires Authentication)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/users/profile` | Get current user's profile |
+| GET | `/api/v1/users/activity` | Get user activity log with pagination |
+| GET | `/api/v1/users/stats` | Get user statistics/KPIs |
+
+**Example - Get Profile:**
+```bash
+curl -X GET http://localhost:8080/api/v1/users/profile \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Example - Get Activity:**
+```bash
+curl -X GET "http://localhost:8080/api/v1/users/activity?page=1&limit=10" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**Example - Get Stats:**
+```bash
+curl -X GET http://localhost:8080/api/v1/users/stats \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
 ### Admin (Requires Admin Role)
 
 | Method | Endpoint | Description |
