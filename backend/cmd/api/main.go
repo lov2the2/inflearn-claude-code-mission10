@@ -100,6 +100,8 @@ func main() {
         users.Use(middleware.AuthRequired(cfg.JWT.Secret))
         {
             users.GET("/profile", h.User.GetProfile)
+            users.GET("/activity", h.User.GetActivity)
+            users.GET("/stats", h.User.GetStats)
          }
 
         // Admin routes (protected)
