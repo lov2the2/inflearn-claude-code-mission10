@@ -1,7 +1,84 @@
-.PHONY: help install-backend install-frontend install dev-db dev-backend dev-frontend dev clean migrate-create migrate-up migrate-down migrate-force migrate-version start stop start-db stop-db start-backend stop-backend start-frontend stop-frontend status logs
+.PHONY: help install-backend install-frontend install dev-db dev-backend dev-frontend dev clean migrate-create migrate-up migrate-down migrate-force migrate-version start stop start-db stop-db start-backend stop-backend start-frontend stop-frontend status logs check-go check-node check-docker check-tools check-all install-go-tools install-air install-migrate setup
+
+# Prerequisite checks
+check-go:
+	@command -v go >/dev/null 2>&1 || { echo "ERROR: Go is not installed. Install from https://go.dev/dl/"; exit 1; }
+	@echo "✓ Go version: $$(go version)"
+
+check-node:
+	@command -v node >/dev/null 2>&1 || { echo "ERROR: Node.js is not installed. Install from https://nodejs.org/"; exit 1; }
+	@command -v npm >/dev/null 2>&1 || { echo "ERROR: npm is not installed. Install Node.js from https://nodejs.org/"; exit 1; }
+	@echo "✓ Node.js version: $$(node --version)"
+	@echo "✓ npm version: $$(npm --version)"
+
+check-docker:
+	@command -v docker >/dev/null 2>&1 || { echo "ERROR: Docker is not installed. Install from https://www.docker.com/products/docker-desktop"; exit 1; }
+	@docker info >/dev/null 2>&1 || { echo "ERROR: Docker daemon is not running. Start Docker Desktop"; exit 1; }
+	@echo "✓ Docker is running"
+
+check-tools:
+	@echo "Checking Go tools..."
+	@if command -v air >/dev/null 2>&1; then \
+		echo "✓ air is installed: $$(air -v)"; \
+	else \
+		echo "⚠ air not installed - will be installed with 'make install'"; \
+	fi
+	@if command -v migrate >/dev/null 2>&1; then \
+		echo "✓ golang-migrate is installed: $$(migrate -version 2>&1 | head -n1)"; \
+	else \
+		echo "⚠ golang-migrate not installed - will be installed with 'make install'"; \
+	fi
+
+check-all: check-go check-node check-docker check-tools
+	@echo ""
+	@echo "✓ All prerequisite checks completed!"
+
+# Tool installation
+install-air:
+	@if command -v air >/dev/null 2>&1; then \
+		echo "✓ air is already installed: $$(air -v)"; \
+	else \
+		echo "Installing air (Go live reload tool)..."; \
+		go install github.com/air-verse/air@latest; \
+		echo "✓ air installed successfully"; \
+	fi
+
+install-migrate:
+	@if command -v migrate >/dev/null 2>&1; then \
+		echo "✓ golang-migrate is already installed: $$(migrate -version 2>&1 | head -n1)"; \
+	else \
+		echo "Installing golang-migrate..."; \
+		go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest; \
+		echo "✓ golang-migrate installed successfully"; \
+	fi
+
+install-go-tools: check-go install-air install-migrate
+	@echo ""
+	@echo "✓ All Go tools installed successfully"
+	@echo ""
+	@if ! echo $$PATH | grep -q "$$(go env GOPATH)/bin"; then \
+		echo "⚠ WARNING: Go tools installed but may not be in PATH"; \
+		echo ""; \
+		echo "Add to your ~/.zshrc or ~/.bashrc:"; \
+		echo "  export PATH=\"\$$HOME/go/bin:\$$PATH\""; \
+		echo ""; \
+		echo "Then run: source ~/.zshrc"; \
+		echo ""; \
+	fi
 
 help:
 	@echo "Available commands:"
+	@echo ""
+	@echo "Prerequisites (run these first):"
+	@echo "  make check-all          - Verify all prerequisites are met"
+	@echo "  make check-go           - Check if Go is installed"
+	@echo "  make check-node         - Check if Node.js/npm are installed"
+	@echo "  make check-docker       - Check if Docker is running"
+	@echo "  make check-tools        - Check if Go tools (air, migrate) are installed"
+	@echo ""
+	@echo "Setup:"
+	@echo "  make setup              - Complete setup (checks + install)"
+	@echo "  make install-go-tools   - Install Go development tools (air, migrate)"
 	@echo ""
 	@echo "Development:"
 	@echo "  make start              - Start all servers (DB → Backend → Frontend)"
@@ -36,13 +113,44 @@ help:
 	@echo "Cleanup:"
 	@echo "  make clean              - Clean Docker volumes and temp files"
 
-install: install-backend install-frontend
+install: check-all install-backend install-frontend
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "✓ All dependencies installed successfully!"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo ""
+	@echo "Next steps:"
+	@if [ ! -f backend/.env ]; then \
+		echo "  1. cp backend/.env.example backend/.env"; \
+	else \
+		echo "  1. ✓ backend/.env exists"; \
+	fi
+	@if [ ! -f frontend/.env.local ]; then \
+		echo "  2. cp frontend/.env.local.example frontend/.env.local"; \
+	else \
+		echo "  2. ✓ frontend/.env.local exists"; \
+	fi
+	@echo "  3. make start"
+	@echo ""
 
-install-backend:
+install-backend: check-go install-go-tools
+	@echo "Installing backend dependencies..."
 	cd backend && go mod download && go mod tidy
+	@echo "✓ Backend dependencies installed"
 
-install-frontend:
+install-frontend: check-node
+	@echo "Installing frontend dependencies..."
 	cd frontend && npm install
+	@echo "✓ Frontend dependencies installed"
+
+setup: check-all install
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "✓ Setup Complete!"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo ""
+	@echo "Quick start: make start"
+	@echo ""
 
 dev-db:
 	docker-compose up -d postgres
