@@ -95,6 +95,13 @@ func main() {
             auth.POST("/logout", h.Auth.Logout)
         }
 
+        // User routes (protected)
+        users := v1.Group("/users")
+        users.Use(middleware.AuthRequired(cfg.JWT.Secret))
+        {
+            users.GET("/profile", h.User.GetProfile)
+         }
+
         // Admin routes (protected)
         admin := v1.Group("/admin")
         admin.Use(middleware.AuthRequired(cfg.JWT.Secret))

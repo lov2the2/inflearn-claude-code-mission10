@@ -11,6 +11,7 @@ type Handler struct {
     Admin  *AdminHandler
     CSV    *CSVHandler
     Health *HealthHandler
+    User   *UserHandler
 }
 
 func NewHandler(service *service.Service, db *gorm.DB) *Handler {
@@ -19,5 +20,6 @@ func NewHandler(service *service.Service, db *gorm.DB) *Handler {
         Admin:  NewAdminHandler(service.Admin),
         CSV:    NewCSVHandler(service.CSV),
         Health: NewHealthHandler(db),
+        User:   NewUserHandler(service.User),
     }
 }
