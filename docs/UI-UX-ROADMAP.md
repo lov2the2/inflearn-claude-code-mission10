@@ -49,6 +49,130 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 
 ---
 
+## 🔧 GIT WORKFLOW (MUST FOLLOW)
+
+**이 프로젝트는 루트 디렉토리에서만 Git을 관리합니다.**
+
+### 중요 규칙
+
+1. **모든 Git 명령은 프로젝트 루트에서 실행**
+   - ✅ 올바름: `/Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission/`
+   - ❌ 잘못됨: `~/starter-kit-mission/frontend/` 또는 `~/starter-kit-mission/backend/`
+
+2. **frontend와 backend는 독립적인 Git 저장소가 아님**
+   - `frontend/.git` 또는 `backend/.git`이 존재하면 안 됨
+   - 모든 파일은 루트 저장소에서 추적됨
+
+3. **작업 전 항상 루트 디렉토리 확인**
+   ```bash
+   pwd  # 현재 위치 확인
+   # 출력: /Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission
+   ```
+
+### 올바른 Git 워크플로우
+
+```bash
+# 1. 루트 디렉토리로 이동
+cd /Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission
+
+# 2. 변경사항 확인
+git status
+
+# 3. 파일 추가 (frontend/backend 파일 포함)
+git add frontend/app/layout.tsx
+git add backend/internal/handler/user_handler.go
+# 또는 전체 추가
+git add -A
+
+# 4. 커밋 (로드맵 형식 준수)
+git commit -m "feat: Implement feature - Phase X.X (docs/UI-UX-ROADMAP.md)
+
+- 수행 단계: Phase X.X - 기능명
+- 주요 변경사항:
+  - 변경사항 1
+  - 변경사항 2
+
+참조: docs/UI-UX-ROADMAP.md
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
+
+# 5. 푸시
+git push origin main
+```
+
+### 일반적인 실수와 해결 방법
+
+#### 실수 1: frontend에서 Git 명령 실행
+
+```bash
+# ❌ 잘못된 방법
+cd frontend
+git add .
+git commit -m "Update layout"
+# 결과: frontend/.git 생성됨, 루트와 분리됨
+
+# ✅ 올바른 방법
+cd /Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission
+git add frontend/
+git commit -m "feat: Update frontend layout - Phase X.X (docs/UI-UX-ROADMAP.md)
+..."
+```
+
+#### 실수 2: frontend/.git이 생성된 경우
+
+```bash
+# 문제 확인
+ls -la frontend/.git  # 디렉토리 존재 확인
+
+# 해결 방법
+cd /Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission
+rm -rf frontend/.git  # frontend의 독립 Git 제거
+git rm --cached frontend  # 루트 Git 캐시에서 제거
+git add frontend/  # 디렉토리로 다시 추가
+git commit -m "chore: Migrate frontend to root git management"
+```
+
+#### 실수 3: "no configured push destination" 에러
+
+```bash
+# 문제: 잘못된 디렉토리에서 push 시도
+
+# 해결 방법
+cd /Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission
+git remote -v  # origin이 설정되어 있는지 확인
+git push origin main
+```
+
+### Phase 작업 시 Git 체크리스트
+
+Phase 작업 전:
+- [ ] `pwd`로 루트 디렉토리 확인
+- [ ] `git status`로 clean 상태 확인
+
+Phase 작업 중:
+- [ ] 파일 수정은 어디서든 가능 (VS Code, 터미널 등)
+- [ ] Git 명령은 반드시 루트에서만 실행
+
+Phase 작업 후:
+- [ ] 루트에서 `git status` 확인
+- [ ] 루트에서 `git add` 실행
+- [ ] 루트에서 커밋 메시지 작성 (로드맵 형식 준수)
+- [ ] 루트에서 `git push` 실행
+
+### Remote 설정 확인
+
+```bash
+cd /Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission
+git remote -v
+# 출력 예시:
+# origin  git@github.com:lov2the2/inflearn-claude-code-mission10.git (fetch)
+# origin  git@github.com:lov2the2/inflearn-claude-code-mission10.git (push)
+```
+
+---
+
 ## 프로젝트 컨텍스트
 
 **프로젝트**: Go + Next.js Full-stack Starter Kit
