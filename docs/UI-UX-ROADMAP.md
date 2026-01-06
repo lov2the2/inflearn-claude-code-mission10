@@ -1,5 +1,54 @@
 # UI/UX 개선 및 사용자 워크플로우 로드맵
 
+---
+
+## 🚨 COMMIT MESSAGE CONVENTION (MUST FOLLOW)
+
+**모든 커밋은 반드시 다음 형식을 따라야 합니다:**
+
+```
+<type>: <subject> - Phase X.X (docs/UI-UX-ROADMAP.md)
+
+<body>
+- 수행 단계: Phase X.X - <단계명>
+- 주요 변경사항:
+  - <변경사항 1>
+  - <변경사항 2>
+  - <변경사항 3>
+
+참조: docs/UI-UX-ROADMAP.md
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+```
+
+### 필수 포함 항목
+
+1. **로드맵 파일명**: `docs/UI-UX-ROADMAP.md` (제목에 포함)
+2. **수행 단계**: Phase X.X - 단계명 명시
+3. **주요 변경사항**: 구체적인 수정 내역 나열
+
+### 예시
+
+```
+feat: Implement landing page and guest navbar - Phase 1.1 (docs/UI-UX-ROADMAP.md)
+
+- 수행 단계: Phase 1.1 - 홈페이지 개선
+- 주요 변경사항:
+  - Add auto-redirect logic for authenticated users to /dashboard
+  - Create GuestNavbar component with Sign In/Get Started buttons
+  - Implement landing page with Hero, Features, CTA, and Footer sections
+
+참조: docs/UI-UX-ROADMAP.md
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+```
+
+---
+
 ## 프로젝트 컨텍스트
 
 **프로젝트**: Go + Next.js Full-stack Starter Kit
