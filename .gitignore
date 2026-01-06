@@ -2,6 +2,8 @@
 backend/tmp/
 backend/.env
 backend/docs/
+backend/api
+backend/bin/
 
 # Frontend
 frontend/node_modules/
@@ -27,3 +29,5 @@ logs/
 .pids/
 *.pid
 
+# Root dependencies
+node_modules/
