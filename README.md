@@ -111,150 +111,40 @@ starter-kit-mission/
 ## Quick Start
 
 ### Prerequisites
-
-Before setting up this project, ensure you have the following installed:
-
-#### Required (Must Install Manually)
-
-| Tool | Version | Installation | Purpose |
-|------|---------|--------------|---------|
-| **Go** | 1.21+ | [go.dev/dl](https://go.dev/dl/) | Backend language |
-| **Node.js** | 18+ | [nodejs.org](https://nodejs.org/) | Frontend runtime |
-| **npm** | 8+ | Included with Node.js | Frontend package manager |
-| **Docker Desktop** | Latest | [docker.com](https://www.docker.com/products/docker-desktop) | PostgreSQL container |
-
-#### Auto-Installed (Handled by `make install`)
-
-These tools will be automatically installed when you run `make install`:
-
-| Tool | Version | Purpose |
-|------|---------|---------|
-| **air** | latest | Go live reload for backend development |
-| **golang-migrate** | latest | Database migration tool |
-
-#### Verification
-
-Run this command to verify your environment:
-
-```bash
-make check-all
-```
-
-Expected output:
-```
-✓ Go version: go version go1.25.5 darwin/arm64
-✓ Node.js version: v18.0.0
-✓ npm version: 8.0.0
-✓ Docker is running
-⚠ air not installed - will be installed with 'make install'
-⚠ golang-migrate not installed - will be installed with 'make install'
-```
-
-Don't worry about missing tools (⚠) - they'll be installed in the next step!
+- Go 1.21+
+- Node.js 18+
+- Docker Desktop
 
 ### Installation
 
-#### 1. Clone Repository
-
+1. **Clone repository**
 ```bash
 git clone <repository-url>
 cd starter-kit-mission
 ```
 
-#### 2. Verify Prerequisites
-
-```bash
-make check-all
-```
-
-**Troubleshooting:**
-- If Go is missing: Install from [go.dev/dl](https://go.dev/dl/)
-- If Node.js is missing: Install from [nodejs.org](https://nodejs.org/)
-- If Docker is not running: Start Docker Desktop application
-
-#### 3. Install Dependencies
-
+2. **Install dependencies**
 ```bash
 make install
 ```
 
-This command will:
-1. ✓ Verify all prerequisites (Go, Node.js, Docker)
-2. ✓ Install Go development tools (air, golang-migrate)
-3. ✓ Download Go modules
-4. ✓ Install npm packages
-
-**Expected duration:** 2-5 minutes (depending on internet speed)
-
-**If installation fails:**
-- Check that `$HOME/go/bin` is in your PATH:
-  ```bash
-  echo $PATH | grep -q "$HOME/go/bin" && echo "✓ PATH is set" || echo "⚠ Add to PATH"
-  ```
-- Add to your shell config (`~/.zshrc` or `~/.bashrc`):
-  ```bash
-  export PATH="$HOME/go/bin:$PATH"
-  ```
-- Reload shell: `source ~/.zshrc`
-- Re-run `make install`
-
-#### 4. Configure Environment Variables
-
-**Backend:**
-```bash
-cp backend/.env.example backend/.env
-# Edit backend/.env if needed (defaults work for local development)
-```
-
-**Frontend:**
-```bash
-cp frontend/.env.local.example frontend/.env.local
-# Edit frontend/.env.local if needed (defaults work for local development)
-```
-
-#### 5. Start Development Environment
-
-**Option A: Automated (Recommended)**
-```bash
-make start    # Starts all services in background
-make status   # Check if everything is running
-make logs     # View logs if needed
-```
-
-**Option B: Manual (3 terminals)**
+3. **Start development environment**
 ```bash
 # Terminal 1: Start PostgreSQL
 make dev-db
 
-# Terminal 2: Start backend (wait for DB to be ready)
+# Terminal 2: Start backend
 make dev-backend
 
-# Terminal 3: Start frontend (wait for backend to be ready)
+# Terminal 3: Start frontend
 make dev-frontend
 ```
 
-#### 6. Access Applications
-
+4. **Access applications**
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080
 - Swagger Docs: http://localhost:8080/swagger/index.html
 - Health Check: http://localhost:8080/health
-
-#### 7. Verify Everything Works
-
-**Test backend health:**
-```bash
-curl http://localhost:8080/health
-# Expected: {"status":"ok"}
-```
-
-**Test frontend:**
-Open http://localhost:3000 in your browser - you should see the login page.
-
-**Stop all services:**
-```bash
-make stop
-```
 
 ## Environment Variables
 
@@ -328,126 +218,6 @@ make dev-frontend   # Terminal 3
 API documentation is available via Swagger UI:
 - **URL**: http://localhost:8080/swagger/index.html
 - **Generate docs**: `cd backend && swag init -g cmd/api/main.go`
-
-## Troubleshooting
-
-### Installation Issues
-
-#### "Go is not installed"
-**Cause**: Go binary not found in PATH
-
-**Solution**:
-1. Install Go from [go.dev/dl](https://go.dev/dl/)
-2. Verify installation: `go version`
-3. If still fails, check PATH: `echo $PATH`
-
-#### "air: command not found" (after installation)
-**Cause**: `$GOPATH/bin` or `$HOME/go/bin` not in PATH
-
-**Solution**:
-1. Check where Go installs binaries:
-   ```bash
-   go env GOPATH  # Usually $HOME/go
-   ```
-2. Add to your shell config (`~/.zshrc` or `~/.bashrc`):
-   ```bash
-   export PATH="$HOME/go/bin:$PATH"
-   ```
-3. Reload shell: `source ~/.zshrc` (or restart terminal)
-4. Re-run: `make install-go-tools`
-
-#### "migrate: command not found" (after installation)
-**Cause**: Same as air - PATH issue
-
-**Solution**: Follow the same steps as "air: command not found" above
-
-#### "npm install" fails with permission errors
-**Cause**: npm trying to install to system directories
-
-**Solution**:
-```bash
-# DO NOT use sudo with npm!
-# Instead, fix npm permissions:
-mkdir ~/.npm-global
-npm config set prefix '~/.npm-global'
-echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.zshrc
-source ~/.zshrc
-```
-
-#### "Docker daemon is not running"
-**Cause**: Docker Desktop is not started
-
-**Solution**:
-1. Open Docker Desktop application
-2. Wait for "Docker is running" indicator (usually in menu bar)
-3. Re-run: `make check-docker`
-
-### Runtime Issues
-
-#### Backend fails to start: "Error connecting to database"
-**Cause**: PostgreSQL container not running or not ready
-
-**Solution**:
-```bash
-make start-db          # Start PostgreSQL
-docker ps              # Verify container is running
-make start-backend     # Retry backend
-```
-
-#### Frontend shows "Network Error" when calling API
-**Cause**: Backend is not running or wrong API URL
-
-**Solution**:
-1. Check backend is running: `make status`
-2. Test backend health: `curl http://localhost:8080/health`
-3. Verify frontend env: `cat frontend/.env.local`
-   - Should contain: `NEXT_PUBLIC_API_URL=http://localhost:8080`
-
-#### Migration fails: "Dirty database version"
-**Cause**: Previous migration failed midway
-
-**Solution**:
-```bash
-# Check current version
-make migrate-version
-
-# Force to a known good version (e.g., 1)
-make migrate-force
-# Enter version: 1
-
-# Re-run migrations
-make migrate-up
-```
-
-### Platform-Specific Notes
-
-#### macOS
-- Docker Desktop requires macOS 11 or newer
-- If you have Homebrew, you can install tools via:
-  ```bash
-  brew install go node docker
-  ```
-- Apple Silicon (M1/M2): All tools work natively
-
-#### Linux
-- Install Docker via official script: `curl -fsSL https://get.docker.com | sh`
-- Add user to docker group: `sudo usermod -aG docker $USER`
-- Log out and back in for group changes to take effect
-
-#### Windows (WSL2)
-- Use WSL2 (Windows Subsystem for Linux)
-- Install Docker Desktop with WSL2 backend
-- Run all commands inside WSL2 terminal
-- Path issues are common - ensure `.zshrc` or `.bashrc` is properly configured
-
-### Getting Help
-
-If you encounter issues not covered here:
-1. Check logs: `make logs`
-2. Check server status: `make status`
-3. View full backend logs: `cat logs/backend.log`
-4. View full frontend logs: `cat logs/frontend.log`
-5. Clean restart: `make stop && make clean && make start`
 
 ## Admin Features
 
