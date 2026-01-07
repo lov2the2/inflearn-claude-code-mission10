@@ -102,6 +102,8 @@ func main() {
             users.GET("/profile", h.User.GetProfile)
             users.GET("/activity", h.User.GetActivity)
             users.GET("/stats", h.User.GetStats)
+            users.PATCH("/profile", h.User.UpdateProfile)
+            users.PATCH("/password", h.User.UpdatePassword)
          }
 
         // Admin routes (protected)

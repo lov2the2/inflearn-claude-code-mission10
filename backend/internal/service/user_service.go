@@ -2,16 +2,20 @@ package service
 
 import (
     "errors"
+    "strings"
     "time"
 
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/repository"
+    "start-kit-backend/internal/util"
 )
 
 type UserService interface {
     GetProfile(userID uint) (*dto.UserProfileResponse, error)
     GetActivity(userID uint, params *dto.UserActivityRequest) (*dto.UserActivityResponse, error)
     GetStats(userID uint) (*dto.UserStatsResponse, error)
+    UpdateProfile(userID uint, req *dto.UpdateProfileRequest) (*dto.UserProfileResponse, error)
+    UpdatePassword(userID uint, req *dto.UpdatePasswordRequest) error
 }
 
 type userService struct {
@@ -116,4 +120,56 @@ func (s *userService) generateMockActivities(userID uint, limit int) []dto.UserA
         limit = len(activities)
     }
     return activities[:limit]
+}
+
+func (s *userService) UpdateProfile(userID uint, req *dto.UpdateProfileRequest) (*dto.UserProfileResponse, error) {
+    // Verify user exists
+    _, err := s.repo.User.FindByID(userID)
+    if err != nil {
+        return nil, errors.New("user not found")
+    }
+
+    // Validate name (additional business rules)
+    if len(strings.TrimSpace(req.Name)) < 2 {
+        return nil, errors.New("name must be at least 2 characters")
+    }
+
+    // Update name
+    if err := s.repo.User.UpdateName(userID, req.Name); err != nil {
+        return nil, errors.New("failed to update profile")
+    }
+
+    // Return updated profile
+    return s.GetProfile(userID)
+}
+
+func (s *userService) UpdatePassword(userID uint, req *dto.UpdatePasswordRequest) error {
+    // Verify user exists
+    user, err := s.repo.User.FindByID(userID)
+    if err != nil {
+        return errors.New("user not found")
+    }
+
+    // Verify current password
+    if !util.CheckPassword(req.CurrentPassword, user.PasswordHash) {
+        return errors.New("current password is incorrect")
+    }
+
+    // Ensure new password is different
+    if util.CheckPassword(req.NewPassword, user.PasswordHash) {
+        return errors.New("new password must be different from current password")
+    }
+
+    // Hash new password
+    newPasswordHash, err := util.HashPassword(req.NewPassword)
+    if err != nil {
+        return errors.New("failed to hash password")
+    }
+
+    // Update password
+    if err := s.repo.User.UpdatePassword(userID, newPasswordHash); err != nil {
+        return errors.New("failed to update password")
+    }
+
+    return nil
 }

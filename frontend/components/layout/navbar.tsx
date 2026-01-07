@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sheet'
 import { useEffect, useState } from 'react'
 import { User } from '@/types/auth'
-import { Menu, LogOut, LayoutDashboard, Shield } from 'lucide-react'
+import { Menu, LogOut, LayoutDashboard, Shield, UserCircle } from 'lucide-react'
 
 export default function Navbar() {
     const router = useRouter()
@@ -61,6 +61,12 @@ export default function Navbar() {
                                 className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                             >
                                 Dashboard
+                            </a>
+                            <a
+                                href="/profile"
+                                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                            >
+                                Profile
                             </a>
                             {user && isAdmin(user) && (
                                 <a
@@ -114,6 +120,14 @@ export default function Navbar() {
                                     >
                                         <LayoutDashboard className="mr-2 h-5 w-5" />
                                         Dashboard
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-start text-lg"
+                                        onClick={() => handleNavigation('/profile')}
+                                    >
+                                        <UserCircle className="mr-2 h-5 w-5" />
+                                        Profile
                                     </Button>
                                     {user && isAdmin(user) && (
                                         <Button

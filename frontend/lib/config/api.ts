@@ -19,6 +19,7 @@ export const API_CONFIG = {
             PROFILE: '/api/v1/users/profile',
             ACTIVITY: '/api/v1/users/activity',
             STATS: '/api/v1/users/stats',
+            UPDATE_PASSWORD: '/api/v1/users/password',
         },
         ADMIN: {
             USERS: '/api/v1/admin/users',

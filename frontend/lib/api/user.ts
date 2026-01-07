@@ -71,3 +71,37 @@ export async function getUserStats(): Promise<UserStats> {
     )
     return response.data.data
 }
+
+/**
+ * Updates current user's profile information
+ * @param name - New name
+ * @returns Updated user profile
+ */
+export async function updateUserProfile(name: string): Promise<UserProfile> {
+    const response = await apiClient.patch<{ data: { profile: UserProfile } }>(
+        API_CONFIG.ENDPOINTS.USER.PROFILE,
+        { name }
+    )
+    return response.data.data.profile
+}
+
+/**
+ * Changes current user's password
+ * @param currentPassword - Current password for verification
+ * @param newPassword - New password
+ * @param confirmPassword - New password confirmation
+ */
+export async function updateUserPassword(
+    currentPassword: string,
+    newPassword: string,
+    confirmPassword: string
+): Promise<void> {
+    await apiClient.patch(
+        API_CONFIG.ENDPOINTS.USER.UPDATE_PASSWORD,
+        {
+            current_password: currentPassword,
+            new_password: newPassword,
+            confirm_password: confirmPassword
+        }
+    )
+}

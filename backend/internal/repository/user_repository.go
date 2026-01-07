@@ -10,6 +10,8 @@ type UserRepository interface {
     Create(user *model.User) error
     FindByEmail(email string) (*model.User, error)
     FindByID(id uint) (*model.User, error)
+    UpdateName(userID uint, name string) error
+    UpdatePassword(userID uint, passwordHash string) error
 }
 
 type userRepository struct {
@@ -40,4 +42,16 @@ func (r *userRepository) FindByID(id uint) (*model.User, error) {
         return nil, err
     }
     return &user, nil
+}
+
+func (r *userRepository) UpdateName(userID uint, name string) error {
+    return r.db.Model(&model.User{}).
+        Where("id = ?", userID).
+        Update("name", name).Error
+}
+
+func (r *userRepository) UpdatePassword(userID uint, passwordHash string) error {
+    return r.db.Model(&model.User{}).
+        Where("id = ?", userID).
+        Update("password_hash", passwordHash).Error
 }

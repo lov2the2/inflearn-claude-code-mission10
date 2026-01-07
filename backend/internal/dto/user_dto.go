@@ -53,3 +53,25 @@ type UserStatsResponse struct {
     AccountAgeInDays int       `json:"account_age_in_days"`
     TotalActions     int       `json:"total_actions"`
 }
+
+// ====================
+// Profile Update DTOs
+// ====================
+
+// UpdateProfileRequest represents profile update payload
+type UpdateProfileRequest struct {
+    Name string `json:"name" binding:"required,min=2,max=100"`
+}
+
+// UpdatePasswordRequest represents password change payload
+type UpdatePasswordRequest struct {
+    CurrentPassword string `json:"current_password" binding:"required,min=1"`
+    NewPassword     string `json:"new_password" binding:"required,min=8,max=128"`
+    ConfirmPassword string `json:"confirm_password" binding:"required,eqfield=NewPassword"`
+}
+
+// UpdateProfileResponse represents successful profile update
+type UpdateProfileResponse struct {
+    Message string              `json:"message"`
+    Profile UserProfileResponse `json:"profile"`
+}
