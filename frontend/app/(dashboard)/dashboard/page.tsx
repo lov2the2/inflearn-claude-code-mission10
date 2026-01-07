@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { ActivityTable } from '@/components/dashboard/activity-table'
+import { AnalyticsSection } from '@/components/dashboard/analytics-section'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { use_user_profile } from '@/lib/hooks/queries/use-user-profile'
 import { use_user_stats } from '@/lib/hooks/queries/use-user-stats'
@@ -104,6 +105,9 @@ export default function DashboardPage() {
                     description="Most recent access"
                 />
             </div>
+
+            {/* Analytics Section */}
+            <AnalyticsSection />
 
             {/* Profile Card */}
             <Card>

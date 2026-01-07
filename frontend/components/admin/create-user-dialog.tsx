@@ -37,7 +37,7 @@ const create_user_schema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name too long'),
     password: z.string().optional(),
     role: z.enum(['admin', 'user'], {
-        required_error: 'Please select a role',
+        message: 'Please select a role',
     }),
 })
 
