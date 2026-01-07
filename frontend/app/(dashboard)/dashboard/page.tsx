@@ -1,47 +1,40 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StatsCard } from '@/components/dashboard/stats-card'
 import { ActivityTable } from '@/components/dashboard/activity-table'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
-import { getUserProfile, getUserActivity, getUserStats, UserProfile, UserActivity, UserStats } from '@/lib/api/user'
+import { use_user_profile } from '@/lib/hooks/queries/use-user-profile'
+import { use_user_stats } from '@/lib/hooks/queries/use-user-stats'
+import { use_user_activity } from '@/lib/hooks/queries/use-user-activity'
 import { Activity, Calendar, LogIn, Zap } from 'lucide-react'
 
 export default function DashboardPage() {
-    const [profile, setProfile] = useState<UserProfile | null>(null)
-    const [stats, setStats] = useState<UserStats | null>(null)
-    const [activity, setActivity] = useState<UserActivity[]>([])
-    const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const {
+        data: profile,
+        isLoading: profile_loading,
+        isError: profile_error
+    } = use_user_profile()
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                setIsLoading(true)
-                setError(null)
+    const {
+        data: stats,
+        isLoading: stats_loading,
+        isError: stats_error
+    } = use_user_stats()
 
-                const [profileData, statsData, activityData] = await Promise.all([
-                    getUserProfile(),
-                    getUserStats(),
-                    getUserActivity(),
-                ])
+    const {
+        data: activity_data,
+        isLoading: activity_loading,
+        isError: activity_error
+    } = use_user_activity(1, 10)
 
-                setProfile(profileData)
-                setStats(statsData)
-                setActivity(activityData.data)
-            } catch (err: any) {
-                console.error('Failed to fetch dashboard data:', err)
-                setError('Failed to load dashboard data. Please try again later.')
-            } finally {
-                setIsLoading(false)
-            }
-        }
+    // Combine loading states
+    const is_loading = profile_loading || stats_loading || activity_loading
+    const has_error = profile_error || stats_error || activity_error
 
-        fetchData()
-    }, [])
+    const activity = activity_data?.data ?? []
 
-    if (isLoading) {
+    if (is_loading) {
         return (
             <div className="space-y-8">
                 <div>
@@ -62,14 +55,16 @@ export default function DashboardPage() {
         )
     }
 
-    if (error) {
+    if (has_error) {
         return (
             <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold">Dashboard</h1>
                     <p className="text-muted-foreground">Welcome back!</p>
                 </div>
-                <div className="p-4 text-sm text-red-600 bg-red-50 rounded-md">{error}</div>
+                <div className="p-4 text-sm text-red-600 bg-red-50 rounded-md">
+                    Failed to load dashboard data. Please try again later.
+                </div>
             </div>
         )
     }

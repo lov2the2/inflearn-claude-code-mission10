@@ -1,8 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
-import { adminApi, User } from '@/lib/api/admin'
+import { adminApi } from '@/lib/api/admin'
+import { use_user_list } from '@/lib/hooks/queries/use-user-list'
+import { use_update_role } from '@/lib/hooks/mutations/use-update-role'
+import { use_delete_user } from '@/lib/hooks/mutations/use-delete-user'
 import { UserListTable } from '@/components/admin/user-list-table'
 import { CSVImportDialog } from '@/components/admin/csv-import-dialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,51 +13,26 @@ import { Button } from '@/components/ui/button'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
 
 export default function AdminUsersPage() {
-    const [users, setUsers] = useState<User[]>([])
-    const [total, setTotal] = useState(0)
     const [page, setPage] = useState(1)
     const [limit] = useState(10)
-    const [loading, setLoading] = useState(true)
     const [exporting, setExporting] = useState(false)
     const [importDialogOpen, setImportDialogOpen] = useState(false)
 
-    const fetchUsers = async () => {
-        try {
-            setLoading(true)
-            const data = await adminApi.listUsers({ page, limit })
-            setUsers(data.users)
-            setTotal(data.total)
-        } catch (error) {
-            console.error('Failed to fetch users:', error)
-        } finally {
-            setLoading(false)
-        }
-    }
+    // Query hook for user list
+    const { data, isLoading } = use_user_list(page, limit)
+    const users = data?.users ?? []
+    const total = data?.total ?? 0
 
-    useEffect(() => {
-        fetchUsers()
-    }, [page])
+    // Mutation hooks
+    const update_role_mutation = use_update_role()
+    const delete_user_mutation = use_delete_user()
 
     const handleRoleUpdate = async (userId: number, newRole: 'admin' | 'user') => {
-        try {
-            await adminApi.updateUserRole(userId, newRole)
-            toast.success(`User role updated to ${newRole} successfully`)
-            await fetchUsers() // Refresh list
-        } catch (error) {
-            console.error('Failed to update role:', error)
-            toast.error('Failed to update user role')
-        }
+        update_role_mutation.mutate({ user_id: userId, new_role: newRole })
     }
 
     const handleDelete = async (userId: number) => {
-        try {
-            await adminApi.deleteUser(userId)
-            toast.success('User deleted successfully')
-            await fetchUsers() // Refresh list
-        } catch (error) {
-            console.error('Failed to delete user:', error)
-            toast.error('Failed to delete user')
-        }
+        delete_user_mutation.mutate(userId)
     }
 
     const handleExport = async () => {
@@ -96,7 +74,7 @@ export default function AdminUsersPage() {
                     </div>
                 </CardHeader>
             <CardContent>
-                {loading ? (
+                {isLoading ? (
                     <TableSkeleton rows={10} columns={5} />
                 ) : (
                     <UserListTable
@@ -134,7 +112,6 @@ export default function AdminUsersPage() {
         <CSVImportDialog
             open={importDialogOpen}
             onOpenChange={setImportDialogOpen}
-            onSuccess={fetchUsers}
         />
         </>
     )
