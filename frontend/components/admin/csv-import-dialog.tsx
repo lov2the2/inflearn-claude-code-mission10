@@ -178,8 +178,8 @@ export function CSVImportDialog({ open, onOpenChange, onSuccess }: CSVImportDial
                             <Button variant="outline" onClick={handleClose} disabled={importing}>
                                 Cancel
                             </Button>
-                            <Button onClick={handleImport} disabled={!file || importing}>
-                                {importing ? 'Importing...' : 'Import'}
+                            <Button onClick={handleImport} isLoading={importing} loadingText="Importing..." disabled={!file}>
+                                Import
                             </Button>
                         </>
                     ) : (

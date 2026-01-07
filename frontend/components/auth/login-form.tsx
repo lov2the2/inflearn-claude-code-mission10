@@ -96,8 +96,8 @@ export default function LoginForm() {
                         </div>
                     )}
 
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? 'Logging in...' : 'Login'}
+                    <Button type="submit" className="w-full" isLoading={isLoading} loadingText="Logging in...">
+                        Login
                     </Button>
                 </form>
             </CardContent>

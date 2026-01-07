@@ -7,6 +7,7 @@ import { UserListTable } from '@/components/admin/user-list-table'
 import { CSVImportDialog } from '@/components/admin/csv-import-dialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 
 export default function AdminUsersPage() {
     const [users, setUsers] = useState<User[]>([])
@@ -86,8 +87,8 @@ export default function AdminUsersPage() {
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>User Management</CardTitle>
                     <div className="flex gap-2">
-                        <Button onClick={handleExport} disabled={exporting} variant="outline">
-                            {exporting ? 'Exporting...' : 'Export CSV'}
+                        <Button onClick={handleExport} isLoading={exporting} loadingText="Exporting..." variant="outline">
+                            Export CSV
                         </Button>
                         <Button onClick={() => setImportDialogOpen(true)} variant="outline">
                             Import CSV
@@ -96,7 +97,7 @@ export default function AdminUsersPage() {
                 </CardHeader>
             <CardContent>
                 {loading ? (
-                    <div>Loading...</div>
+                    <TableSkeleton rows={10} columns={5} />
                 ) : (
                     <UserListTable
                         users={users}

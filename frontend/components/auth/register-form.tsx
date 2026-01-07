@@ -113,8 +113,8 @@ export default function RegisterForm() {
                         </div>
                     )}
 
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? 'Creating account...' : 'Register'}
+                    <Button type="submit" className="w-full" isLoading={isLoading} loadingText="Creating account...">
+                        Register
                     </Button>
                 </form>
             </CardContent>

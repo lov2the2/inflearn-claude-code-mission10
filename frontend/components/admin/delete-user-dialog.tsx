@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import { toast } from 'sonner'
 import { User } from '@/lib/api/admin'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,6 +20,21 @@ interface DeleteUserDialogProps {
 }
 
 export function DeleteUserDialog({ user, onConfirm, onCancel }: DeleteUserDialogProps) {
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    const handleConfirm = async () => {
+        setIsDeleting(true)
+        try {
+            await onConfirm()
+            toast.success('User deleted successfully')
+            onCancel()
+        } catch (error) {
+            toast.error('Failed to delete user')
+        } finally {
+            setIsDeleting(false)
+        }
+    }
+
     return (
         <Dialog open={true} onOpenChange={onCancel}>
             <DialogContent>
@@ -30,10 +47,10 @@ export function DeleteUserDialog({ user, onConfirm, onCancel }: DeleteUserDialog
                 </DialogHeader>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={onCancel}>
+                    <Button variant="outline" onClick={onCancel} disabled={isDeleting}>
                         Cancel
                     </Button>
-                    <Button variant="destructive" onClick={onConfirm}>
+                    <Button variant="destructive" onClick={handleConfirm} isLoading={isDeleting}>
                         Delete User
                     </Button>
                 </DialogFooter>
