@@ -17,8 +17,8 @@ export const query_keys = {
         all: ['admin'] as const,
         users: {
             all: () => [...query_keys.admin.all, 'users'] as const,
-            list: (page: number, limit: number) =>
-                [...query_keys.admin.users.all(), 'list', { page, limit }] as const,
+            list: (page: number, limit: number, search: string, role: string) =>
+                [...query_keys.admin.users.all(), 'list', { page, limit, search, role }] as const,
             detail: (id: number) =>
                 [...query_keys.admin.users.all(), 'detail', id] as const,
         },

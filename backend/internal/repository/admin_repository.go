@@ -7,7 +7,7 @@ import (
 )
 
 type AdminRepository interface {
-    ListUsers(offset, limit int) ([]model.User, int64, error)
+    ListUsers(offset, limit int, search, role string) ([]model.User, int64, error)
     GetAllUsers() ([]model.User, error)
     UpdateRole(userID uint, role model.UserRole) error
     UpsertUser(user *model.User) (created bool, err error)
@@ -22,17 +22,30 @@ func NewAdminRepository(db *gorm.DB) AdminRepository {
     return &adminRepository{db: db}
 }
 
-func (r *adminRepository) ListUsers(offset, limit int) ([]model.User, int64, error) {
+func (r *adminRepository) ListUsers(offset, limit int, search, role string) ([]model.User, int64, error) {
     var users []model.User
     var total int64
 
-    // Count total users
-    if err := r.db.Model(&model.User{}).Count(&total).Error; err != nil {
+    // Build query with filters
+    query := r.db.Model(&model.User{})
+
+    // Apply search filter (name or email)
+    if search != "" {
+        query = query.Where("name ILIKE ? OR email ILIKE ?", "%"+search+"%", "%"+search+"%")
+    }
+
+    // Apply role filter
+    if role != "" {
+        query = query.Where("role = ?", role)
+    }
+
+    // Count total users with filters
+    if err := query.Count(&total).Error; err != nil {
         return nil, 0, err
     }
 
-    // Get paginated users
-    if err := r.db.Offset(offset).Limit(limit).Find(&users).Error; err != nil {
+    // Get paginated users with filters
+    if err := query.Offset(offset).Limit(limit).Find(&users).Error; err != nil {
         return nil, 0, err
     }
 

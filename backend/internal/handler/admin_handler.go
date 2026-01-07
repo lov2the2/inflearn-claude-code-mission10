@@ -131,6 +131,38 @@ func (h *AdminHandler) UpdateUserRole(c *gin.Context) {
     c.JSON(http.StatusOK, dto.NewSuccessResponse(nil, "User role updated successfully"))
 }
 
+// CreateUser godoc
+// @Summary Create new user (admin only)
+// @Description Create a new user with optional password generation
+// @Tags admin
+// @Accept json
+// @Produce json
+// @Param request body dto.CreateUserRequest true "User creation request"
+// @Security BearerAuth
+// @Success 201 {object} dto.SuccessResponse{data=dto.CreateUserResponse}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 409 {object} dto.ErrorResponse
+// @Router /api/v1/admin/users [post]
+func (h *AdminHandler) CreateUser(c *gin.Context) {
+    var req dto.CreateUserRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, dto.NewErrorResponse(err.Error()))
+        return
+    }
+
+    response, err := h.adminService.CreateUser(&req)
+    if err != nil {
+        if err.Error() == "user with this email already exists" {
+            c.JSON(http.StatusConflict, dto.NewErrorResponse(err.Error()))
+            return
+        }
+        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        return
+    }
+
+    c.JSON(http.StatusCreated, dto.NewSuccessResponse(response, "User created successfully"))
+}
+
 // DeleteUser godoc
 // @Summary Delete user (admin only)
 // @Description Soft delete a specific user

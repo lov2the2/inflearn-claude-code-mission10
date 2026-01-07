@@ -4,8 +4,10 @@ import "time"
 
 // ListUsersRequest represents query parameters for listing users
 type ListUsersRequest struct {
-    Page  int `form:"page,default=1" binding:"omitempty,min=1"`
-    Limit int `form:"limit,default=10" binding:"omitempty,min=1,max=100"`
+    Page   int    `form:"page,default=1" binding:"omitempty,min=1"`
+    Limit  int    `form:"limit,default=10" binding:"omitempty,min=1,max=100"`
+    Search string `form:"search" binding:"omitempty"`
+    Role   string `form:"role" binding:"omitempty,oneof=admin user ''"`
 }
 
 // ListUsersResponse represents the response for listing users
@@ -29,4 +31,18 @@ type UserDetailResponse struct {
 // UpdateUserRoleRequest represents the request body for updating user role
 type UpdateUserRoleRequest struct {
     Role string `json:"role" binding:"required,oneof=admin user"`
+}
+
+// CreateUserRequest represents the request body for creating a new user
+type CreateUserRequest struct {
+    Email    string `json:"email" binding:"required,email"`
+    Name     string `json:"name" binding:"required,min=2,max=100"`
+    Password string `json:"password" binding:"omitempty,min=8"`
+    Role     string `json:"role" binding:"required,oneof=admin user"`
+}
+
+// CreateUserResponse represents the response for creating a new user
+type CreateUserResponse struct {
+    User            UserResponse `json:"user"`
+    GeneratedPassword string     `json:"generated_password,omitempty"`
 }

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import { Eye } from 'lucide-react'
 import { User } from '@/lib/api/admin'
 import { RoleUpdateDialog } from './role-update-dialog'
 import { DeleteUserDialog } from './delete-user-dialog'
@@ -52,8 +54,13 @@ export function UserListTable({ users, onRoleUpdate, onDelete }: UserListTablePr
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     {user.email}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {user.name}
+                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                    <Link
+                                        href={`/admin/users/${user.id}`}
+                                        className="text-blue-600 hover:text-blue-800 hover:underline"
+                                    >
+                                        {user.name}
+                                    </Link>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -65,6 +72,16 @@ export function UserListTable({ users, onRoleUpdate, onDelete }: UserListTablePr
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                                    <Link href={`/admin/users/${user.id}`}>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="gap-1"
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                            View
+                                        </Button>
+                                    </Link>
                                     <Button
                                         onClick={() => {
                                             setSelectedUser(user)

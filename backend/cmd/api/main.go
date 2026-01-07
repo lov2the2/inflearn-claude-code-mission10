@@ -112,6 +112,7 @@ func main() {
         admin.Use(middleware.RequireAdmin())
         {
             admin.GET("/users", h.Admin.ListUsers)
+            admin.POST("/users", h.Admin.CreateUser)
             admin.GET("/users/:id", h.Admin.GetUser)
             admin.PATCH("/users/:id/role", h.Admin.UpdateUserRole)
             admin.DELETE("/users/:id", h.Admin.DeleteUser)

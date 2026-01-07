@@ -16,6 +16,8 @@ export interface UserDetail extends User {
 export interface ListUsersParams {
     page?: number
     limit?: number
+    search?: string
+    role?: 'admin' | 'user' | ''
 }
 
 export interface ListUsersResponse {
@@ -42,6 +44,18 @@ export interface CSVImportResult {
     errors?: CSVImportError[]
 }
 
+export interface CreateUserRequest {
+    email: string
+    name: string
+    password?: string
+    role: 'admin' | 'user'
+}
+
+export interface CreateUserResponse {
+    user: User
+    generated_password?: string
+}
+
 export const adminApi = {
     listUsers: async (params: ListUsersParams = {}): Promise<ListUsersResponse> => {
         const response = await apiClient.get<ApiResponse<ListUsersResponse>>(
@@ -54,6 +68,14 @@ export const adminApi = {
     getUser: async (id: number): Promise<UserDetail> => {
         const response = await apiClient.get<ApiResponse<UserDetail>>(
             `/api/v1/admin/users/${id}`
+        )
+        return response.data.data
+    },
+
+    createUser: async (data: CreateUserRequest): Promise<CreateUserResponse> => {
+        const response = await apiClient.post<ApiResponse<CreateUserResponse>>(
+            '/api/v1/admin/users',
+            data
         )
         return response.data.data
     },

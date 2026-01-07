@@ -2,24 +2,31 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { Search, UserPlus, Filter } from 'lucide-react'
 import { adminApi } from '@/lib/api/admin'
 import { use_user_list } from '@/lib/hooks/queries/use-user-list'
 import { use_update_role } from '@/lib/hooks/mutations/use-update-role'
 import { use_delete_user } from '@/lib/hooks/mutations/use-delete-user'
 import { UserListTable } from '@/components/admin/user-list-table'
 import { CSVImportDialog } from '@/components/admin/csv-import-dialog'
+import { CreateUserDialog } from '@/components/admin/create-user-dialog'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
 
 export default function AdminUsersPage() {
     const [page, setPage] = useState(1)
     const [limit] = useState(10)
+    const [search, setSearch] = useState('')
+    const [role, setRole] = useState<'admin' | 'user' | ''>('')
     const [exporting, setExporting] = useState(false)
     const [importDialogOpen, setImportDialogOpen] = useState(false)
+    const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
-    // Query hook for user list
-    const { data, isLoading } = use_user_list(page, limit)
+    // Query hook for user list with search and role filter
+    const { data, isLoading } = use_user_list(page, limit, search, role)
     const users = data?.users ?? []
     const total = data?.total ?? 0
 
@@ -59,18 +66,61 @@ export default function AdminUsersPage() {
         }
     }
 
+    const handleSearchChange = (value: string) => {
+        setSearch(value)
+        setPage(1) // Reset to first page on search
+    }
+
+    const handleRoleChange = (value: string) => {
+        setRole(value as 'admin' | 'user' | '')
+        setPage(1) // Reset to first page on filter
+    }
+
     return (
         <>
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>User Management</CardTitle>
-                    <div className="flex gap-2">
-                        <Button onClick={handleExport} isLoading={exporting} loadingText="Exporting..." variant="outline">
-                            Export CSV
-                        </Button>
-                        <Button onClick={() => setImportDialogOpen(true)} variant="outline">
-                            Import CSV
-                        </Button>
+                <CardHeader className="flex flex-col space-y-4">
+                    <div className="flex flex-row items-center justify-between">
+                        <CardTitle>User Management</CardTitle>
+                        <div className="flex gap-2">
+                            <Button
+                                onClick={() => setCreateDialogOpen(true)}
+                                className="gap-2"
+                            >
+                                <UserPlus className="h-4 w-4" />
+                                Create User
+                            </Button>
+                            <Button onClick={handleExport} isLoading={exporting} loadingText="Exporting..." variant="outline">
+                                Export CSV
+                            </Button>
+                            <Button onClick={() => setImportDialogOpen(true)} variant="outline">
+                                Import CSV
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Search and Filter */}
+                    <div className="flex gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                            <Input
+                                placeholder="Search by name or email..."
+                                value={search}
+                                onChange={(e) => handleSearchChange(e.target.value)}
+                                className="pl-9"
+                            />
+                        </div>
+                        <Select value={role} onValueChange={handleRoleChange}>
+                            <SelectTrigger className="w-[180px]">
+                                <Filter className="mr-2 h-4 w-4" />
+                                <SelectValue placeholder="Filter by role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="">All Roles</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="user">User</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </CardHeader>
             <CardContent>
@@ -112,6 +162,11 @@ export default function AdminUsersPage() {
         <CSVImportDialog
             open={importDialogOpen}
             onOpenChange={setImportDialogOpen}
+        />
+
+        <CreateUserDialog
+            open={createDialogOpen}
+            onOpenChange={setCreateDialogOpen}
         />
         </>
     )
