@@ -2,312 +2,50 @@
 
 ---
 
-## 🚨 COMMIT MESSAGE CONVENTION (MUST FOLLOW)
+## 🚨 COMMIT CONVENTION (이 프로젝트 전용)
 
-**모든 커밋은 반드시 다음 형식을 따라야 합니다:**
+**이 프로젝트는 `/git:commit` 명령어를 사용하되, 다음 규칙을 반드시 따라야 합니다:**
+
+### 필수 형식
 
 ```
 <type>(<scope>): <subject> - Phase X.X (docs/UI-UX-ROADMAP.md)
-
-<body>
-- 수행 단계: Phase X.X - <단계명>
-- 영역: <Frontend|Backend|Fullstack>
-- 주요 변경사항:
-  - <변경사항 1>
-  - <변경사항 2>
-  - <변경사항 3>
-
-참조: docs/UI-UX-ROADMAP.md
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 ```
 
-### 필수 포함 항목
-
-1. **Scope**: `frontend`, `backend`, `fullstack` 중 하나 (제목에 포함)
-2. **로드맵 파일명**: `docs/UI-UX-ROADMAP.md` (제목에 포함)
-3. **수행 단계**: Phase X.X - 단계명 명시
-4. **영역**: Frontend/Backend/Fullstack 명시
-5. **주요 변경사항**: 구체적인 수정 내역 나열
+**필수 포함 항목**:
+- **Scope**: `frontend`, `backend`, `fullstack` 중 하나
+- **Phase 번호**: 현재 작업 중인 Phase (예: Phase 1.2)
+- **로드맵 참조**: `(docs/UI-UX-ROADMAP.md)` 포함
 
 ### 예시
 
 **Frontend만 변경**:
 ```
-feat(frontend): Implement landing page and guest navbar - Phase 1.1 (docs/UI-UX-ROADMAP.md)
+feat(frontend): Implement toast notification system - Phase 1.2 (docs/UI-UX-ROADMAP.md)
+```
 
-- 수행 단계: Phase 1.1 - 홈페이지 개선
-- 영역: Frontend
-- 주요 변경사항:
-  - Add auto-redirect logic for authenticated users to /dashboard
-  - Create GuestNavbar component with Sign In/Get Started buttons
-  - Implement landing page with Hero, Features, CTA, and Footer sections
-
-참조: docs/UI-UX-ROADMAP.md
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
+**Backend만 변경**:
+```
+feat(backend): Add user profile update endpoints - Phase 2.2 (docs/UI-UX-ROADMAP.md)
 ```
 
 **Fullstack 변경**:
 ```
 feat(fullstack): Implement profile edit feature - Phase 2.2 (docs/UI-UX-ROADMAP.md)
-
-- 수행 단계: Phase 2.2 - 프로필 수정 기능
-- 영역: Fullstack
-- 주요 변경사항:
-  - Backend: Add PATCH /api/v1/users/profile endpoint
-  - Backend: Add PATCH /api/v1/users/password endpoint
-  - Frontend: Create profile edit form with validation
-  - Frontend: Integrate API calls with React Query
-
-참조: docs/UI-UX-ROADMAP.md
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 ```
 
----
+### Monorepo Git 워크플로우
 
-## 🔧 GIT WORKFLOW (MUST FOLLOW)
+**중요**: 이 프로젝트는 Monorepo 구조로 루트 디렉토리에서만 Git을 관리합니다.
 
-**이 프로젝트는 Monorepo 구조로 루트 디렉토리에서만 Git을 관리합니다.**
-
----
-
-### 1. 기본 규칙
-
-#### 1.1 Monorepo 관리
-- ✅ **모든 Git 명령은 프로젝트 루트에서 실행**
+- ✅ 모든 Git 명령은 프로젝트 루트에서 실행
 - ❌ `frontend/.git` 또는 `backend/.git` 존재하면 안 됨
-- ✅ 파일 수정은 어디서든 가능, Git 명령만 루트에서 실행
-
-**루트 경로**:
-```bash
-/Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission
-```
+- 루트 경로: `/Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission`
 
 **작업 전 확인**:
 ```bash
 pwd  # 현재 위치 확인
 git remote -v  # origin이 올바른지 확인
-```
-
----
-
-### 2. Frontend/Backend 구분 전략
-
-#### 2.1 Commit Message Scope (핵심)
-
-**Conventional Commits 형식으로 영역 구분**:
-
-```
-<type>(<scope>): <subject> - Phase X.X (docs/UI-UX-ROADMAP.md)
-
-- 수행 단계: Phase X.X - 단계명
-- 영역: <Frontend|Backend|Fullstack>
-- 주요 변경사항:
-  - 변경사항 1
-  - 변경사항 2
-
-참조: docs/UI-UX-ROADMAP.md
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
-```
-
-**Scope 값**:
-- `frontend`: Frontend만 변경
-- `backend`: Backend만 변경
-- `fullstack`: Frontend + Backend 동시 변경
-
-#### 2.2 Branch 전략
-
-**기능 단위로 명명** (영역 구분 없이):
-```bash
-feat/toast-system          # ✅ 권장
-feat/profile-edit          # ✅ 권장
-fix/navbar-responsive      # ✅ 권장
-
-feat/frontend/toast-system # ❌ 불필요
-```
-
-#### 2.3 Tag 전략
-
-**전체 프로젝트의 릴리스 버전만 관리**:
-```bash
-v1.1.0  # Phase 1 완료
-v1.2.0  # Phase 2 완료
-```
-
----
-
-### 3. 커밋 메시지 예시
-
-#### 예시 1: Frontend만 변경 (Phase 1.2)
-```bash
-git commit -m "feat(frontend): Implement toast notification system - Phase 1.2 (docs/UI-UX-ROADMAP.md)
-
-- 수행 단계: Phase 1.2 - 토스트 알림 시스템
-- 영역: Frontend
-- 주요 변경사항:
-  - Install shadcn toast component
-  - Add Toaster to root layout
-  - Integrate toast in login/register actions
-
-참조: docs/UI-UX-ROADMAP.md
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
-```
-
-#### 예시 2: Backend만 변경 (Phase 2.2)
-```bash
-git commit -m "feat(backend): Add user profile update endpoints - Phase 2.2 (docs/UI-UX-ROADMAP.md)
-
-- 수행 단계: Phase 2.2 - 프로필 수정 기능
-- 영역: Backend
-- 주요 변경사항:
-  - Add PATCH /api/v1/users/profile endpoint
-  - Add PATCH /api/v1/users/password endpoint
-  - Implement password validation logic
-
-참조: docs/UI-UX-ROADMAP.md
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
-```
-
-#### 예시 3: Fullstack 변경 (Phase 2.2)
-```bash
-git commit -m "feat(fullstack): Implement profile edit feature - Phase 2.2 (docs/UI-UX-ROADMAP.md)
-
-- 수행 단계: Phase 2.2 - 프로필 수정 기능
-- 영역: Fullstack
-- 주요 변경사항:
-  - Backend: Add profile update endpoints
-  - Frontend: Create profile edit form with validation
-  - Frontend: Integrate API calls with React Query
-
-참조: docs/UI-UX-ROADMAP.md
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
-
-Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
-```
-
----
-
-### 4. 표준 워크플로우
-
-```bash
-# 1. 루트 디렉토리로 이동
-cd /Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission
-
-# 2. 브랜치 생성 (기능 단위)
-git checkout -b feat/toast-system
-
-# 3. 작업 후 변경사항 확인
-git status
-
-# 4. 파일 스테이징
-git add frontend/components/ui/toast.tsx
-git add frontend/app/layout.tsx
-# 또는 전체 추가
-git add -A
-
-# 5. 커밋 (scope로 영역 구분)
-git commit -m "feat(frontend): Implement toast system - Phase 1.2 (docs/UI-UX-ROADMAP.md)
-..."
-
-# 6. 푸시
-git push origin feat/toast-system
-
-# 7. 머지 후 브랜치 삭제
-git checkout main
-git pull origin main
-git branch -d feat/toast-system
-```
-
----
-
-### 5. Git History 검색
-
-```bash
-# Frontend 변경사항만 보기
-git log --grep="feat(frontend)"
-
-# Backend 변경사항만 보기
-git log --grep="feat(backend)"
-
-# Phase 1.2 관련 모든 변경사항
-git log --grep="Phase 1.2"
-
-# Frontend + Phase 1.2
-git log --grep="frontend" --grep="Phase 1.2" --all-match
-```
-
----
-
-### 6. 체크리스트
-
-**Phase 작업 전**:
-- [ ] `pwd`로 루트 디렉토리 확인
-- [ ] `git status`로 clean 상태 확인
-- [ ] Phase 번호 확인 (docs/UI-UX-ROADMAP.md)
-
-**Phase 작업 중**:
-- [ ] 브랜치 생성 (`feat/기능명`)
-- [ ] Scope 결정 (frontend/backend/fullstack)
-- [ ] 파일 수정 (어디서든 가능)
-
-**Phase 작업 후**:
-- [ ] 루트에서 `git status` 확인
-- [ ] 루트에서 `git add` 실행
-- [ ] Scope + Phase를 포함한 커밋 메시지 작성
-- [ ] 루트에서 `git push` 실행
-
----
-
-### 7. 트러블슈팅
-
-#### ❌ 실수: frontend에서 Git 명령 실행
-
-```bash
-# 잘못된 방법
-cd frontend
-git add .  # ❌ 독립 저장소로 오인
-
-# 올바른 방법
-cd /Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission
-git add frontend/  # ✅ 루트에서 실행
-```
-
-#### ❌ 실수: frontend/.git이 생성된 경우
-
-```bash
-# 해결 방법
-rm -rf frontend/.git
-git rm --cached frontend
-git add frontend/
-git commit -m "chore: Migrate frontend to root git management"
-```
-
-#### ❌ 실수: "no configured push destination" 에러
-
-```bash
-# 원인: 잘못된 디렉토리에서 push 시도
-
-# 해결 방법
-cd /Users/junseokh-air/Projects/Study/inflearn/claude-code-mastery/starter-kit-mission
-git push origin main
 ```
 
 ---
