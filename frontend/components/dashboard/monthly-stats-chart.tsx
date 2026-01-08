@@ -11,16 +11,52 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts'
-import { generate_monthly_stats } from '@/lib/utils/chart-data'
+import { use_monthly_stats } from '@/lib/hooks/use_analytics'
 import { CHART_COLORS } from '@/types/analytics'
 
 /**
  * Monthly Statistics Chart Component
  * Displays last 6 months of activity trends as stacked bar chart
- * Uses mock data until Phase 3.3 (real activity tracking)
+ * Fetches real activity data from backend
  */
 export function MonthlyStatsChart() {
-    const data = generate_monthly_stats()
+    const { data, isLoading, error } = use_monthly_stats()
+
+    // Loading state
+    if (isLoading) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Monthly Statistics</CardTitle>
+                    <CardDescription>Activity trends over the last 6 months</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="h-[350px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">Loading chart data...</p>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    // Error or empty state
+    if (error || !data || data.length === 0) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Monthly Statistics</CardTitle>
+                    <CardDescription>Activity trends over the last 6 months</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="h-[350px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">
+                            {data?.length === 0 ? 'No activity data yet' : 'Failed to load data'}
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
 
     return (
         <Card>

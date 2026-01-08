@@ -2,16 +2,51 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
-import { generate_activity_distribution } from '@/lib/utils/chart-data'
-import { useMemo } from 'react'
+import { use_activity_distribution } from '@/lib/hooks/use_analytics'
 
 /**
  * Activity Distribution Chart Component
  * Displays breakdown of activity types as a donut chart
- * Uses mock data until Phase 3.3 (real activity tracking)
+ * Fetches real activity data from backend
  */
 export function ActivityDistributionChart() {
-    const data = useMemo(() => generate_activity_distribution(), [])
+    const { data, isLoading, error } = use_activity_distribution()
+
+    // Loading state
+    if (isLoading) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Activity Distribution</CardTitle>
+                    <CardDescription>Breakdown by action type</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="h-[300px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">Loading chart data...</p>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    // Error or empty state
+    if (error || !data || data.length === 0) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Activity Distribution</CardTitle>
+                    <CardDescription>Breakdown by action type</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="h-[300px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">
+                            {data?.length === 0 ? 'No activity data yet' : 'Failed to load data'}
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
 
     // Custom legend renderer for better mobile layout
     const render_legend = (props: any) => {
