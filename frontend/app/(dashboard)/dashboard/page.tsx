@@ -63,7 +63,7 @@ export default function DashboardPage() {
                     <h1 className="text-3xl font-bold">Dashboard</h1>
                     <p className="text-muted-foreground">Welcome back!</p>
                 </div>
-                <div className="p-4 text-sm text-red-600 bg-red-50 rounded-md">
+                <div className="p-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950 rounded-md">
                     Failed to load dashboard data. Please try again later.
                 </div>
             </div>

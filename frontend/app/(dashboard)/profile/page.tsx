@@ -93,7 +93,7 @@ export default function ProfilePage() {
                                 disabled={update_profile.isPending}
                             />
                             {profile_form.formState.errors.name && (
-                                <p className="text-sm text-red-500">
+                                <p className="text-sm text-red-500 dark:text-red-400">
                                     {profile_form.formState.errors.name.message}
                                 </p>
                             )}
@@ -144,7 +144,7 @@ export default function ProfilePage() {
                                 disabled={update_password.isPending}
                             />
                             {password_form.formState.errors.current_password && (
-                                <p className="text-sm text-red-500">
+                                <p className="text-sm text-red-500 dark:text-red-400">
                                     {password_form.formState.errors.current_password.message}
                                 </p>
                             )}
@@ -159,7 +159,7 @@ export default function ProfilePage() {
                                 disabled={update_password.isPending}
                             />
                             {password_form.formState.errors.new_password && (
-                                <p className="text-sm text-red-500">
+                                <p className="text-sm text-red-500 dark:text-red-400">
                                     {password_form.formState.errors.new_password.message}
                                 </p>
                             )}
@@ -177,7 +177,7 @@ export default function ProfilePage() {
                                 disabled={update_password.isPending}
                             />
                             {password_form.formState.errors.confirm_password && (
-                                <p className="text-sm text-red-500">
+                                <p className="text-sm text-red-500 dark:text-red-400">
                                     {password_form.formState.errors.confirm_password.message}
                                 </p>
                             )}
