@@ -164,3 +164,69 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 
     c.JSON(http.StatusOK, dto.NewSuccessResponse(nil, "Password updated successfully"))
 }
+
+// GetLoginTrend godoc
+// @Summary Get login trend
+// @Description Get last 7 days login trend
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dto.SuccessResponse{data=[]dto.LoginTrendDataPoint}
+// @Failure 401 {object} dto.ErrorResponse
+// @Router /api/v1/users/activity/login-trend [get]
+func (h *UserHandler) GetLoginTrend(c *gin.Context) {
+    userID := middleware.GetUserID(c)
+
+    data, err := h.userService.GetLoginTrend(userID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("failed to get login trend"))
+        return
+    }
+
+    c.JSON(http.StatusOK, dto.NewSuccessResponse(data, ""))
+}
+
+// GetDistribution godoc
+// @Summary Get activity distribution
+// @Description Get activity breakdown by action type
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dto.SuccessResponse{data=[]dto.ActivityDistributionData}
+// @Failure 401 {object} dto.ErrorResponse
+// @Router /api/v1/users/activity/distribution [get]
+func (h *UserHandler) GetDistribution(c *gin.Context) {
+    userID := middleware.GetUserID(c)
+
+    data, err := h.userService.GetDistribution(userID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("failed to get activity distribution"))
+        return
+    }
+
+    c.JSON(http.StatusOK, dto.NewSuccessResponse(data, ""))
+}
+
+// GetMonthlyStats godoc
+// @Summary Get monthly statistics
+// @Description Get last 6 months activity statistics
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} dto.SuccessResponse{data=[]dto.MonthlyStatData}
+// @Failure 401 {object} dto.ErrorResponse
+// @Router /api/v1/users/activity/monthly-stats [get]
+func (h *UserHandler) GetMonthlyStats(c *gin.Context) {
+    userID := middleware.GetUserID(c)
+
+    data, err := h.userService.GetMonthlyStats(userID)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("failed to get monthly stats"))
+        return
+    }
+
+    c.JSON(http.StatusOK, dto.NewSuccessResponse(data, ""))
+}
