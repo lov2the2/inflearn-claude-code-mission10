@@ -73,6 +73,9 @@ func main() {
     // Initialize Gin router
     router := gin.Default()
 
+    // Apply Request ID middleware (should be early in the chain)
+    router.Use(middleware.RequestID())
+
     // Apply CORS middleware
     router.Use(middleware.CORS(cfg.CORS.AllowedOrigins))
 

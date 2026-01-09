@@ -17,16 +17,21 @@ const apiClient = axios.create({
 })
 
 /**
- * Request interceptor to add authentication token
- * Automatically adds Bearer token to all requests if available
+ * Request interceptor to add authentication token and request ID
+ * Automatically adds Bearer token and X-Request-ID to all requests
  */
 apiClient.interceptors.request.use(
     (config) => {
         if (typeof window !== 'undefined') {
+            // Add authentication token
             const token = getAccessToken()
             if (token) {
                 config.headers.Authorization = `Bearer ${token}`
             }
+
+            // Generate and add request ID for tracing
+            const requestId = crypto.randomUUID()
+            config.headers['X-Request-ID'] = requestId
         }
         return config
     },
