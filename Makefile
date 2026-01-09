@@ -33,6 +33,10 @@ help:
 	@echo "  make migrate-down       - Rollback last migration"
 	@echo "  make migrate-version    - Show current migration version"
 	@echo ""
+	@echo "Testing:"
+	@echo "  make test               - Run all tests"
+	@echo "  make test-coverage      - Run tests with coverage report"
+	@echo ""
 	@echo "Cleanup:"
 	@echo "  make clean              - Clean Docker volumes and temp files"
 
@@ -112,3 +116,11 @@ logs:
 	@echo ""
 	@echo "=== Frontend Logs ==="
 	@tail -n 50 logs/frontend.log 2>/dev/null || echo "No frontend logs"
+
+test:
+	cd backend && go test ./... -v
+
+test-coverage:
+	cd backend && go test ./... -coverprofile=coverage.out
+	cd backend && go tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage report generated: backend/coverage.html"
