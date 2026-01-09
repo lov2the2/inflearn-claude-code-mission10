@@ -6,7 +6,9 @@ import (
 
     "start-kit-backend/internal/config"
     "start-kit-backend/internal/dto"
+    "start-kit-backend/internal/middleware"
     "start-kit-backend/internal/service"
+    "start-kit-backend/pkg/logger"
 
     "github.com/gin-gonic/gin"
 )
@@ -46,17 +48,40 @@ func NewAuthHandler(
 // @Failure 500 {object} dto.ErrorResponse
 // @Router /api/v1/auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
+    requestID := middleware.GetRequestID(c)
+    log := logger.WithRequestID(requestID)
+
     var req dto.RegisterRequest
     if err := c.ShouldBindJSON(&req); err != nil {
+        log.Warn().
+            Err(err).
+            Str("action", "register").
+            Msg("Invalid request body")
         c.JSON(http.StatusBadRequest, dto.NewErrorResponse(err.Error()))
         return
     }
 
+    log.Info().
+        Str("action", "register").
+        Str("email", req.Email).
+        Msg("User registration attempt")
+
     authResp, err := h.authService.Register(&req)
     if err != nil {
+        log.Error().
+            Err(err).
+            Str("action", "register").
+            Str("email", req.Email).
+            Msg("User registration failed")
         c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
         return
     }
+
+    log.Info().
+        Str("action", "register").
+        Uint("user_id", authResp.User.ID).
+        Str("email", authResp.User.Email).
+        Msg("User registered successfully")
 
     // Set access token cookie
     c.SetCookie(
@@ -96,17 +121,40 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Failure 401 {object} dto.ErrorResponse
 // @Router /api/v1/auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
+    requestID := middleware.GetRequestID(c)
+    log := logger.WithRequestID(requestID)
+
     var req dto.LoginRequest
     if err := c.ShouldBindJSON(&req); err != nil {
+        log.Warn().
+            Err(err).
+            Str("action", "login").
+            Msg("Invalid request body")
         c.JSON(http.StatusBadRequest, dto.NewErrorResponse(err.Error()))
         return
     }
 
+    log.Info().
+        Str("action", "login").
+        Str("email", req.Email).
+        Msg("User login attempt")
+
     authResp, err := h.authService.Login(&req)
     if err != nil {
+        log.Warn().
+            Err(err).
+            Str("action", "login").
+            Str("email", req.Email).
+            Msg("User login failed")
         c.JSON(http.StatusUnauthorized, dto.NewErrorResponse(err.Error()))
         return
     }
+
+    log.Info().
+        Str("action", "login").
+        Uint("user_id", authResp.User.ID).
+        Str("email", authResp.User.Email).
+        Msg("User logged in successfully")
 
     // Set access token cookie
     c.SetCookie(
@@ -146,6 +194,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Failure 401 {object} dto.ErrorResponse
 // @Router /api/v1/auth/refresh [post]
 func (h *AuthHandler) Refresh(c *gin.Context) {
+    requestID := middleware.GetRequestID(c)
+    log := logger.WithRequestID(requestID)
+
     // Try to get refresh token from cookie first
     refreshToken, err := c.Cookie("refresh_token")
 
@@ -153,6 +204,10 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
     if err != nil {
         var req dto.RefreshTokenRequest
         if err := c.ShouldBindJSON(&req); err != nil {
+            log.Warn().
+                Err(err).
+                Str("action", "refresh").
+                Msg("No refresh token provided")
             c.JSON(http.StatusBadRequest, dto.NewErrorResponse("refresh token required"))
             return
         }
@@ -160,15 +215,31 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
     }
 
     if refreshToken == "" {
+        log.Warn().
+            Str("action", "refresh").
+            Msg("Empty refresh token")
         c.JSON(http.StatusBadRequest, dto.NewErrorResponse("refresh token required"))
         return
     }
 
+    log.Info().
+        Str("action", "refresh").
+        Msg("Token refresh attempt")
+
     authResp, err := h.authService.Refresh(refreshToken)
     if err != nil {
+        log.Warn().
+            Err(err).
+            Str("action", "refresh").
+            Msg("Token refresh failed")
         c.JSON(http.StatusUnauthorized, dto.NewErrorResponse(err.Error()))
         return
     }
+
+    log.Info().
+        Str("action", "refresh").
+        Uint("user_id", authResp.User.ID).
+        Msg("Token refreshed successfully")
 
     // Set new access token cookie
     c.SetCookie(
@@ -210,6 +281,9 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 // @Failure 500 {object} dto.ErrorResponse
 // @Router /api/v1/auth/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
+    requestID := middleware.GetRequestID(c)
+    log := logger.WithRequestID(requestID)
+
     // Try to get refresh token from cookie first
     refreshToken, err := c.Cookie("refresh_token")
 
@@ -218,6 +292,9 @@ func (h *AuthHandler) Logout(c *gin.Context) {
         var req dto.RefreshTokenRequest
         if err := c.ShouldBindJSON(&req); err != nil {
             // If no token provided, just clear cookies and return success
+            log.Info().
+                Str("action", "logout").
+                Msg("Logout without token (clearing cookies only)")
             h.clearAuthCookies(c)
             c.JSON(http.StatusOK, dto.NewSuccessResponse(nil, "Logout successful"))
             return
@@ -225,9 +302,17 @@ func (h *AuthHandler) Logout(c *gin.Context) {
         refreshToken = req.RefreshToken
     }
 
+    log.Info().
+        Str("action", "logout").
+        Msg("User logout attempt")
+
     // Revoke refresh token if provided
     if refreshToken != "" {
         if err := h.authService.Logout(refreshToken); err != nil {
+            log.Error().
+                Err(err).
+                Str("action", "logout").
+                Msg("Failed to revoke refresh token")
             c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
             return
         }
@@ -235,6 +320,10 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 
     // Clear cookies
     h.clearAuthCookies(c)
+
+    log.Info().
+        Str("action", "logout").
+        Msg("User logged out successfully")
 
     c.JSON(http.StatusOK, dto.NewSuccessResponse(nil, "Logout successful"))
 }

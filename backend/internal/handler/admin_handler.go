@@ -8,6 +8,7 @@ import (
     "start-kit-backend/internal/middleware"
     "start-kit-backend/internal/model"
     "start-kit-backend/internal/service"
+    "start-kit-backend/pkg/logger"
 
     "github.com/gin-gonic/gin"
 )
@@ -36,8 +37,16 @@ func NewAdminHandler(adminService service.AdminService) *AdminHandler {
 // @Failure 403 {object} dto.ErrorResponse
 // @Router /api/v1/admin/users [get]
 func (h *AdminHandler) ListUsers(c *gin.Context) {
+    requestID := middleware.GetRequestID(c)
+    adminID := middleware.GetUserID(c)
+    log := logger.WithContext(requestID, adminID)
+
     var params dto.ListUsersRequest
     if err := c.ShouldBindQuery(&params); err != nil {
+        log.Warn().
+            Err(err).
+            Str("action", "list_users").
+            Msg("Invalid query parameters")
         c.JSON(http.StatusBadRequest, dto.NewErrorResponse(err.Error()))
         return
     }
@@ -50,11 +59,26 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
         params.Limit = 10
     }
 
+    log.Info().
+        Str("action", "list_users").
+        Int("page", params.Page).
+        Int("limit", params.Limit).
+        Msg("Fetching user list")
+
     response, err := h.adminService.ListUsers(&params)
     if err != nil {
+        log.Error().
+            Err(err).
+            Str("action", "list_users").
+            Msg("Failed to fetch user list")
         c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
         return
     }
+
+    log.Info().
+        Str("action", "list_users").
+        Int("total_users", response.Total).
+        Msg("User list fetched successfully")
 
     c.JSON(http.StatusOK, dto.NewSuccessResponse(response, "Users retrieved successfully"))
 }

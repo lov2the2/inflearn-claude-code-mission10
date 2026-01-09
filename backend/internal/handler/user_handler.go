@@ -6,6 +6,7 @@ import (
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/middleware"
     "start-kit-backend/internal/service"
+    "start-kit-backend/pkg/logger"
 
     "github.com/gin-gonic/gin"
 )
@@ -31,13 +32,27 @@ func NewUserHandler(userService service.UserService) *UserHandler {
 // @Security BearerAuth
 // @Router /api/v1/users/profile [get]
 func (h *UserHandler) GetProfile(c *gin.Context) {
+    requestID := middleware.GetRequestID(c)
     userID := middleware.GetUserID(c)
+    log := logger.WithContext(requestID, userID)
+
+    log.Info().
+        Str("action", "get_profile").
+        Msg("Fetching user profile")
 
     profile, err := h.userService.GetProfile(userID)
     if err != nil {
+        log.Error().
+            Err(err).
+            Str("action", "get_profile").
+            Msg("Failed to fetch user profile")
         c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
         return
     }
+
+    log.Info().
+        Str("action", "get_profile").
+        Msg("User profile fetched successfully")
 
     c.JSON(http.StatusOK, dto.NewSuccessResponse(profile, ""))
 }

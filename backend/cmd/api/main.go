@@ -1,7 +1,6 @@
 package main
 
 import (
-    "log"
     "time"
 
     "start-kit-backend/internal/config"
@@ -11,8 +10,10 @@ import (
     "start-kit-backend/internal/repository"
     "start-kit-backend/internal/service"
     "start-kit-backend/pkg/database"
+    "start-kit-backend/pkg/logger"
 
     "github.com/gin-gonic/gin"
+    "github.com/rs/zerolog/log"
 
     swaggerFiles "github.com/swaggo/files"
     ginSwagger "github.com/swaggo/gin-swagger"
@@ -33,6 +34,13 @@ func main() {
     // Load configuration
     cfg := config.Load()
 
+    // Initialize logger
+    logger.Init(cfg.Server.Environment)
+    log.Info().
+        Str("environment", cfg.Server.Environment).
+        Str("gin_mode", cfg.Server.GinMode).
+        Msg("Starting application")
+
     // Set Gin mode
     gin.SetMode(cfg.Server.GinMode)
 
@@ -46,24 +54,37 @@ func main() {
         SSLMode:  cfg.Database.SSLMode,
     })
     if err != nil {
-        log.Fatalf("Failed to connect to database: %v", err)
+        log.Fatal().Err(err).Msg("Failed to connect to database")
     }
+
+    log.Info().
+        Str("host", cfg.Database.Host).
+        Str("port", cfg.Database.Port).
+        Str("database", cfg.Database.DBName).
+        Msg("Database connection established")
 
     // Auto-migrate models
     if err := db.AutoMigrate(&model.User{}, &model.RefreshToken{}, &model.Activity{}); err != nil {
-        log.Fatalf("Failed to migrate database: %v", err)
+        log.Fatal().Err(err).Msg("Failed to migrate database")
     }
+
+    log.Info().Msg("Database migration completed")
 
     // Parse JWT expiry durations
     jwtExpiry, err := time.ParseDuration(cfg.JWT.AccessExpiry)
     if err != nil {
-        log.Fatalf("Invalid JWT access expiry duration: %v", err)
+        log.Fatal().Err(err).Msg("Invalid JWT access expiry duration")
     }
 
     refreshTokenExpiry, err := time.ParseDuration(cfg.JWT.RefreshExpiry)
     if err != nil {
-        log.Fatalf("Invalid JWT refresh expiry duration: %v", err)
+        log.Fatal().Err(err).Msg("Invalid JWT refresh expiry duration")
     }
+
+    log.Info().
+        Str("access_expiry", cfg.JWT.AccessExpiry).
+        Str("refresh_expiry", cfg.JWT.RefreshExpiry).
+        Msg("JWT configuration loaded")
 
     // Initialize layers
     repo := repository.NewRepository(db)
@@ -139,8 +160,12 @@ func main() {
 
     // Start server
     port := ":" + cfg.Server.Port
-    log.Printf("Server starting on port %s", port)
+    log.Info().
+        Str("port", cfg.Server.Port).
+        Str("environment", cfg.Server.Environment).
+        Msg("Server starting")
+
     if err := router.Run(port); err != nil {
-        log.Fatalf("Failed to start server: %v", err)
+        log.Fatal().Err(err).Msg("Failed to start server")
     }
 }
