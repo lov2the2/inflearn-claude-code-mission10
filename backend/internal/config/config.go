@@ -12,6 +12,7 @@ type Config struct {
     Database DatabaseConfig
     JWT      JWTConfig
     CORS     CORSConfig
+    Cookie   CookieConfig
 }
 
 type ServerConfig struct {
@@ -36,6 +37,11 @@ type JWTConfig struct {
 
 type CORSConfig struct {
     AllowedOrigins string
+}
+
+type CookieConfig struct {
+    Secure bool
+    Domain string
 }
 
 func Load() *Config {
@@ -64,6 +70,10 @@ func Load() *Config {
         },
         CORS: CORSConfig{
             AllowedOrigins: getEnv("ALLOWED_ORIGINS", "http://localhost:3000"),
+        },
+        Cookie: CookieConfig{
+            Secure: getEnv("COOKIE_SECURE", "false") == "true",
+            Domain: getEnv("COOKIE_DOMAIN", "localhost"),
         },
     }
 }

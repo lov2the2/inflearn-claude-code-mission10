@@ -68,7 +68,13 @@ func main() {
     // Initialize layers
     repo := repository.NewRepository(db)
     svc := service.NewService(repo, cfg.JWT.Secret, jwtExpiry, refreshTokenExpiry)
-    h := handler.NewHandler(svc, db)
+    h := handler.NewHandler(handler.HandlerConfig{
+        Service:       svc,
+        DB:            db,
+        CookieConfig:  cfg.Cookie,
+        AccessExpiry:  jwtExpiry,
+        RefreshExpiry: refreshTokenExpiry,
+    })
 
     // Initialize Gin router
     router := gin.Default()

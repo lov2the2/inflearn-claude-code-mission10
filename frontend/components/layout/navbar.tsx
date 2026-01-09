@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { clearSession, getUser, getRefreshToken } from '@/lib/auth/session'
+import { clearSession, getUser } from '@/lib/auth/session'
 import { authApi } from '@/lib/api/auth'
 import { isAdmin } from '@/lib/auth/role'
 import { Button } from '@/components/ui/button'
@@ -28,16 +28,15 @@ export default function Navbar() {
     }, [])
 
     const handleLogout = async () => {
-        const refreshToken = getRefreshToken()
-
-        if (refreshToken) {
-            try {
-                await authApi.logout(refreshToken)
-            } catch (error) {
-                console.error('Logout error:', error)
-            }
+        try {
+            // Call backend logout to clear HttpOnly cookies
+            await authApi.logout()
+        } catch (error) {
+            console.error('Logout error:', error)
+            // Continue with client-side cleanup even if backend call fails
         }
 
+        // Clear client-side user data
         clearSession()
         setOpen(false)
         router.push('/login')

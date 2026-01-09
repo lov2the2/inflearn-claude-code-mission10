@@ -12,23 +12,36 @@ import (
 
 func AuthRequired(jwtSecret string) gin.HandlerFunc {
     return func(c *gin.Context) {
-        // Extract token from Authorization header
-        authHeader := c.GetHeader("Authorization")
-        if authHeader == "" {
-            c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("missing authorization header"))
+        var tokenString string
+
+        // Try to get token from cookie first (preferred method)
+        tokenString, err := c.Cookie("access_token")
+
+        // If cookie not found, try Authorization header (fallback for API testing/Swagger)
+        if err != nil {
+            authHeader := c.GetHeader("Authorization")
+            if authHeader == "" {
+                c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("missing authentication token"))
+                c.Abort()
+                return
+            }
+
+            // Check Bearer prefix
+            parts := strings.Split(authHeader, " ")
+            if len(parts) != 2 || parts[0] != "Bearer" {
+                c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("invalid authorization header format"))
+                c.Abort()
+                return
+            }
+
+            tokenString = parts[1]
+        }
+
+        if tokenString == "" {
+            c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("missing authentication token"))
             c.Abort()
             return
         }
-
-        // Check Bearer prefix
-        parts := strings.Split(authHeader, " ")
-        if len(parts) != 2 || parts[0] != "Bearer" {
-            c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("invalid authorization header format"))
-            c.Abort()
-            return
-        }
-
-        tokenString := parts[1]
 
         // Validate token
         claims, err := util.ValidateToken(tokenString, jwtSecret)

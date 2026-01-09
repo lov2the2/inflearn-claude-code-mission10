@@ -1,5 +1,5 @@
 import apiClient from './client'
-import { LoginRequest, RegisterRequest, AuthResponse, RefreshTokenResponse } from '@/types/auth'
+import { LoginRequest, RegisterRequest, AuthResponse } from '@/types/auth'
 import { ApiResponse } from '@/types/api'
 
 export const authApi = {
@@ -19,17 +19,8 @@ export const authApi = {
         return response.data.data
     },
 
-    refresh: async (refreshToken: string): Promise<RefreshTokenResponse> => {
-        const response = await apiClient.post<ApiResponse<RefreshTokenResponse>>(
-            '/api/v1/auth/refresh',
-            { refresh_token: refreshToken }
-        )
-        return response.data.data
-    },
-
-    logout: async (refreshToken: string): Promise<void> => {
-        await apiClient.post('/api/v1/auth/logout', {
-            refresh_token: refreshToken
-        })
+    logout: async (): Promise<void> => {
+        // Backend reads refresh token from HttpOnly cookie
+        await apiClient.post('/api/v1/auth/logout')
     },
 }

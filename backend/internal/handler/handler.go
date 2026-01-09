@@ -1,6 +1,9 @@
 package handler
 
 import (
+    "time"
+
+    "start-kit-backend/internal/config"
     "start-kit-backend/internal/service"
 
     "gorm.io/gorm"
@@ -14,12 +17,20 @@ type Handler struct {
     User   *UserHandler
 }
 
-func NewHandler(service *service.Service, db *gorm.DB) *Handler {
+type HandlerConfig struct {
+    Service       *service.Service
+    DB            *gorm.DB
+    CookieConfig  config.CookieConfig
+    AccessExpiry  time.Duration
+    RefreshExpiry time.Duration
+}
+
+func NewHandler(cfg HandlerConfig) *Handler {
     return &Handler{
-        Auth:   NewAuthHandler(service.Auth),
-        Admin:  NewAdminHandler(service.Admin),
-        CSV:    NewCSVHandler(service.CSV),
-        Health: NewHealthHandler(db),
-        User:   NewUserHandler(service.User),
+        Auth:   NewAuthHandler(cfg.Service.Auth, cfg.CookieConfig, cfg.AccessExpiry, cfg.RefreshExpiry),
+        Admin:  NewAdminHandler(cfg.Service.Admin),
+        CSV:    NewCSVHandler(cfg.Service.CSV),
+        Health: NewHealthHandler(cfg.DB),
+        User:   NewUserHandler(cfg.Service.User),
     }
 }

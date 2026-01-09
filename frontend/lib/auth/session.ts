@@ -19,44 +19,22 @@ function safeJsonParse<T>(value: string | null, fallback: T): T {
 }
 
 /**
- * Set authentication session
- * Stores access token, refresh token, and user information
+ * Set user session data
+ * With cookie-based auth, only stores non-sensitive user info (not tokens)
+ * Tokens are managed by HttpOnly cookies on the backend
  * @param authResponse - Authentication response from API
  * @throws Error if localStorage is unavailable or quota exceeded
  */
 export const setSession = (authResponse: AuthResponse): void => {
     if (typeof window !== 'undefined') {
         try {
-            localStorage.setItem('access_token', authResponse.access_token)
-            localStorage.setItem('refresh_token', authResponse.refresh_token)
+            // Only store user information (no tokens - handled by HttpOnly cookies)
             localStorage.setItem('user', JSON.stringify(authResponse.user))
         } catch (error) {
             console.error('Failed to save session:', error)
             throw new Error('Unable to save session. Please check browser storage settings.')
         }
     }
-}
-
-/**
- * Get access token from storage
- * @returns Access token or null if not found
- */
-export const getAccessToken = (): string | null => {
-    if (typeof window !== 'undefined') {
-        return localStorage.getItem('access_token')
-    }
-    return null
-}
-
-/**
- * Get refresh token from storage
- * @returns Refresh token or null if not found
- */
-export const getRefreshToken = (): string | null => {
-    if (typeof window !== 'undefined') {
-        return localStorage.getItem('refresh_token')
-    }
-    return null
 }
 
 /**
@@ -74,20 +52,21 @@ export const getUser = (): User | null => {
 
 /**
  * Clear authentication session
- * Removes all session-related data from storage
+ * Removes user data from localStorage
+ * Note: HttpOnly cookies are cleared by backend logout endpoint
  */
 export const clearSession = (): void => {
     if (typeof window !== 'undefined') {
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
         localStorage.removeItem('user')
     }
 }
 
 /**
  * Check if user is authenticated
- * @returns True if access token exists, false otherwise
+ * With cookie-based auth, checks if user data exists in localStorage
+ * Note: This is a client-side hint; actual auth is validated by backend via cookies
+ * @returns True if user data exists, false otherwise
  */
 export const isAuthenticated = (): boolean => {
-    return getAccessToken() !== null
+    return getUser() !== null
 }
