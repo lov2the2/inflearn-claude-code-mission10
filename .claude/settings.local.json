@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Skill(git:commit)"
     ]
   }
 }
