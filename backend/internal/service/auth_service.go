@@ -4,6 +4,7 @@ import (
     "errors"
     "time"
 
+    "start-kit-backend/internal/apperror"
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/model"
     "start-kit-backend/internal/repository"
@@ -39,16 +40,16 @@ func (s *authService) Register(req *dto.RegisterRequest) (*dto.AuthResponse, err
     // Check if user already exists
     existingUser, err := s.repo.User.FindByEmail(req.Email)
     if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-        return nil, err
+        return nil, apperror.Internal("failed to check existing user")
     }
     if existingUser != nil {
-        return nil, errors.New("user with this email already exists")
+        return nil, apperror.Conflict("user with this email already exists")
     }
 
     // Hash password
     passwordHash, err := util.HashPassword(req.Password)
     if err != nil {
-        return nil, err
+        return nil, apperror.Internal("failed to hash password")
     }
 
     // Create user
@@ -60,7 +61,7 @@ func (s *authService) Register(req *dto.RegisterRequest) (*dto.AuthResponse, err
     }
 
     if err := s.repo.User.Create(user); err != nil {
-        return nil, err
+        return nil, apperror.Internal("failed to create user")
     }
 
     // Generate tokens
@@ -72,14 +73,14 @@ func (s *authService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
     user, err := s.repo.User.FindByEmail(req.Email)
     if err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
-            return nil, errors.New("invalid credentials")
+            return nil, apperror.Unauthorized("invalid credentials")
         }
-        return nil, err
+        return nil, apperror.Internal("failed to find user")
     }
 
     // Check password
     if !util.CheckPassword(req.Password, user.PasswordHash) {
-        return nil, errors.New("invalid credentials")
+        return nil, apperror.Unauthorized("invalid credentials")
     }
 
     // Generate tokens
@@ -91,20 +92,20 @@ func (s *authService) Refresh(refreshToken string) (*dto.AuthResponse, error) {
     token, err := s.repo.Token.FindByToken(refreshToken)
     if err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
-            return nil, errors.New("invalid refresh token")
+            return nil, apperror.Unauthorized("invalid refresh token")
         }
-        return nil, err
+        return nil, apperror.Internal("failed to validate refresh token")
     }
 
     // Get user
     user, err := s.repo.User.FindByID(token.UserID)
     if err != nil {
-        return nil, errors.New("user not found")
+        return nil, apperror.NotFound("user not found")
     }
 
     // Revoke old token
     if err := s.repo.Token.RevokeByToken(refreshToken); err != nil {
-        return nil, err
+        return nil, apperror.Internal("failed to revoke old token")
     }
 
     // Generate new tokens
@@ -127,13 +128,13 @@ func (s *authService) generateTokens(user *model.User) (*dto.AuthResponse, error
         s.jwtExpiry,
     )
     if err != nil {
-        return nil, err
+        return nil, apperror.Internal("failed to generate access token")
     }
 
     // Generate refresh token
     refreshTokenStr, err := util.GenerateRefreshToken()
     if err != nil {
-        return nil, err
+        return nil, apperror.Internal("failed to generate refresh token")
     }
 
     // Save refresh token to database
@@ -144,7 +145,7 @@ func (s *authService) generateTokens(user *model.User) (*dto.AuthResponse, error
     }
 
     if err := s.repo.Token.Create(refreshToken); err != nil {
-        return nil, err
+        return nil, apperror.Internal("failed to save refresh token")
     }
 
     return &dto.AuthResponse{

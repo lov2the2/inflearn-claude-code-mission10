@@ -8,6 +8,7 @@ import * as z from 'zod'
 import { toast } from 'sonner'
 import { authApi } from '@/lib/api/auth'
 import { setSession } from '@/lib/auth/session'
+import { handleAPIError, isValidationError, extractValidationErrors } from '@/lib/api/errors'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -39,12 +40,22 @@ export default function LoginForm() {
 
             const response = await authApi.login(data)
             setSession(response)
-            toast.success('Successfully logged in! Redirecting...')
+            toast.success('로그인에 성공했습니다!')
             router.push('/dashboard')
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.error || 'Login failed. Please try again.'
+        } catch (err: unknown) {
+            // Use standardized error handling
+            const errorMessage = handleAPIError(err)
             setError(errorMessage)
             toast.error(errorMessage)
+
+            // Handle validation errors with field-specific messages
+            if (isValidationError(err)) {
+                const validationErrors = extractValidationErrors(err)
+                if (validationErrors) {
+                    // Can optionally set field-specific errors here
+                    console.log('Validation errors:', validationErrors)
+                }
+            }
         } finally {
             setIsLoading(false)
         }

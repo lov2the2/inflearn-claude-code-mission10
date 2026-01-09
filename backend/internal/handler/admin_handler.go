@@ -4,6 +4,7 @@ import (
     "net/http"
     "strconv"
 
+    "start-kit-backend/internal/apperror"
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/middleware"
     "start-kit-backend/internal/model"
@@ -71,13 +72,18 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
             Err(err).
             Str("action", "list_users").
             Msg("Failed to fetch user list")
-        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
         return
     }
 
     log.Info().
         Str("action", "list_users").
-        Int("total_users", response.Total).
+        Int64("total_users", response.Total).
         Msg("User list fetched successfully")
 
     c.JSON(http.StatusOK, dto.NewSuccessResponse(response, "Users retrieved successfully"))
@@ -104,7 +110,11 @@ func (h *AdminHandler) GetUser(c *gin.Context) {
 
     user, err := h.adminService.GetUser(uint(userID))
     if err != nil {
-        c.JSON(http.StatusNotFound, dto.NewErrorResponse("user not found"))
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
         return
     }
 
@@ -144,11 +154,11 @@ func (h *AdminHandler) UpdateUserRole(c *gin.Context) {
     // Update role
     err = h.adminService.UpdateUserRole(uint(userID), model.UserRole(req.Role), adminID)
     if err != nil {
-        if err.Error() == "cannot modify your own role" {
-            c.JSON(http.StatusConflict, dto.NewErrorResponse(err.Error()))
-            return
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
         }
-        c.JSON(http.StatusNotFound, dto.NewErrorResponse("user not found"))
         return
     }
 
@@ -176,11 +186,11 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 
     response, err := h.adminService.CreateUser(&req)
     if err != nil {
-        if err.Error() == "user with this email already exists" {
-            c.JSON(http.StatusConflict, dto.NewErrorResponse(err.Error()))
-            return
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
         }
-        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
         return
     }
 
@@ -213,11 +223,11 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
     // Delete user
     err = h.adminService.DeleteUser(uint(userID), adminID)
     if err != nil {
-        if err.Error() == "cannot delete your own account" {
-            c.JSON(http.StatusConflict, dto.NewErrorResponse(err.Error()))
-            return
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
         }
-        c.JSON(http.StatusNotFound, dto.NewErrorResponse("user not found"))
         return
     }
 

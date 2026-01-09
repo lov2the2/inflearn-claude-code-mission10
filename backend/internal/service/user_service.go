@@ -1,10 +1,10 @@
 package service
 
 import (
-    "errors"
     "strings"
     "time"
 
+    "start-kit-backend/internal/apperror"
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/repository"
     "start-kit-backend/internal/util"
@@ -32,7 +32,7 @@ func NewUserService(repo *repository.Repository) UserService {
 func (s *userService) GetProfile(userID uint) (*dto.UserProfileResponse, error) {
     user, err := s.repo.User.FindByID(userID)
     if err != nil {
-        return nil, errors.New("user not found")
+        return nil, apperror.NotFound("user not found")
     }
 
     return &dto.UserProfileResponse{
@@ -48,13 +48,13 @@ func (s *userService) GetActivity(userID uint, params *dto.UserActivityRequest) 
     // Verify user exists
     _, err := s.repo.User.FindByID(userID)
     if err != nil {
-        return nil, errors.New("user not found")
+        return nil, apperror.NotFound("user not found")
     }
 
     // Fetch real activities from database
     activities, total, err := s.repo.Activity.FindByUserID(userID, params.Page, params.Limit)
     if err != nil {
-        return nil, errors.New("failed to fetch activities")
+        return nil, apperror.Internal("failed to fetch activities")
     }
 
     // Convert to DTOs
@@ -80,7 +80,7 @@ func (s *userService) GetActivity(userID uint, params *dto.UserActivityRequest) 
 func (s *userService) GetStats(userID uint) (*dto.UserStatsResponse, error) {
     user, err := s.repo.User.FindByID(userID)
     if err != nil {
-        return nil, errors.New("user not found")
+        return nil, apperror.NotFound("user not found")
     }
 
     // Get real stats from activities
@@ -105,17 +105,17 @@ func (s *userService) UpdateProfile(userID uint, req *dto.UpdateProfileRequest) 
     // Verify user exists
     _, err := s.repo.User.FindByID(userID)
     if err != nil {
-        return nil, errors.New("user not found")
+        return nil, apperror.NotFound("user not found")
     }
 
     // Validate name (additional business rules)
     if len(strings.TrimSpace(req.Name)) < 2 {
-        return nil, errors.New("name must be at least 2 characters")
+        return nil, apperror.Validation("name must be at least 2 characters")
     }
 
     // Update name
     if err := s.repo.User.UpdateName(userID, req.Name); err != nil {
-        return nil, errors.New("failed to update profile")
+        return nil, apperror.Internal("failed to update profile")
     }
 
     // Return updated profile
@@ -126,28 +126,28 @@ func (s *userService) UpdatePassword(userID uint, req *dto.UpdatePasswordRequest
     // Verify user exists
     user, err := s.repo.User.FindByID(userID)
     if err != nil {
-        return errors.New("user not found")
+        return apperror.NotFound("user not found")
     }
 
     // Verify current password
     if !util.CheckPassword(req.CurrentPassword, user.PasswordHash) {
-        return errors.New("current password is incorrect")
+        return apperror.Unauthorized("current password is incorrect")
     }
 
     // Ensure new password is different
     if util.CheckPassword(req.NewPassword, user.PasswordHash) {
-        return errors.New("new password must be different from current password")
+        return apperror.Validation("new password must be different from current password")
     }
 
     // Hash new password
     newPasswordHash, err := util.HashPassword(req.NewPassword)
     if err != nil {
-        return errors.New("failed to hash password")
+        return apperror.Internal("failed to hash password")
     }
 
     // Update password
     if err := s.repo.User.UpdatePassword(userID, newPasswordHash); err != nil {
-        return errors.New("failed to update password")
+        return apperror.Internal("failed to update password")
     }
 
     return nil

@@ -2,9 +2,9 @@ package service
 
 import (
     "crypto/rand"
-    "errors"
     "math/big"
 
+    "start-kit-backend/internal/apperror"
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/model"
     "start-kit-backend/internal/repository"
@@ -34,7 +34,7 @@ func (s *adminService) ListUsers(params *dto.ListUsersRequest) (*dto.ListUsersRe
     // Get users from repository with search and role filter
     users, total, err := s.repo.Admin.ListUsers(offset, params.Limit, params.Search, params.Role)
     if err != nil {
-        return nil, err
+        return nil, apperror.Internal("failed to list users")
     }
 
     // Convert to response DTOs
@@ -59,7 +59,7 @@ func (s *adminService) ListUsers(params *dto.ListUsersRequest) (*dto.ListUsersRe
 func (s *adminService) GetUser(userID uint) (*dto.UserDetailResponse, error) {
     user, err := s.repo.User.FindByID(userID)
     if err != nil {
-        return nil, err
+        return nil, apperror.NotFound("user not found")
     }
 
     return &dto.UserDetailResponse{
@@ -76,7 +76,7 @@ func (s *adminService) CreateUser(req *dto.CreateUserRequest) (*dto.CreateUserRe
     // Check if user already exists
     existingUser, _ := s.repo.User.FindByEmail(req.Email)
     if existingUser != nil {
-        return nil, errors.New("user with this email already exists")
+        return nil, apperror.Conflict("user with this email already exists")
     }
 
     var passwordHash string
@@ -86,18 +86,18 @@ func (s *adminService) CreateUser(req *dto.CreateUserRequest) (*dto.CreateUserRe
     if req.Password == "" {
         password, err := generate_random_password(12)
         if err != nil {
-            return nil, err
+            return nil, apperror.Internal("failed to generate password")
         }
         generatedPassword = password
         hash, err := util.HashPassword(password)
         if err != nil {
-            return nil, err
+            return nil, apperror.Internal("failed to hash password")
         }
         passwordHash = hash
     } else {
         hash, err := util.HashPassword(req.Password)
         if err != nil {
-            return nil, err
+            return nil, apperror.Internal("failed to hash password")
         }
         passwordHash = hash
     }
@@ -112,7 +112,7 @@ func (s *adminService) CreateUser(req *dto.CreateUserRequest) (*dto.CreateUserRe
 
     // Create user in database
     if err := s.repo.User.Create(user); err != nil {
-        return nil, err
+        return nil, apperror.Internal("failed to create user")
     }
 
     // Prepare response
@@ -150,31 +150,39 @@ func generate_random_password(length int) (string, error) {
 func (s *adminService) UpdateUserRole(userID uint, newRole model.UserRole, adminID uint) error {
     // Prevent admin from changing their own role
     if userID == adminID {
-        return errors.New("cannot modify your own role")
+        return apperror.Forbidden("cannot modify your own role")
     }
 
     // Check if user exists
     _, err := s.repo.User.FindByID(userID)
     if err != nil {
-        return err
+        return apperror.NotFound("user not found")
     }
 
     // Update role
-    return s.repo.Admin.UpdateRole(userID, newRole)
+    if err := s.repo.Admin.UpdateRole(userID, newRole); err != nil {
+        return apperror.Internal("failed to update user role")
+    }
+
+    return nil
 }
 
 func (s *adminService) DeleteUser(userID uint, adminID uint) error {
     // Prevent admin from deleting themselves
     if userID == adminID {
-        return errors.New("cannot delete your own account")
+        return apperror.Forbidden("cannot delete your own account")
     }
 
     // Check if user exists
     _, err := s.repo.User.FindByID(userID)
     if err != nil {
-        return err
+        return apperror.NotFound("user not found")
     }
 
     // Delete user (soft delete via GORM)
-    return s.repo.Admin.Delete(userID)
+    if err := s.repo.Admin.Delete(userID); err != nil {
+        return apperror.Internal("failed to delete user")
+    }
+
+    return nil
 }

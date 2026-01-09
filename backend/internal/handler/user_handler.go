@@ -3,6 +3,7 @@ package handler
 import (
     "net/http"
 
+    "start-kit-backend/internal/apperror"
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/middleware"
     "start-kit-backend/internal/service"
@@ -46,7 +47,12 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
             Err(err).
             Str("action", "get_profile").
             Msg("Failed to fetch user profile")
-        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
         return
     }
 
@@ -81,7 +87,11 @@ func (h *UserHandler) GetActivity(c *gin.Context) {
 
     activity, err := h.userService.GetActivity(userID, &params)
     if err != nil {
-        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
         return
     }
 
@@ -103,7 +113,11 @@ func (h *UserHandler) GetStats(c *gin.Context) {
 
     stats, err := h.userService.GetStats(userID)
     if err != nil {
-        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
         return
     }
 
@@ -134,7 +148,11 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 
     profile, err := h.userService.UpdateProfile(userID, &req)
     if err != nil {
-        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
         return
     }
 
@@ -169,11 +187,11 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
     }
 
     if err := h.userService.UpdatePassword(userID, &req); err != nil {
-        statusCode := http.StatusBadRequest
-        if err.Error() == "current password is incorrect" {
-            statusCode = http.StatusUnauthorized
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
         }
-        c.JSON(statusCode, dto.NewErrorResponse(err.Error()))
         return
     }
 

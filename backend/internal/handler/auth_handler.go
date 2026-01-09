@@ -4,6 +4,7 @@ import (
     "net/http"
     "time"
 
+    "start-kit-backend/internal/apperror"
     "start-kit-backend/internal/config"
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/middleware"
@@ -73,7 +74,12 @@ func (h *AuthHandler) Register(c *gin.Context) {
             Str("action", "register").
             Str("email", req.Email).
             Msg("User registration failed")
-        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
         return
     }
 
@@ -146,7 +152,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
             Str("action", "login").
             Str("email", req.Email).
             Msg("User login failed")
-        c.JSON(http.StatusUnauthorized, dto.NewErrorResponse(err.Error()))
+
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
         return
     }
 
@@ -232,7 +243,12 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
             Err(err).
             Str("action", "refresh").
             Msg("Token refresh failed")
-        c.JSON(http.StatusUnauthorized, dto.NewErrorResponse(err.Error()))
+
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
         return
     }
 
