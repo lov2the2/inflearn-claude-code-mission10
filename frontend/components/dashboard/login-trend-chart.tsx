@@ -2,16 +2,52 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts'
-import { generate_login_trend_data } from '@/lib/utils/chart-data'
+import { use_login_trend } from '@/lib/hooks/use_analytics'
 import { TrendingUp } from 'lucide-react'
 
 /**
  * Login Trend Chart Component
  * Displays last 7 days of login activity with trend indicator
- * Uses mock data until Phase 3.3 (real activity tracking)
+ * Fetches real activity data from backend
  */
 export function LoginTrendChart() {
-    const data = generate_login_trend_data()
+    const { data, isLoading, error } = use_login_trend()
+
+    // Loading state
+    if (isLoading) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Login Trend</CardTitle>
+                    <CardDescription>Last 7 days activity</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="h-[300px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">Loading chart data...</p>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    // Error or empty state
+    if (error || !data || data.length === 0) {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Login Trend</CardTitle>
+                    <CardDescription>Last 7 days activity</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="h-[300px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">
+                            {data?.length === 0 ? 'No activity data yet' : 'Failed to load data'}
+                        </p>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
 
     // Calculate trend (simple: compare last day to average)
     const last_day_logins = data[data.length - 1]?.logins || 0

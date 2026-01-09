@@ -50,7 +50,7 @@ func main() {
     }
 
     // Auto-migrate models
-    if err := db.AutoMigrate(&model.User{}, &model.RefreshToken{}); err != nil {
+    if err := db.AutoMigrate(&model.User{}, &model.RefreshToken{}, &model.Activity{}); err != nil {
         log.Fatalf("Failed to migrate database: %v", err)
     }
 
@@ -98,9 +98,13 @@ func main() {
         // User routes (protected)
         users := v1.Group("/users")
         users.Use(middleware.AuthRequired(cfg.JWT.Secret))
+        users.Use(middleware.ActivityLogger(repo))
         {
             users.GET("/profile", h.User.GetProfile)
             users.GET("/activity", h.User.GetActivity)
+            users.GET("/activity/login-trend", h.User.GetLoginTrend)
+            users.GET("/activity/distribution", h.User.GetDistribution)
+            users.GET("/activity/monthly-stats", h.User.GetMonthlyStats)
             users.GET("/stats", h.User.GetStats)
             users.PATCH("/profile", h.User.UpdateProfile)
             users.PATCH("/password", h.User.UpdatePassword)
@@ -110,6 +114,7 @@ func main() {
         admin := v1.Group("/admin")
         admin.Use(middleware.AuthRequired(cfg.JWT.Secret))
         admin.Use(middleware.RequireAdmin())
+        admin.Use(middleware.ActivityLogger(repo))
         {
             admin.GET("/users", h.Admin.ListUsers)
             admin.POST("/users", h.Admin.CreateUser)

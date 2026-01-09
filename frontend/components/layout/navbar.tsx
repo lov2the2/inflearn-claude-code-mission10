@@ -16,6 +16,7 @@ import {
 import { useEffect, useState } from 'react'
 import { User } from '@/types/auth'
 import { Menu, LogOut, LayoutDashboard, Shield, UserCircle } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default function Navbar() {
     const router = useRouter()
@@ -48,30 +49,30 @@ export default function Navbar() {
     }
 
     return (
-        <nav className="bg-white shadow-sm border-b">
+        <nav className="bg-white dark:bg-gray-900 shadow-sm border-b dark:border-gray-800">
             <div className="container mx-auto px-4">
                 <div className="flex justify-between items-center h-16">
                     <div className="flex items-center space-x-8">
-                        <h1 className="text-xl font-bold">Starter Kit</h1>
+                        <h1 className="text-xl font-bold dark:text-white">Starter Kit</h1>
 
                         {/* Desktop Menu */}
                         <div className="hidden md:flex space-x-4">
                             <a
                                 href="/dashboard"
-                                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                             >
                                 Dashboard
                             </a>
                             <a
                                 href="/profile"
-                                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                             >
                                 Profile
                             </a>
                             {user && isAdmin(user) && (
                                 <a
                                     href="/admin/users"
-                                    className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                                    className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                                 >
                                     Admin
                                 </a>
@@ -81,10 +82,11 @@ export default function Navbar() {
 
                     {/* Desktop User Info & Logout */}
                     <div className="hidden md:flex items-center space-x-4">
+                        <ThemeToggle />
                         {user && (
-                            <div className="text-sm text-gray-700">
+                            <div className="text-sm text-gray-700 dark:text-gray-300">
                                 <span className="font-medium">{user.name}</span>
-                                <span className="text-gray-500 ml-2">({user.role})</span>
+                                <span className="text-gray-500 dark:text-gray-400 ml-2">({user.role})</span>
                             </div>
                         )}
                         <Button onClick={handleLogout} variant="outline" size="sm">
@@ -139,7 +141,11 @@ export default function Navbar() {
                                             Admin
                                         </Button>
                                     )}
-                                    <div className="pt-4 border-t">
+                                    <div className="pt-4 border-t space-y-2">
+                                        <div className="flex justify-between items-center px-4 py-2">
+                                            <span className="text-sm font-medium">Theme</span>
+                                            <ThemeToggle />
+                                        </div>
                                         <Button
                                             variant="destructive"
                                             className="w-full justify-start text-lg"

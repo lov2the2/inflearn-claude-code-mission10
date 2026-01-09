@@ -23,7 +23,7 @@ export default function DashboardLayout({
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
             <Navbar />
             <main className="container mx-auto py-8 px-4">
                 {children}

@@ -102,7 +102,7 @@ export default function AdminUsersPage() {
                     {/* Search and Filter */}
                     <div className="flex gap-4">
                         <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
                             <Input
                                 placeholder="Search by name or email..."
                                 value={search}
@@ -136,21 +136,21 @@ export default function AdminUsersPage() {
 
                 {/* Pagination */}
                 <div className="mt-4 flex justify-between items-center">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                         Showing {(page - 1) * limit + 1} to {Math.min(page * limit, total)} of {total} users
                     </p>
                     <div className="space-x-2">
                         <button
                             onClick={() => setPage(p => Math.max(1, p - 1))}
                             disabled={page === 1}
-                            className="px-3 py-1 border rounded disabled:opacity-50"
+                            className="px-3 py-1 border rounded disabled:opacity-50 dark:border-gray-700"
                         >
                             Previous
                         </button>
                         <button
                             onClick={() => setPage(p => p + 1)}
                             disabled={page * limit >= total}
-                            className="px-3 py-1 border rounded disabled:opacity-50"
+                            className="px-3 py-1 border rounded disabled:opacity-50 dark:border-gray-700"
                         >
                             Next
                         </button>

@@ -5,9 +5,9 @@ export default function RegisterPage() {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen py-12 px-4">
             <RegisterForm />
-            <p className="mt-4 text-sm text-gray-600">
+            <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
                 Already have an account?{' '}
-                <Link href="/login" className="text-blue-600 hover:underline">
+                <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:underline">
                     Login here
                 </Link>
             </p>

@@ -105,3 +105,56 @@ export async function updateUserPassword(
         }
     )
 }
+
+// ============================================================
+// Analytics Chart Data Endpoints
+// ============================================================
+
+export interface LoginTrendData {
+    date: string
+    logins: number
+}
+
+export interface ActivityDistributionData {
+    action: string
+    count: number
+}
+
+export interface MonthlyStatsData {
+    month: string
+    logins: number
+    actions: number
+}
+
+/**
+ * Fetches login trend data for the last 7 days
+ * @returns Array of daily login counts
+ */
+export async function getLoginTrend(): Promise<LoginTrendData[]> {
+    const response = await apiClient.get<{ data: LoginTrendData[] }>(
+        `${API_CONFIG.ENDPOINTS.USER.ACTIVITY}/login-trend`
+    )
+    return response.data.data
+}
+
+/**
+ * Fetches activity distribution breakdown by action type
+ * @returns Array of activity counts grouped by action
+ */
+export async function getActivityDistribution(): Promise<ActivityDistributionData[]> {
+    const response = await apiClient.get<{ data: ActivityDistributionData[] }>(
+        `${API_CONFIG.ENDPOINTS.USER.ACTIVITY}/distribution`
+    )
+    return response.data.data
+}
+
+/**
+ * Fetches monthly statistics for the last 6 months
+ * @returns Array of monthly aggregated statistics
+ */
+export async function getMonthlyStats(): Promise<MonthlyStatsData[]> {
+    const response = await apiClient.get<{ data: MonthlyStatsData[] }>(
+        `${API_CONFIG.ENDPOINTS.USER.ACTIVITY}/monthly-stats`
+    )
+    return response.data.data
+}
