@@ -20,6 +20,7 @@ func (r *Repository) WithTransaction(fn TxFunc) error {
         Admin:    NewAdminRepository(tx),
         Token:    NewTokenRepository(tx),
         Activity: NewActivityRepository(tx),
+        Session:  NewSessionRepository(tx),
     }
 
     // Execute the function with transactional repository

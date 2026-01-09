@@ -64,7 +64,7 @@ func main() {
         Msg("Database connection established")
 
     // Auto-migrate models
-    if err := db.AutoMigrate(&model.User{}, &model.RefreshToken{}, &model.Activity{}); err != nil {
+    if err := db.AutoMigrate(&model.User{}, &model.RefreshToken{}, &model.Activity{}, &model.Session{}); err != nil {
         log.Fatal().Err(err).Msg("Failed to migrate database")
     }
 
@@ -133,6 +133,15 @@ func main() {
             auth.POST("/login", h.Auth.Login)
             auth.POST("/refresh", h.Auth.Refresh)
             auth.POST("/logout", h.Auth.Logout)
+
+            // Session management routes (protected)
+            authProtected := auth.Group("")
+            authProtected.Use(middleware.AuthRequired(cfg.JWT.Secret))
+            {
+                authProtected.GET("/sessions", h.Auth.GetSessions)
+                authProtected.POST("/sessions/revoke", h.Auth.RevokeSession)
+                authProtected.POST("/logout-all", h.Auth.LogoutAll)
+            }
         }
 
         // User routes (protected)

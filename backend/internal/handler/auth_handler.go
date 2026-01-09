@@ -67,7 +67,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
         Str("email", req.Email).
         Msg("User registration attempt")
 
-    authResp, err := h.authService.Register(&req)
+    // Get user agent and IP address
+    userAgent := c.GetHeader("User-Agent")
+    ipAddress := c.ClientIP()
+
+    authResp, err := h.authService.Register(&req, userAgent, ipAddress)
     if err != nil {
         log.Error().
             Err(err).
@@ -145,7 +149,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
         Str("email", req.Email).
         Msg("User login attempt")
 
-    authResp, err := h.authService.Login(&req)
+    // Get user agent and IP address
+    userAgent := c.GetHeader("User-Agent")
+    ipAddress := c.ClientIP()
+
+    authResp, err := h.authService.Login(&req, userAgent, ipAddress)
     if err != nil {
         log.Warn().
             Err(err).
@@ -237,7 +245,11 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
         Str("action", "refresh").
         Msg("Token refresh attempt")
 
-    authResp, err := h.authService.Refresh(refreshToken)
+    // Get user agent and IP address
+    userAgent := c.GetHeader("User-Agent")
+    ipAddress := c.ClientIP()
+
+    authResp, err := h.authService.Refresh(refreshToken, userAgent, ipAddress)
     if err != nil {
         log.Warn().
             Err(err).
@@ -342,6 +354,183 @@ func (h *AuthHandler) Logout(c *gin.Context) {
         Msg("User logged out successfully")
 
     c.JSON(http.StatusOK, dto.NewSuccessResponse(nil, "Logout successful"))
+}
+
+// GetSessions godoc
+// @Summary Get user sessions
+// @Description Get all active sessions for the authenticated user
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.SuccessResponse{data=dto.SessionListResponse}
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/v1/auth/sessions [get]
+// @Security BearerAuth
+func (h *AuthHandler) GetSessions(c *gin.Context) {
+    requestID := middleware.GetRequestID(c)
+    log := logger.WithRequestID(requestID)
+
+    // Get user ID from context (set by auth middleware)
+    userID, exists := c.Get("user_id")
+    if !exists {
+        log.Error().
+            Str("action", "get_sessions").
+            Msg("User ID not found in context")
+        c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("unauthorized"))
+        return
+    }
+
+    // Get current refresh token from cookie
+    currentToken, _ := c.Cookie("refresh_token")
+
+    sessions, err := h.authService.GetUserSessions(userID.(uint), currentToken)
+    if err != nil {
+        log.Error().
+            Err(err).
+            Str("action", "get_sessions").
+            Uint("user_id", userID.(uint)).
+            Msg("Failed to get user sessions")
+
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
+        return
+    }
+
+    log.Info().
+        Str("action", "get_sessions").
+        Uint("user_id", userID.(uint)).
+        Int("session_count", len(sessions.Sessions)).
+        Msg("Retrieved user sessions")
+
+    c.JSON(http.StatusOK, dto.NewSuccessResponse(sessions, "Sessions retrieved successfully"))
+}
+
+// RevokeSession godoc
+// @Summary Revoke a session
+// @Description Revoke a specific session by ID
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.RevokeSessionRequest true "Session ID to revoke"
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/v1/auth/sessions/revoke [post]
+// @Security BearerAuth
+func (h *AuthHandler) RevokeSession(c *gin.Context) {
+    requestID := middleware.GetRequestID(c)
+    log := logger.WithRequestID(requestID)
+
+    // Get user ID from context
+    userID, exists := c.Get("user_id")
+    if !exists {
+        log.Error().
+            Str("action", "revoke_session").
+            Msg("User ID not found in context")
+        c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("unauthorized"))
+        return
+    }
+
+    var req dto.RevokeSessionRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        log.Warn().
+            Err(err).
+            Str("action", "revoke_session").
+            Msg("Invalid request body")
+        c.JSON(http.StatusBadRequest, dto.NewErrorResponse(err.Error()))
+        return
+    }
+
+    log.Info().
+        Str("action", "revoke_session").
+        Uint("user_id", userID.(uint)).
+        Str("session_id", req.SessionID).
+        Msg("Session revocation attempt")
+
+    if err := h.authService.RevokeSession(userID.(uint), req.SessionID); err != nil {
+        log.Error().
+            Err(err).
+            Str("action", "revoke_session").
+            Uint("user_id", userID.(uint)).
+            Str("session_id", req.SessionID).
+            Msg("Failed to revoke session")
+
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
+        return
+    }
+
+    log.Info().
+        Str("action", "revoke_session").
+        Uint("user_id", userID.(uint)).
+        Str("session_id", req.SessionID).
+        Msg("Session revoked successfully")
+
+    c.JSON(http.StatusOK, dto.NewSuccessResponse(nil, "Session revoked successfully"))
+}
+
+// LogoutAll godoc
+// @Summary Logout from all devices
+// @Description Revoke all sessions for the authenticated user
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /api/v1/auth/logout-all [post]
+// @Security BearerAuth
+func (h *AuthHandler) LogoutAll(c *gin.Context) {
+    requestID := middleware.GetRequestID(c)
+    log := logger.WithRequestID(requestID)
+
+    // Get user ID from context
+    userID, exists := c.Get("user_id")
+    if !exists {
+        log.Error().
+            Str("action", "logout_all").
+            Msg("User ID not found in context")
+        c.JSON(http.StatusUnauthorized, dto.NewErrorResponse("unauthorized"))
+        return
+    }
+
+    log.Info().
+        Str("action", "logout_all").
+        Uint("user_id", userID.(uint)).
+        Msg("Logout all attempt")
+
+    if err := h.authService.LogoutAll(userID.(uint)); err != nil {
+        log.Error().
+            Err(err).
+            Str("action", "logout_all").
+            Uint("user_id", userID.(uint)).
+            Msg("Failed to logout all sessions")
+
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
+        return
+    }
+
+    // Clear cookies for current session
+    h.clearAuthCookies(c)
+
+    log.Info().
+        Str("action", "logout_all").
+        Uint("user_id", userID.(uint)).
+        Msg("Logged out from all devices successfully")
+
+    c.JSON(http.StatusOK, dto.NewSuccessResponse(nil, "Logged out from all devices"))
 }
 
 // clearAuthCookies clears both access and refresh token cookies

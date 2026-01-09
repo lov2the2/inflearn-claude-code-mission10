@@ -8,6 +8,7 @@ type Repository struct {
     Admin    AdminRepository
     Token    TokenRepository
     Activity ActivityRepository
+    Session  SessionRepository
 }
 
 func NewRepository(db *gorm.DB) *Repository {
@@ -17,5 +18,6 @@ func NewRepository(db *gorm.DB) *Repository {
         Admin:    NewAdminRepository(db),
         Token:    NewTokenRepository(db),
         Activity: NewActivityRepository(db),
+        Session:  NewSessionRepository(db),
     }
 }

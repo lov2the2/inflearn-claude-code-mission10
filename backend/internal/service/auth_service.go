@@ -14,10 +14,13 @@ import (
 )
 
 type AuthService interface {
-    Register(req *dto.RegisterRequest) (*dto.AuthResponse, error)
-    Login(req *dto.LoginRequest) (*dto.AuthResponse, error)
-    Refresh(refreshToken string) (*dto.AuthResponse, error)
+    Register(req *dto.RegisterRequest, userAgent, ipAddress string) (*dto.AuthResponse, error)
+    Login(req *dto.LoginRequest, userAgent, ipAddress string) (*dto.AuthResponse, error)
+    Refresh(refreshToken, userAgent, ipAddress string) (*dto.AuthResponse, error)
     Logout(refreshToken string) error
+    GetUserSessions(userID uint, currentToken string) (*dto.SessionListResponse, error)
+    RevokeSession(userID uint, sessionID string) error
+    LogoutAll(userID uint) error
 }
 
 type authService struct {
@@ -36,7 +39,7 @@ func NewAuthService(repo *repository.Repository, jwtSecret string, jwtExpiry, re
     }
 }
 
-func (s *authService) Register(req *dto.RegisterRequest) (*dto.AuthResponse, error) {
+func (s *authService) Register(req *dto.RegisterRequest, userAgent, ipAddress string) (*dto.AuthResponse, error) {
     // Check if user already exists
     existingUser, err := s.repo.User.FindByEmail(req.Email)
     if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -67,8 +70,8 @@ func (s *authService) Register(req *dto.RegisterRequest) (*dto.AuthResponse, err
             return apperror.Internal("failed to create user")
         }
 
-        // Generate tokens (using transactional repository for token creation)
-        response, err := s.generateTokensWithRepo(txRepo, user)
+        // Generate tokens and session (using transactional repository)
+        response, err := s.generateTokensAndSessionWithRepo(txRepo, user, userAgent, ipAddress)
         if err != nil {
             return err
         }
@@ -84,7 +87,7 @@ func (s *authService) Register(req *dto.RegisterRequest) (*dto.AuthResponse, err
     return authResponse, nil
 }
 
-func (s *authService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
+func (s *authService) Login(req *dto.LoginRequest, userAgent, ipAddress string) (*dto.AuthResponse, error) {
     // Find user by email
     user, err := s.repo.User.FindByEmail(req.Email)
     if err != nil {
@@ -99,13 +102,13 @@ func (s *authService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
         return nil, apperror.Unauthorized("invalid credentials")
     }
 
-    // Generate tokens
-    return s.generateTokens(user)
+    // Generate tokens and session
+    return s.generateTokensAndSession(user, userAgent, ipAddress)
 }
 
-func (s *authService) Refresh(refreshToken string) (*dto.AuthResponse, error) {
-    // Find and validate refresh token
-    token, err := s.repo.Token.FindByToken(refreshToken)
+func (s *authService) Refresh(refreshToken, userAgent, ipAddress string) (*dto.AuthResponse, error) {
+    // Find and validate session by refresh token
+    session, err := s.repo.Session.GetSessionByToken(refreshToken)
     if err != nil {
         if errors.Is(err, gorm.ErrRecordNotFound) {
             return nil, apperror.Unauthorized("invalid refresh token")
@@ -114,21 +117,21 @@ func (s *authService) Refresh(refreshToken string) (*dto.AuthResponse, error) {
     }
 
     // Get user
-    user, err := s.repo.User.FindByID(token.UserID)
+    user, err := s.repo.User.FindByID(session.UserID)
     if err != nil {
         return nil, apperror.NotFound("user not found")
     }
 
-    // Revoke old token and generate new tokens within a transaction
+    // Revoke old session and generate new tokens within a transaction
     var authResponse *dto.AuthResponse
     err = s.repo.WithTransaction(func(txRepo *repository.Repository) error {
-        // Revoke old token
-        if err := txRepo.Token.RevokeByToken(refreshToken); err != nil {
-            return apperror.Internal("failed to revoke old token")
+        // Revoke old session
+        if err := txRepo.Session.RevokeSession(session.ID); err != nil {
+            return apperror.Internal("failed to revoke old session")
         }
 
-        // Generate new tokens
-        response, err := s.generateTokensWithRepo(txRepo, user)
+        // Generate new tokens and session
+        response, err := s.generateTokensAndSessionWithRepo(txRepo, user, userAgent, ipAddress)
         if err != nil {
             return err
         }
@@ -145,17 +148,70 @@ func (s *authService) Refresh(refreshToken string) (*dto.AuthResponse, error) {
 }
 
 func (s *authService) Logout(refreshToken string) error {
-    // Revoke refresh token
-    return s.repo.Token.RevokeByToken(refreshToken)
+    // Find session by refresh token
+    session, err := s.repo.Session.GetSessionByToken(refreshToken)
+    if err != nil {
+        return err
+    }
+
+    // Revoke session
+    return s.repo.Session.RevokeSession(session.ID)
 }
 
-// Helper function to generate access and refresh tokens using default repository
-func (s *authService) generateTokens(user *model.User) (*dto.AuthResponse, error) {
-    return s.generateTokensWithRepo(s.repo, user)
+func (s *authService) GetUserSessions(userID uint, currentToken string) (*dto.SessionListResponse, error) {
+    // Get all active sessions for user
+    sessions, err := s.repo.Session.GetUserSessions(userID)
+    if err != nil {
+        return nil, apperror.Internal("failed to get user sessions")
+    }
+
+    // Convert to response format
+    sessionResponses := make([]*dto.SessionResponse, 0, len(sessions))
+    for _, session := range sessions {
+        sessionResponses = append(sessionResponses, &dto.SessionResponse{
+            ID:        session.ID,
+            UserAgent: session.UserAgent,
+            IPAddress: session.IPAddress,
+            ExpiresAt: session.ExpiresAt,
+            CreatedAt: session.CreatedAt,
+            IsCurrent: session.RefreshToken == currentToken,
+        })
+    }
+
+    return &dto.SessionListResponse{
+        Sessions: sessionResponses,
+    }, nil
 }
 
-// Helper function to generate access and refresh tokens using custom repository (for transactions)
-func (s *authService) generateTokensWithRepo(repo *repository.Repository, user *model.User) (*dto.AuthResponse, error) {
+func (s *authService) RevokeSession(userID uint, sessionID string) error {
+    // Parse UUID
+    sessionUUID, err := util.ParseUUID(sessionID)
+    if err != nil {
+        return apperror.Validation("invalid session ID")
+    }
+
+    // Get session to verify ownership
+    session, err := s.repo.Session.GetSessionByToken("")
+    if err == nil && session.UserID != userID {
+        return apperror.Forbidden("cannot revoke session of another user")
+    }
+
+    // Revoke session
+    return s.repo.Session.RevokeSession(sessionUUID)
+}
+
+func (s *authService) LogoutAll(userID uint) error {
+    // Revoke all user sessions
+    return s.repo.Session.RevokeAllUserSessions(userID)
+}
+
+// Helper function to generate access and refresh tokens with session using default repository
+func (s *authService) generateTokensAndSession(user *model.User, userAgent, ipAddress string) (*dto.AuthResponse, error) {
+    return s.generateTokensAndSessionWithRepo(s.repo, user, userAgent, ipAddress)
+}
+
+// Helper function to generate access and refresh tokens with session using custom repository (for transactions)
+func (s *authService) generateTokensAndSessionWithRepo(repo *repository.Repository, user *model.User, userAgent, ipAddress string) (*dto.AuthResponse, error) {
     // Generate access token
     accessToken, err := util.GenerateAccessToken(
         user.ID,
@@ -174,15 +230,17 @@ func (s *authService) generateTokensWithRepo(repo *repository.Repository, user *
         return nil, apperror.Internal("failed to generate refresh token")
     }
 
-    // Save refresh token to database
-    refreshToken := &model.RefreshToken{
-        UserID:    user.ID,
-        Token:     refreshTokenStr,
-        ExpiresAt: time.Now().Add(s.refreshTokenExpiry),
+    // Create session with refresh token
+    session := &model.Session{
+        UserID:       user.ID,
+        RefreshToken: refreshTokenStr,
+        UserAgent:    userAgent,
+        IPAddress:    ipAddress,
+        ExpiresAt:    time.Now().Add(s.refreshTokenExpiry),
     }
 
-    if err := repo.Token.Create(refreshToken); err != nil {
-        return nil, apperror.Internal("failed to save refresh token")
+    if err := repo.Session.CreateSession(session); err != nil {
+        return nil, apperror.Internal("failed to create session")
     }
 
     return &dto.AuthResponse{
