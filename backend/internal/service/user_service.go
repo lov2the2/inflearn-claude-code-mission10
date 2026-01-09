@@ -145,9 +145,23 @@ func (s *userService) UpdatePassword(userID uint, req *dto.UpdatePasswordRequest
         return apperror.Internal("failed to hash password")
     }
 
-    // Update password
-    if err := s.repo.User.UpdatePassword(userID, newPasswordHash); err != nil {
-        return apperror.Internal("failed to update password")
+    // Update password and revoke all refresh tokens within a transaction
+    err = s.repo.WithTransaction(func(txRepo *repository.Repository) error {
+        // Update password
+        if err := txRepo.User.UpdatePassword(userID, newPasswordHash); err != nil {
+            return apperror.Internal("failed to update password")
+        }
+
+        // Revoke all refresh tokens for security (force re-login on all devices)
+        if err := txRepo.Token.RevokeAllByUserID(userID); err != nil {
+            return apperror.Internal("failed to revoke tokens")
+        }
+
+        return nil
+    })
+
+    if err != nil {
+        return err
     }
 
     return nil

@@ -52,20 +52,36 @@ func (s *authService) Register(req *dto.RegisterRequest) (*dto.AuthResponse, err
         return nil, apperror.Internal("failed to hash password")
     }
 
-    // Create user
-    user := &model.User{
-        Email:        req.Email,
-        PasswordHash: passwordHash,
-        Name:         req.Name,
-        Role:         model.RoleUser, // Default role
+    // Create user and generate tokens within a transaction
+    var authResponse *dto.AuthResponse
+    err = s.repo.WithTransaction(func(txRepo *repository.Repository) error {
+        // Create user
+        user := &model.User{
+            Email:        req.Email,
+            PasswordHash: passwordHash,
+            Name:         req.Name,
+            Role:         model.RoleUser, // Default role
+        }
+
+        if err := txRepo.User.Create(user); err != nil {
+            return apperror.Internal("failed to create user")
+        }
+
+        // Generate tokens (using transactional repository for token creation)
+        response, err := s.generateTokensWithRepo(txRepo, user)
+        if err != nil {
+            return err
+        }
+
+        authResponse = response
+        return nil
+    })
+
+    if err != nil {
+        return nil, err
     }
 
-    if err := s.repo.User.Create(user); err != nil {
-        return nil, apperror.Internal("failed to create user")
-    }
-
-    // Generate tokens
-    return s.generateTokens(user)
+    return authResponse, nil
 }
 
 func (s *authService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
@@ -103,13 +119,29 @@ func (s *authService) Refresh(refreshToken string) (*dto.AuthResponse, error) {
         return nil, apperror.NotFound("user not found")
     }
 
-    // Revoke old token
-    if err := s.repo.Token.RevokeByToken(refreshToken); err != nil {
-        return nil, apperror.Internal("failed to revoke old token")
+    // Revoke old token and generate new tokens within a transaction
+    var authResponse *dto.AuthResponse
+    err = s.repo.WithTransaction(func(txRepo *repository.Repository) error {
+        // Revoke old token
+        if err := txRepo.Token.RevokeByToken(refreshToken); err != nil {
+            return apperror.Internal("failed to revoke old token")
+        }
+
+        // Generate new tokens
+        response, err := s.generateTokensWithRepo(txRepo, user)
+        if err != nil {
+            return err
+        }
+
+        authResponse = response
+        return nil
+    })
+
+    if err != nil {
+        return nil, err
     }
 
-    // Generate new tokens
-    return s.generateTokens(user)
+    return authResponse, nil
 }
 
 func (s *authService) Logout(refreshToken string) error {
@@ -117,8 +149,13 @@ func (s *authService) Logout(refreshToken string) error {
     return s.repo.Token.RevokeByToken(refreshToken)
 }
 
-// Helper function to generate access and refresh tokens
+// Helper function to generate access and refresh tokens using default repository
 func (s *authService) generateTokens(user *model.User) (*dto.AuthResponse, error) {
+    return s.generateTokensWithRepo(s.repo, user)
+}
+
+// Helper function to generate access and refresh tokens using custom repository (for transactions)
+func (s *authService) generateTokensWithRepo(repo *repository.Repository, user *model.User) (*dto.AuthResponse, error) {
     // Generate access token
     accessToken, err := util.GenerateAccessToken(
         user.ID,
@@ -144,7 +181,7 @@ func (s *authService) generateTokens(user *model.User) (*dto.AuthResponse, error
         ExpiresAt: time.Now().Add(s.refreshTokenExpiry),
     }
 
-    if err := s.repo.Token.Create(refreshToken); err != nil {
+    if err := repo.Token.Create(refreshToken); err != nil {
         return nil, apperror.Internal("failed to save refresh token")
     }
 
