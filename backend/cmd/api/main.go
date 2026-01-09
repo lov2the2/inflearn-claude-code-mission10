@@ -87,6 +87,7 @@ func main() {
         Msg("JWT configuration loaded")
 
     // Initialize layers
+    // Option 1: Manual dependency injection (current approach)
     repo := repository.NewRepository(db)
     svc := service.NewService(repo, cfg.JWT.Secret, jwtExpiry, refreshTokenExpiry)
     h := handler.NewHandler(handler.HandlerConfig{
@@ -96,6 +97,15 @@ func main() {
         AccessExpiry:  jwtExpiry,
         RefreshExpiry: refreshTokenExpiry,
     })
+
+    // Option 2: Wire dependency injection (uncomment to use)
+    // import wireDI "start-kit-backend/internal/wire"
+    // h := wireDI.InitializeHandler(
+    //     db,
+    //     cfg,
+    //     wireDI.JWTExpiry(jwtExpiry),
+    //     wireDI.RefreshExpiry(refreshTokenExpiry),
+    // )
 
     // Initialize Gin router
     router := gin.Default()
