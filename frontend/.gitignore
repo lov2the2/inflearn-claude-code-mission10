@@ -40,3 +40,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# OpenAPI generated code
+/lib/api/generated/
+/lib/api/swagger.json
