@@ -100,4 +100,15 @@ export const datasetsApi = {
         )
         return response.data
     },
+
+    /**
+     * Export dataset as CSV file
+     */
+    exportDataset: async (id: string): Promise<Blob> => {
+        const response = await apiClient.get(
+            `/api/v1/datasets/${id}/export`,
+            { responseType: 'blob' }
+        )
+        return response.data
+    },
 }

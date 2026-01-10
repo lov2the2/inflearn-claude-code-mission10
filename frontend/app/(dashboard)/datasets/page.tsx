@@ -39,6 +39,10 @@ export default function DatasetsPage() {
         router.push(`/datasets/${id}`)
     }
 
+    const handleJoin = (id: string) => {
+        router.push(`/datasets/join?left=${id}`)
+    }
+
     const handleDeleteClick = (id: string, name: string) => {
         setSelectedDataset({ id, name })
         setDeleteDialogOpen(true)
@@ -101,6 +105,7 @@ export default function DatasetsPage() {
                                         key={dataset.id}
                                         dataset={dataset}
                                         onView={handleView}
+                                        onJoin={handleJoin}
                                         onDelete={(id) => handleDeleteClick(id, dataset.display_name)}
                                         canDelete={user_is_admin}
                                     />
