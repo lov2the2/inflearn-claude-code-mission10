@@ -1,27 +1,27 @@
 # Go + Next.js Full-stack Starter Kit
 
-A production-ready monorepo starter kit featuring Go backend with Clean Architecture and Next.js 15 frontend.
+Go 백엔드(Clean Architecture)와 Next.js 15 프론트엔드로 구성된 프로덕션 레디 모노레포 스타터 킷입니다.
 
-## Features
+## 기능
 
-- 🔐 JWT Authentication with RBAC (Admin/User roles)
-- 🔄 Refresh Token Implementation with Auto-Refresh
-- 📊 CSV Import/Export (Backend + Frontend UI)
-- 📄 Pagination Support
-- 📚 Swagger API Documentation
-- 👥 Admin Panel UI (User Management)
-- 🚀 Server Management Scripts
-- 🐳 Docker Compose Orchestration
-- 🔥 Live Reload (Air + Next.js)
+- 🔐 JWT 인증 및 RBAC (Admin/User 역할)
+- 🔄 Refresh Token 구현 및 자동 갱신
+- 📊 CSV 가져오기/내보내기 (백엔드 + 프론트엔드 UI)
+- 📄 페이지네이션 지원
+- 📚 Swagger API 문서
+- 👥 Admin Panel UI (사용자 관리)
+- 🚀 서버 관리 스크립트
+- 🐳 Docker Compose 오케스트레이션
+- 🔥 라이브 리로드 (Air + Next.js)
 
-## Authentication Flow
+## 인증 흐름
 
-**Token Management:**
-- Access tokens (15 minutes expiry) for API authentication
-- Refresh tokens (7 days expiry) for obtaining new access tokens
-- Automatic token refresh on 401 responses (frontend)
+**토큰 관리:**
+- Access token (15분 만료) - API 인증용
+- Refresh token (7일 만료) - 새 access token 발급용
+- 401 응답 시 자동 토큰 갱신 (프론트엔드)
 
-**Token Refresh:**
+**토큰 갱신:**
 ```bash
 POST /api/v1/auth/refresh
 {
@@ -29,7 +29,7 @@ POST /api/v1/auth/refresh
 }
 ```
 
-Response:
+응답:
 ```json
 {
   "access_token": "new_access_token",
@@ -38,34 +38,34 @@ Response:
 }
 ```
 
-## Tech Stack
+## 기술 스택
 
 ### Backend
-- **Language**: Go 1.21+
-- **Framework**: Gin
-- **Database**: PostgreSQL
+- **언어**: Go 1.21+
+- **프레임워크**: Gin
+- **데이터베이스**: PostgreSQL
 - **ORM**: GORM
-- **Auth**: JWT (golang-jwt/jwt)
-- **Validation**: go-playground/validator
+- **인증**: JWT (golang-jwt/jwt)
+- **검증**: go-playground/validator
 - **CSV**: encoding/csv, gocsv
-- **API Docs**: swaggo/swag
-- **Dev Tools**: Air (live reload)
+- **API 문서**: swaggo/swag
+- **개발 도구**: Air (live reload)
 
 ### Frontend
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: shadcn/ui
-- **HTTP Client**: Axios
-- **State Management**: React Query
-- **Forms**: react-hook-form + zod
+- **프레임워크**: Next.js 15 (App Router)
+- **언어**: TypeScript
+- **스타일링**: Tailwind CSS
+- **UI 컴포넌트**: shadcn/ui
+- **HTTP 클라이언트**: Axios
+- **상태 관리**: React Query
+- **폼**: react-hook-form + zod
 
 ### Infrastructure
-- **Database**: PostgreSQL 16
-- **Container**: Docker Compose
-- **Build Tool**: Makefile
+- **데이터베이스**: PostgreSQL 16
+- **컨테이너**: Docker Compose
+- **빌드 도구**: Makefile
 
-## Architecture
+## 아키텍처
 
 ### Backend: Clean Architecture
 ```
@@ -75,78 +75,78 @@ Handler → Service → Repository → Model
 ### Frontend: App Router
 ```
 app/
-├── (auth)/          # Public routes
-├── (dashboard)/     # Protected routes
+├── (auth)/          # 공개 라우트
+├── (dashboard)/     # 보호된 라우트
 └── api/             # Route handlers
 ```
 
-## Project Structure
+## 프로젝트 구조
 
 ```
 starter-kit-mission/
 ├── backend/
-│   ├── cmd/api/                 # Application entry point
+│   ├── cmd/api/                 # 애플리케이션 진입점
 │   ├── internal/
-│   │   ├── handler/             # HTTP handlers
-│   │   ├── service/             # Business logic
-│   │   ├── repository/          # Data access
-│   │   ├── model/               # Domain models
-│   │   ├── middleware/          # HTTP middleware
+│   │   ├── handler/             # HTTP 핸들러
+│   │   ├── service/             # 비즈니스 로직
+│   │   ├── repository/          # 데이터 액세스
+│   │   ├── model/               # 도메인 모델
+│   │   ├── middleware/          # HTTP 미들웨어
 │   │   ├── dto/                 # Data transfer objects
-│   │   └── util/                # Utilities
-│   ├── pkg/database/            # DB connection
-│   ├── migrations/              # SQL migrations
-│   └── docs/                    # Swagger docs
+│   │   └── util/                # 유틸리티
+│   ├── pkg/database/            # DB 연결
+│   ├── migrations/              # SQL 마이그레이션
+│   └── docs/                    # Swagger 문서
 ├── frontend/
 │   ├── app/                     # Next.js App Router
-│   ├── components/              # React components
-│   ├── lib/                     # Utilities & API client
-│   ├── types/                   # TypeScript types
+│   ├── components/              # React 컴포넌트
+│   ├── lib/                     # 유틸리티 & API 클라이언트
+│   ├── types/                   # TypeScript 타입
 │   └── actions/                 # Server actions
 ├── docker-compose.yml
 ├── Makefile
 └── README.md
 ```
 
-## Quick Start
+## 빠른 시작
 
-### Prerequisites
+### 사전 요구사항
 - Go 1.21+
 - Node.js 18+
 - Docker Desktop
 
-### Installation
+### 설치
 
-1. **Clone repository**
+1. **저장소 클론**
 ```bash
 git clone <repository-url>
 cd starter-kit-mission
 ```
 
-2. **Install dependencies**
+2. **의존성 설치**
 ```bash
 make install
 ```
 
-3. **Start development environment**
+3. **개발 환경 시작**
 ```bash
-# Terminal 1: Start PostgreSQL
+# Terminal 1: PostgreSQL 시작
 make dev-db
 
-# Terminal 2: Start backend
+# Terminal 2: 백엔드 시작
 make dev-backend
 
-# Terminal 3: Start frontend
+# Terminal 3: 프론트엔드 시작
 make dev-frontend
 ```
 
-4. **Access applications**
+4. **애플리케이션 접속**
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080
 - Swagger Docs: http://localhost:8080/swagger/index.html
 - Health Check: http://localhost:8080/health
 
-## Environment Variables
+## 환경 변수
 
 ### Backend (`backend/.env`)
 ```env
@@ -173,143 +173,143 @@ NEXT_PUBLIC_API_URL=http://localhost:8080
 API_URL=http://localhost:8080
 ```
 
-## Available Commands
+## 사용 가능한 명령어
 
 ```bash
-make help              # Show all available commands
-make install           # Install all dependencies
-make install-backend   # Install backend dependencies
-make install-frontend  # Install frontend dependencies
-make dev-db           # Start PostgreSQL
-make dev-backend      # Start backend (Air)
-make dev-frontend     # Start frontend (Next.js)
-make clean            # Clean up containers and build artifacts
+make help              # 모든 사용 가능한 명령어 표시
+make install           # 모든 의존성 설치
+make install-backend   # 백엔드 의존성 설치
+make install-frontend  # 프론트엔드 의존성 설치
+make dev-db           # PostgreSQL 시작
+make dev-backend      # 백엔드 시작 (Air)
+make dev-frontend     # 프론트엔드 시작 (Next.js)
+make clean            # 컨테이너 및 빌드 아티팩트 정리
 ```
 
-## Server Management
+## 서버 관리
 
-**Start All Services:**
+**모든 서비스 시작:**
 ```bash
-make start          # Start all servers (DB → Backend → Frontend)
-make status         # Check server status
-make logs           # View recent logs
-make stop           # Stop all servers
+make start          # 모든 서버 시작 (DB → Backend → Frontend)
+make status         # 서버 상태 확인
+make logs           # 최근 로그 보기
+make stop           # 모든 서버 중지
 ```
 
-**Individual Control:**
+**개별 제어:**
 ```bash
-make start-db       # Start PostgreSQL only
-make start-backend  # Start backend only
-make start-frontend # Start frontend only
-make stop-db        # Stop PostgreSQL
-make stop-backend   # Stop backend
-make stop-frontend  # Stop frontend
+make start-db       # PostgreSQL만 시작
+make start-backend  # 백엔드만 시작
+make start-frontend # 프론트엔드만 시작
+make stop-db        # PostgreSQL 중지
+make stop-backend   # 백엔드 중지
+make stop-frontend  # 프론트엔드 중지
 ```
 
-**Legacy (requires 3 terminals):**
+**레거시 방식 (3개 터미널 필요):**
 ```bash
 make dev-db         # Terminal 1
 make dev-backend    # Terminal 2
 make dev-frontend   # Terminal 3
 ```
 
-## API Documentation
+## API 문서
 
-API documentation is available via Swagger UI:
+Swagger UI를 통해 API 문서를 확인할 수 있습니다:
 - **URL**: http://localhost:8080/swagger/index.html
-- **Generate docs**: `cd backend && swag init -g cmd/api/main.go`
+- **문서 생성**: `cd backend && swag init -g cmd/api/main.go`
 
-## Admin Features
+## 관리자 기능
 
-Admins can manage users through dedicated endpoints and UI:
+관리자는 전용 엔드포인트 및 UI를 통해 사용자를 관리할 수 있습니다:
 
-**User Management:**
-- List all users with pagination: `GET /api/v1/admin/users?page=1&limit=10`
-- Get user details: `GET /api/v1/admin/users/{id}`
-- Update user role: `PATCH /api/v1/admin/users/{id}/role`
-- Delete user: `DELETE /api/v1/admin/users/{id}`
+**사용자 관리:**
+- 페이지네이션으로 모든 사용자 조회: `GET /api/v1/admin/users?page=1&limit=10`
+- 사용자 상세 정보 조회: `GET /api/v1/admin/users/{id}`
+- 사용자 역할 업데이트: `PATCH /api/v1/admin/users/{id}/role`
+- 사용자 삭제: `DELETE /api/v1/admin/users/{id}`
 
-**Bulk Operations:**
-- Export users to CSV: `GET /api/v1/admin/users/export`
-- Import users from CSV: `POST /api/v1/admin/users/import`
+**대량 작업:**
+- CSV로 사용자 내보내기: `GET /api/v1/admin/users/export`
+- CSV에서 사용자 가져오기: `POST /api/v1/admin/users/import`
 
-**Frontend Admin Panel:**
-- Access at: `http://localhost:3000/admin/users`
-- Features: user list, role management, delete, CSV import/export
-- Protected route (admin role required)
+**프론트엔드 Admin Panel:**
+- 접속 주소: `http://localhost:3000/admin/users`
+- 기능: 사용자 목록, 역할 관리, 삭제, CSV 가져오기/내보내기
+- 보호된 라우트 (관리자 역할 필요)
 
-## Development Workflow
+## 개발 워크플로우
 
-### Backend Development
+### 백엔드 개발
 ```bash
 cd backend
-air  # Auto-reload on file changes
+air  # 파일 변경 시 자동 리로드
 ```
 
-### Frontend Development
+### 프론트엔드 개발
 ```bash
 cd frontend
-npm run dev  # Hot reload enabled
+npm run dev  # Hot reload 활성화
 ```
 
-### Database Migrations
+### 데이터베이스 마이그레이션
 ```bash
-# Create new migration
+# 새 마이그레이션 생성
 make migrate-create
-# Enter migration name when prompted (e.g., "add_users_table")
+# 프롬프트에서 마이그레이션 이름 입력 (예: "add_users_table")
 
-# Run all pending migrations
+# 모든 대기 중인 마이그레이션 실행
 make migrate-up
 
-# Rollback last migration
+# 마지막 마이그레이션 롤백
 make migrate-down
 
-# Check current migration version
+# 현재 마이그레이션 버전 확인
 make migrate-version
 
-# Force specific version (if migration fails)
+# 특정 버전 강제 적용 (마이그레이션 실패 시)
 make migrate-force
-# Enter version number when prompted
+# 프롬프트에서 버전 번호 입력
 ```
 
-## Project Status
+## 프로젝트 상태
 
-### ✅ Implemented
-- Development environment setup
-- Project structure (Clean Architecture)
-- Docker Compose configuration
-- Makefile automation
-- Health check endpoints
-- User authentication (JWT)
-- Refresh token mechanism with auto-refresh
-- Role-based access control (RBAC)
-- Admin user management endpoints
-- Admin Panel UI (user list, role management, delete)
-- Pagination support
-- CSV import/export (backend + frontend)
-- Swagger/OpenAPI documentation
-- Frontend authentication flow
-- Database models and migrations
-- Server management scripts (start/stop/status/logs)
+### ✅ 구현됨
+- 개발 환경 설정
+- 프로젝트 구조 (Clean Architecture)
+- Docker Compose 구성
+- Makefile 자동화
+- Health check 엔드포인트
+- 사용자 인증 (JWT)
+- Refresh token 메커니즘 및 자동 갱신
+- 역할 기반 접근 제어 (RBAC)
+- 관리자 사용자 관리 엔드포인트
+- Admin Panel UI (사용자 목록, 역할 관리, 삭제)
+- 페이지네이션 지원
+- CSV 가져오기/내보내기 (백엔드 + 프론트엔드)
+- Swagger/OpenAPI 문서
+- 프론트엔드 인증 플로우
+- 데이터베이스 모델 및 마이그레이션
+- 서버 관리 스크립트 (start/stop/status/logs)
 
-### 📋 Planned
-- Comprehensive unit tests
-- Integration tests
-- E2E tests
-- Deployment documentation
+### 📋 계획됨
+- 포괄적인 단위 테스트
+- 통합 테스트
+- E2E 테스트
+- 배포 문서
 
-## Contributing
+## 기여하기
 
-This is a starter kit template. Feel free to:
-- Customize for your project needs
-- Add new features
-- Improve existing implementations
-- Share feedback
+이것은 스타터 킷 템플릿입니다. 자유롭게:
+- 프로젝트 요구사항에 맞게 커스터마이징
+- 새 기능 추가
+- 기존 구현 개선
+- 피드백 공유
 
-## License
+## 라이선스
 
-MIT License - Feel free to use for any project
+MIT License - 모든 프로젝트에 자유롭게 사용 가능
 
 ---
 
-**Note**: This is a starter kit, not a complete application. Use it as a foundation to build your own projects.
+**참고**: 이것은 스타터 킷이며, 완전한 애플리케이션이 아닙니다. 자신만의 프로젝트를 구축하기 위한 기반으로 사용하세요.

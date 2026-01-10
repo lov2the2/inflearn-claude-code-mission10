@@ -1,29 +1,29 @@
-# Backend - Go + Gin API Server
+# Backend - Go + Gin API 서버
 
-RESTful API server built with Go, Gin framework, and PostgreSQL.
+Go, Gin 프레임워크, PostgreSQL로 구축된 RESTful API 서버입니다.
 
-## Architecture
+## 아키텍처
 
-This backend follows **Clean Architecture** principles with clear separation of concerns:
+이 백엔드는 **Clean Architecture** 원칙을 따르며 명확한 관심사 분리를 적용합니다:
 
 ```
 backend/
-├── cmd/api/           # Application entry point
-│   └── main.go        # Server initialization
+├── cmd/api/           # 애플리케이션 진입점
+│   └── main.go        # 서버 초기화
 ├── internal/
-│   ├── handler/       # HTTP handlers (controllers)
-│   ├── service/       # Business logic
-│   ├── repository/    # Data access layer
-│   ├── model/         # Domain entities
-│   ├── dto/           # Data transfer objects
-│   ├── middleware/    # HTTP middleware (auth, cors, etc.)
-│   └── util/          # Utilities (jwt, password, etc.)
-├── migrations/        # Database migrations
-├── docs/              # Swagger/OpenAPI specs
-└── .air.toml          # Live reload configuration
+│   ├── handler/       # HTTP 핸들러 (컨트롤러)
+│   ├── service/       # 비즈니스 로직
+│   ├── repository/    # 데이터 접근 계층
+│   ├── model/         # 도메인 엔티티
+│   ├── dto/           # 데이터 전송 객체
+│   ├── middleware/    # HTTP 미들웨어 (auth, cors 등)
+│   └── util/          # 유틸리티 (jwt, password 등)
+├── migrations/        # 데이터베이스 마이그레이션
+├── docs/              # Swagger/OpenAPI 스펙
+└── .air.toml          # Live reload 설정
 ```
 
-## Tech Stack
+## 기술 스택
 
 - **Framework**: Gin HTTP Framework
 - **Database**: PostgreSQL 16 with GORM
@@ -32,15 +32,15 @@ backend/
 - **Live Reload**: Air
 - **Password Hashing**: bcrypt
 
-## Quick Start
+## 빠른 시작
 
-### Prerequisites
+### 사전 요구사항
 
 - Go 1.21+
 - PostgreSQL 16
-- Air (for live reload): `go install github.com/air-verse/air@latest`
+- Air (live reload용): `go install github.com/air-verse/air@latest`
 
-### Installation
+### 설치
 
 ```bash
 # Install dependencies
@@ -58,9 +58,9 @@ make migrate-up
 air  # OR: go run cmd/api/main.go
 ```
 
-Server runs on `http://localhost:8080`
+서버는 `http://localhost:8080`에서 실행됩니다.
 
-## Environment Variables
+## 환경 변수
 
 ```env
 PORT=8080                          # Server port
@@ -77,9 +77,9 @@ JWT_REFRESH_EXPIRY=168h            # Refresh token expiry (7 days)
 ALLOWED_ORIGINS=http://localhost:3000  # CORS allowed origins
 ```
 
-## API Endpoints
+## API 엔드포인트
 
-### Authentication
+### 인증
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
@@ -88,7 +88,7 @@ ALLOWED_ORIGINS=http://localhost:3000  # CORS allowed origins
 | POST | `/api/v1/auth/refresh` | Refresh access token | No |
 | POST | `/api/v1/auth/logout` | Logout (revoke refresh token) | Yes |
 
-### Users (Requires Authentication)
+### 사용자 (인증 필요)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -96,25 +96,25 @@ ALLOWED_ORIGINS=http://localhost:3000  # CORS allowed origins
 | GET | `/api/v1/users/activity` | Get user activity log with pagination |
 | GET | `/api/v1/users/stats` | Get user statistics/KPIs |
 
-**Example - Get Profile:**
+**예제 - 프로필 조회:**
 ```bash
 curl -X GET http://localhost:8080/api/v1/users/profile \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-**Example - Get Activity:**
+**예제 - 활동 로그 조회:**
 ```bash
 curl -X GET "http://localhost:8080/api/v1/users/activity?page=1&limit=10" \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-**Example - Get Stats:**
+**예제 - 통계 조회:**
 ```bash
 curl -X GET http://localhost:8080/api/v1/users/stats \
   -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
 ```
 
-### Admin (Requires Admin Role)
+### 관리자 (Admin 권한 필요)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -125,47 +125,47 @@ curl -X GET http://localhost:8080/api/v1/users/stats \
 | GET | `/api/v1/admin/users/export` | Export users to CSV |
 | POST | `/api/v1/admin/users/import` | Import users from CSV |
 
-### Health
+### 헬스체크
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check |
 | GET | `/ready` | Readiness check |
 
-### Documentation
+### 문서
 
 - Swagger UI: `http://localhost:8080/swagger/index.html`
 - OpenAPI Spec: `/backend/docs/swagger.yaml`
 
-## Database
+## 데이터베이스
 
-### Migrations
+### 마이그레이션
 
-Migrations are stored in `/backend/migrations/` and managed via `golang-migrate`.
+마이그레이션은 `/backend/migrations/`에 저장되며 `golang-migrate`로 관리됩니다.
 
-**Create new migration:**
+**새 마이그레이션 생성:**
 ```bash
 make migrate-create  # Enter migration name when prompted
 ```
 
-**Apply migrations:**
+**마이그레이션 적용:**
 ```bash
 make migrate-up      # Apply all pending migrations
 ```
 
-**Rollback migration:**
+**마이그레이션 롤백:**
 ```bash
 make migrate-down    # Rollback last migration
 ```
 
-**Check migration version:**
+**마이그레이션 버전 확인:**
 ```bash
 make migrate-version
 ```
 
-### Schema
+### 스키마
 
-**Users Table:**
+**Users 테이블:**
 ```sql
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -178,7 +178,7 @@ CREATE TABLE users (
 );
 ```
 
-**Refresh Tokens Table:**
+**Refresh Tokens 테이블:**
 ```sql
 CREATE TABLE refresh_tokens (
     id SERIAL PRIMARY KEY,
@@ -190,78 +190,78 @@ CREATE TABLE refresh_tokens (
 );
 ```
 
-## Authentication Flow
+## 인증 흐름
 
-1. **Register/Login** → Returns access token + refresh token
-2. **Access token** → Used for API requests (15 min expiry)
-3. **Refresh token** → Used to get new access token (7 day expiry)
-4. **Logout** → Revokes refresh token
+1. **회원가입/로그인** → access token + refresh token 반환
+2. **Access token** → API 요청에 사용 (15분 만료)
+3. **Refresh token** → 새 access token 발급에 사용 (7일 만료)
+4. **로그아웃** → refresh token 폐기
 
-**Token Refresh:**
+**토큰 갱신:**
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/refresh \
   -H "Content-Type: application/json" \
   -d '{"refresh_token": "your_refresh_token"}'
 ```
 
-## Role-Based Access Control
+## 역할 기반 접근 제어 (RBAC)
 
-Two roles supported:
-- **user** - Default role, basic access
-- **admin** - Full access including user management
+두 가지 역할을 지원합니다:
+- **user** - 기본 역할, 기본 접근 권한
+- **admin** - 사용자 관리를 포함한 전체 접근 권한
 
-Admin-only endpoints are protected by `middleware.RequireAdmin()`.
+Admin 전용 엔드포인트는 `middleware.RequireAdmin()`으로 보호됩니다.
 
 ## CSV Import/Export
 
-**Export Format:**
+**내보내기 형식:**
 ```csv
 id,email,name,role,created_at,updated_at
 1,user@example.com,John Doe,user,2024-01-04T10:00:00Z,2024-01-04T10:00:00Z
 ```
 
-**Import Format:**
+**가져오기 형식:**
 ```csv
 email,name,role
 newuser@example.com,New User,user
 admin@example.com,Admin User,admin
 ```
 
-**Import Behavior:**
-- Upsert by email (create or update)
-- New users get auto-generated password (returned in response)
-- Validation: email (required, valid), name (required), role (admin|user)
+**가져오기 동작:**
+- 이메일 기준 Upsert (생성 또는 업데이트)
+- 신규 사용자는 자동 생성된 비밀번호 부여 (응답에 포함)
+- 검증: email (필수, 유효성), name (필수), role (admin|user)
 
-## Development
+## 개발
 
 ### Live Reload
 
-Air watches for file changes and automatically rebuilds:
+Air가 파일 변경을 감지하고 자동으로 재빌드합니다:
 
 ```bash
 cd backend
 air
 ```
 
-Configuration: `.air.toml`
+설정: `.air.toml`
 
-### Generate Swagger Docs
+### Swagger 문서 생성
 
-After modifying API annotations:
+API 주석 수정 후:
 
 ```bash
 cd backend
 swag init -g cmd/api/main.go -o docs
 ```
 
-## Testing
+## 테스트
 
 ```bash
 cd backend
 go test ./...
 ```
 
-## Build for Production
+## 프로덕션 빌드
 
 ```bash
 cd backend
@@ -269,21 +269,21 @@ go build -o bin/api cmd/api/main.go
 ./bin/api
 ```
 
-## Troubleshooting
+## 문제 해결
 
-**Database connection failed:**
-- Check PostgreSQL is running: `docker ps | grep postgres`
-- Verify .env database credentials
-- Test connection: `psql -h localhost -U postgres -d starter_kit`
+**데이터베이스 연결 실패:**
+- PostgreSQL 실행 확인: `docker ps | grep postgres`
+- .env 데이터베이스 자격증명 확인
+- 연결 테스트: `psql -h localhost -U postgres -d starter_kit`
 
-**Port already in use:**
-- Change `PORT` in .env
-- Kill process on port 8080: `lsof -ti:8080 | xargs kill`
+**포트가 이미 사용 중:**
+- .env에서 `PORT` 변경
+- 8080 포트의 프로세스 종료: `lsof -ti:8080 | xargs kill`
 
-**Swagger not updating:**
-- Regenerate docs: `swag init -g cmd/api/main.go -o docs`
-- Restart server
+**Swagger가 업데이트되지 않음:**
+- 문서 재생성: `swag init -g cmd/api/main.go -o docs`
+- 서버 재시작
 
-**Migration failed:**
-- Check version: `make migrate-version`
-- Force version: `make migrate-force` (enter version number)
+**마이그레이션 실패:**
+- 버전 확인: `make migrate-version`
+- 버전 강제 지정: `make migrate-force` (버전 번호 입력)

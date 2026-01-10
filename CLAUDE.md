@@ -23,7 +23,7 @@
 
 Production-ready full-stack starter kit combining:
 - **Go backend** with Clean Architecture (Gin, PostgreSQL, JWT)
-- **Next.js 15 frontend** with App Router (TypeScript, Tailwind, shadcn/ui)
+- **Next.js 16 frontend** with App Router (TypeScript, Tailwind, shadcn/ui)
 - **Complete authentication** with RBAC and automatic token refresh
 
 **Key Features**:
@@ -85,10 +85,13 @@ backend/
 │   └── api/
 │       └── main.go                    # Application entry point
 ├── internal/
-│   ├── handler/                       # HTTP handlers (6 files)
-│   │   ├── auth_handler.go           # Login, register, refresh
-│   │   ├── user_handler.go           # CRUD, CSV import/export
-│   │   └── ...
+│   ├── handler/                       # HTTP handlers
+│   │   ├── auth_handler.go           # Login, register, refresh, session management
+│   │   ├── user_handler.go           # User CRUD operations
+│   │   ├── admin_handler.go          # Admin-specific operations
+│   │   ├── csv_handler.go            # CSV import/export
+│   │   ├── health_handler.go         # Health check endpoint
+│   │   └── handler.go                # Base handler struct
 │   ├── service/                       # Business logic layer
 │   │   ├── auth_service.go
 │   │   └── user_service.go
@@ -107,9 +110,10 @@ backend/
 │   └── config/                        # Configuration management
 ├── pkg/
 │   └── database/                      # PostgreSQL connection
-├── migrations/                        # SQL migrations (2 files)
+├── migrations/                        # SQL migrations (3 files)
 │   ├── 000001_create_users_table.up.sql
-│   └── 000002_create_refresh_tokens_table.up.sql
+│   ├── 000002_create_refresh_tokens_table.up.sql
+│   └── 000003_create_activities_table.up.sql
 ├── docs/                              # Swagger auto-generated docs
 ├── go.mod / go.sum
 ├── .env                               # Environment variables
@@ -185,16 +189,17 @@ starter-kit-mission/
 | **Validation** | go-playground/validator | v10 | Request validation |
 | **Documentation** | Swagger (swaggo) | Latest | API documentation |
 | **Development** | Air | Latest | Hot reload |
-| **Frontend Framework** | Next.js | 15 | React framework (App Router) |
+| **Frontend Framework** | Next.js | 16.1.1 | React framework (App Router) |
 | **Language** | TypeScript | 5.x | Type-safe JavaScript |
+| **UI Library** | React | 19.2.3 | UI framework |
 | **Styling** | Tailwind CSS | 4.x | Utility-first CSS |
 | **UI Components** | shadcn/ui | Latest | Radix UI-based components |
 | **HTTP Client** | Axios | 1.13.2 | API communication |
-| **State Management** | React Query | 5.90.16 | Server state management |
-| **Form Management** | react-hook-form | Latest | Form handling |
-| **Validation** | Zod | Latest | Schema validation |
+| **State Management** | React Query (TanStack Query) | 5.90.16 | Server state management |
+| **Form Management** | react-hook-form | 7.70.0 | Form handling |
+| **Validation** | Zod | 4.3.4 | Schema validation |
 | **Table** | TanStack React Table | 8.21.3 | Data tables |
-| **Icons** | lucide-react | Latest | Icon library |
+| **Icons** | lucide-react | 0.562.0 | Icon library |
 
 ---
 
@@ -428,8 +433,9 @@ This project follows system-wide standards defined in `~/.claude/CLAUDE.md`:
 
 ## Additional Resources
 
-- **Backend README**: `backend/README.md` - Detailed backend documentation
-- **Frontend README**: `frontend/README.md` - Detailed frontend documentation
+- **Backend README**: `backend/README.md` - Detailed backend documentation (Korean)
+- **Frontend README**: `frontend/README.md` - Detailed frontend documentation (Korean)
+- **Root README**: `README.md` - User-facing documentation (Korean)
 - **Swagger UI**: http://localhost:8080/swagger/index.html (when running)
 - **API Base URL**: http://localhost:8080/api/v1
 - **Frontend Dev**: http://localhost:3000
