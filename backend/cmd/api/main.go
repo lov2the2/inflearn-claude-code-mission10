@@ -64,7 +64,14 @@ func main() {
         Msg("Database connection established")
 
     // Auto-migrate models
-    if err := db.AutoMigrate(&model.User{}, &model.RefreshToken{}, &model.Activity{}, &model.Session{}); err != nil {
+    if err := db.AutoMigrate(
+        &model.User{},
+        &model.RefreshToken{},
+        &model.Activity{},
+        &model.Session{},
+        &model.Dataset{},
+        &model.DatasetColumn{},
+    ); err != nil {
         log.Fatal().Err(err).Msg("Failed to migrate database")
     }
 
@@ -174,6 +181,23 @@ func main() {
             // CSV import/export routes
             admin.GET("/users/export", h.CSV.ExportUsersCSV)
             admin.POST("/users/import", h.CSV.ImportUsersCSV)
+        }
+
+        // Dataset routes (protected)
+        datasets := v1.Group("/datasets")
+        datasets.Use(middleware.AuthRequired(cfg.JWT.Secret))
+        datasets.Use(middleware.ActivityLogger(repo))
+        {
+            // Admin only: Upload
+            datasets.POST("/upload", middleware.RequireAdmin(), h.Dataset.UploadCSV)
+
+            // User accessible
+            datasets.GET("", h.Dataset.ListDatasets)
+            datasets.GET("/:id", h.Dataset.GetDataset)
+            datasets.GET("/:id/data", h.Dataset.GetDatasetData)
+
+            // Admin only: Delete
+            datasets.DELETE("/:id", middleware.RequireAdmin(), h.Dataset.DeleteDataset)
         }
     }
 

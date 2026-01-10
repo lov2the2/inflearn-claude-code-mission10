@@ -10,11 +10,12 @@ import (
 )
 
 type Handler struct {
-    Auth   *AuthHandler
-    Admin  *AdminHandler
-    CSV    *CSVHandler
-    Health *HealthHandler
-    User   *UserHandler
+    Auth    *AuthHandler
+    Admin   *AdminHandler
+    CSV     *CSVHandler
+    Health  *HealthHandler
+    User    *UserHandler
+    Dataset *DatasetHandler
 }
 
 type HandlerConfig struct {
@@ -27,10 +28,11 @@ type HandlerConfig struct {
 
 func NewHandler(cfg HandlerConfig) *Handler {
     return &Handler{
-        Auth:   NewAuthHandler(cfg.Service.Auth, cfg.CookieConfig, cfg.AccessExpiry, cfg.RefreshExpiry),
-        Admin:  NewAdminHandler(cfg.Service.Admin),
-        CSV:    NewCSVHandler(cfg.Service.CSV),
-        Health: NewHealthHandler(cfg.DB),
-        User:   NewUserHandler(cfg.Service.User),
+        Auth:    NewAuthHandler(cfg.Service.Auth, cfg.CookieConfig, cfg.AccessExpiry, cfg.RefreshExpiry),
+        Admin:   NewAdminHandler(cfg.Service.Admin),
+        CSV:     NewCSVHandler(cfg.Service.CSV),
+        Health:  NewHealthHandler(cfg.DB),
+        User:    NewUserHandler(cfg.Service.User),
+        Dataset: NewDatasetHandler(cfg.Service.Dataset),
     }
 }
