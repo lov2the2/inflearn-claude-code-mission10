@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sheet'
 import { useEffect, useState } from 'react'
 import { User } from '@/types/auth'
-import { Menu, LogOut, LayoutDashboard, Shield, UserCircle } from 'lucide-react'
+import { Menu, LogOut, LayoutDashboard, Shield, UserCircle, Database } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 
 export default function Navbar() {
@@ -67,6 +67,12 @@ export default function Navbar() {
                                 className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                             >
                                 Profile
+                            </a>
+                            <a
+                                href="/datasets"
+                                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+                            >
+                                Datasets
                             </a>
                             {user && isAdmin(user) && (
                                 <a
@@ -129,6 +135,14 @@ export default function Navbar() {
                                     >
                                         <UserCircle className="mr-2 h-5 w-5" />
                                         Profile
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        className="w-full justify-start text-lg"
+                                        onClick={() => handleNavigation('/datasets')}
+                                    >
+                                        <Database className="mr-2 h-5 w-5" />
+                                        Datasets
                                     </Button>
                                     {user && isAdmin(user) && (
                                         <Button

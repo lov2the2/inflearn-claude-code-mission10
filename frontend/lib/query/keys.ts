@@ -23,4 +23,15 @@ export const query_keys = {
                 [...query_keys.admin.users.all(), 'detail', id] as const,
         },
     },
+
+    // Dataset-related queries
+    datasets: {
+        all: ['datasets'] as const,
+        list: (page: number, limit: number) =>
+            [...query_keys.datasets.all, 'list', { page, limit }] as const,
+        detail: (id: string) =>
+            [...query_keys.datasets.all, 'detail', id] as const,
+        data: (id: string, page: number, limit: number) =>
+            [...query_keys.datasets.all, 'data', id, { page, limit }] as const,
+    },
 } as const
