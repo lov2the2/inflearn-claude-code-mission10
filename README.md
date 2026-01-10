@@ -123,13 +123,28 @@ git clone <repository-url>
 cd starter-kit-mission
 ```
 
-2. **의존성 설치**
+2. **(선택) 포트 변경이 필요한 경우**
+```bash
+cp .env.example .env
+# .env에서 포트 수정 (DB_PORT, BACKEND_PORT, FRONTEND_PORT)
+```
+
+3. **의존성 설치**
 ```bash
 make install
 ```
 
-3. **개발 환경 시작**
+> **참고**: `make install`은 자동으로 다음을 수행합니다:
+> - Root `.env`에서 `backend/.env`와 `frontend/.env.local` 생성
+> - Swagger 문서 생성 (`swag init`)
+> - Go 의존성 및 npm 패키지 설치
+
+4. **개발 환경 시작**
 ```bash
+# 방법 1: 한 번에 모든 서비스 시작 (권장)
+make start
+
+# 방법 2: 개별 터미널에서 실행
 # Terminal 1: PostgreSQL 시작
 make dev-db
 
@@ -140,7 +155,7 @@ make dev-backend
 make dev-frontend
 ```
 
-4. **애플리케이션 접속**
+5. **애플리케이션 접속**
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080
 - Swagger Docs: http://localhost:8080/swagger/index.html
@@ -211,7 +226,7 @@ cd ~/projects/starter-kit-instance1
 cd ~/projects/starter-kit-instance2
 ```
 
-2. **각 인스턴스의 `.env` 파일 수정**
+2. **각 인스턴스의 Root `.env` 파일 수정**
 
 **Instance 1** (`.env`):
 ```env
@@ -231,30 +246,18 @@ FRONTEND_PORT=3001
 DB_NAME=starter_kit_2
 ```
 
-3. **Backend와 Frontend 환경 변수도 업데이트**
+> **참고**: `backend/.env`와 `frontend/.env.local`은 `make install` 시 root `.env`에서 자동 생성됩니다. 수동으로 수정할 필요가 없습니다.
 
-**Instance 2 Backend** (`backend/.env`):
-```env
-PORT=8081
-DB_PORT=5433
-DB_NAME=starter_kit_2
-# ... 나머지 설정
-```
-
-**Instance 2 Frontend** (`frontend/.env.local`):
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8081
-API_URL=http://localhost:8081
-```
-
-4. **각 인스턴스 실행**
+3. **각 인스턴스 설치 및 실행**
 ```bash
 # Instance 1
 cd ~/projects/starter-kit-instance1
+make install
 make start
 
 # Instance 2 (새 터미널)
 cd ~/projects/starter-kit-instance2
+make install
 make start
 ```
 
@@ -275,7 +278,7 @@ make start
 - 각 인스턴스는 고유한 `PROJECT_NAME`을 가져야 합니다 (Docker 컨테이너 충돌 방지)
 - 포트는 다른 서비스와 중복되지 않아야 합니다
 - 각 인스턴스는 별도의 PostgreSQL 데이터베이스를 사용합니다
-- Backend와 Frontend 환경 변수도 일치시켜야 합니다
+- Root `.env`만 수정하면 됩니다 (`backend/.env`, `frontend/.env.local`은 자동 생성)
 
 ## 사용 가능한 명령어
 

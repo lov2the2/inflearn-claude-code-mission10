@@ -1,4 +1,4 @@
-.PHONY: help install-backend install-frontend install dev-db dev-backend dev-frontend dev clean migrate-create migrate-up migrate-down migrate-force migrate-version start stop start-db stop-db start-backend stop-backend start-frontend stop-frontend status logs
+.PHONY: help generate-env install-backend install-frontend install dev-db dev-backend dev-frontend dev clean migrate-create migrate-up migrate-down migrate-force migrate-version start stop start-db stop-db start-backend stop-backend start-frontend stop-frontend status logs
 
 # Load environment variables
 -include .env
@@ -53,10 +53,22 @@ help:
 	@echo "Cleanup:"
 	@echo "  make clean              - Clean Docker volumes and temp files"
 
-install: install-backend install-frontend
+install: generate-env install-backend install-frontend
+
+generate-env:
+	@if [ ! -f .env ]; then \
+		cp .env.example .env; \
+		echo "[INFO] Created .env from .env.example"; \
+	fi
+	@bash scripts/generate-env.sh
 
 install-backend:
 	cd backend && go mod download && go mod tidy
+	@# Install swag if not present
+	@which swag > /dev/null 2>&1 || go install github.com/swaggo/swag/cmd/swag@latest
+	@# Generate Swagger docs
+	cd backend && swag init -g cmd/api/main.go
+	@echo "[INFO] Swagger docs generated"
 
 install-frontend:
 	cd frontend && npm install
