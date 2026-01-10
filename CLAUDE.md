@@ -1,8 +1,8 @@
 # Developer Context - Go + Next.js Starter Kit
 
 > **Project**: Full-stack Starter Kit with Clean Architecture
-> **Version**: 1.0.0
-> **Last Updated**: 2026-01-06
+> **Version**: 1.1.0
+> **Last Updated**: 2026-01-11
 
 ---
 
@@ -202,6 +202,11 @@ starter-kit-mission/
 | **Validation** | Zod | 4.3.4 | Schema validation |
 | **Table** | TanStack React Table | 8.21.3 | Data tables |
 | **Icons** | lucide-react | 0.562.0 | Icon library |
+| **Theme** | next-themes | 0.4.6 | Dark mode support |
+| **Charts** | recharts | 2.15.4 | Data visualization |
+| **Toast** | sonner | 2.0.7 | Toast notifications |
+| **Loading** | nextjs-toploader | 3.9.17 | Page transition loader |
+| **Testing** | Vitest | 4.0.16 | Unit testing framework |
 
 ---
 
@@ -304,12 +309,23 @@ make clean
 **Public**:
 - `POST /api/v1/auth/register` - User registration
 - `POST /api/v1/auth/login` - User login
+- `POST /api/v1/auth/refresh` - Token refresh
 
-**Protected**:
-- `POST /api/v1/auth/refresh` - Token refresh (requires refresh token)
-- `GET /api/v1/users` - List users (Admin only)
-- `POST /api/v1/users/import` - CSV import (Admin only)
-- `GET /api/v1/users/export` - CSV export (Admin only)
+**Protected (User)**:
+- `GET /api/v1/users/profile` - Get current user profile
+- `PATCH /api/v1/users/profile` - Update profile
+- `PATCH /api/v1/users/password` - Change password
+- `GET /api/v1/users/activity` - Get activity log (paginated)
+- `GET /api/v1/users/stats` - Get user statistics
+- `POST /api/v1/auth/logout` - Logout (revoke refresh token)
+
+**Protected (Admin)**:
+- `GET /api/v1/admin/users` - List users (paginated)
+- `GET /api/v1/admin/users/{id}` - Get user details
+- `PATCH /api/v1/admin/users/{id}/role` - Update user role
+- `DELETE /api/v1/admin/users/{id}` - Delete user
+- `GET /api/v1/admin/users/export` - Export users to CSV
+- `POST /api/v1/admin/users/import` - Import users from CSV
 
 ---
 
@@ -546,4 +562,4 @@ This project follows system-wide standards defined in `~/.claude/CLAUDE.md`:
 ---
 
 **Maintained by**: Claude Code
-**Last Updated**: 2026-01-06
+**Last Updated**: 2026-01-11

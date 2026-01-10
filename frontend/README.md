@@ -40,7 +40,12 @@ frontend/
 - **Forms**: React Hook Form + Zod
 - **Data Table**: TanStack Table 8.x
 - **Date Formatting**: date-fns
-- **State**: React hooks
+- **State**: React hooks + TanStack Query
+- **Theme**: next-themes (dark mode)
+- **Charts**: recharts (data visualization)
+- **Toast**: sonner (notifications)
+- **Loading**: nextjs-toploader (page transitions)
+- **Testing**: Vitest + Testing Library
 
 ## 빠른 시작
 
@@ -70,9 +75,15 @@ npm run dev
 ## 환경 변수
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8080    # 백엔드 API URL
+NEXT_PUBLIC_API_URL=http://localhost:8080    # 클라이언트 사이드 API URL
 API_URL=http://localhost:8080                # 서버 사이드 API URL
 ```
+
+**환경변수 용도:**
+- `NEXT_PUBLIC_*`: 클라이언트 사이드(브라우저)에서 접근 가능한 변수. React 컴포넌트에서 사용.
+- `API_URL`: 서버 사이드(Server Components, API Routes)에서만 접근 가능. 보안이 필요한 경우 사용.
+
+**참고**: 둘 다 같은 값이어도 됩니다. 단, `NEXT_PUBLIC_` 접두사가 없는 변수는 클라이언트에 노출되지 않습니다.
 
 ## 기능
 
@@ -386,6 +397,48 @@ npm run start     # 프로덕션 서버 시작
 
 ```bash
 npm run lint      # ESLint 실행
+```
+
+## 테스트
+
+프로젝트는 **Vitest**와 **Testing Library**를 사용하여 테스트를 실행합니다.
+
+### 테스트 명령어
+
+```bash
+npm run test           # 감시 모드로 테스트 실행
+npm run test:run       # 한 번만 테스트 실행
+npm run test:coverage  # 커버리지 리포트 생성
+```
+
+### 테스트 파일 위치
+
+테스트 파일은 소스 파일과 동일한 디렉토리에 `*.test.tsx` 또는 `*.test.ts` 형식으로 배치합니다:
+
+```
+components/
+├── ui/
+│   ├── button.tsx
+│   └── button.test.tsx    # 컴포넌트 테스트
+lib/
+├── api/
+│   ├── client.ts
+│   └── client.test.ts     # 유틸리티 테스트
+```
+
+### 테스트 작성 예시
+
+```typescript
+import { describe, it, expect } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { Button } from '@/components/ui/button'
+
+describe('Button', () => {
+  it('renders correctly', () => {
+    render(<Button>Click me</Button>)
+    expect(screen.getByRole('button')).toHaveTextContent('Click me')
+  })
+})
 ```
 
 ## 문제 해결
