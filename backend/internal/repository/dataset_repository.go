@@ -28,6 +28,10 @@ type DatasetRepository interface {
     InsertBatchData(tableName string, columns []model.DatasetColumn, rows [][]interface{}) error
     GetTableData(tableName string, columns []model.DatasetColumn, page, limit int) ([]map[string]interface{}, int64, error)
     DropDynamicTable(tableName string) error
+
+    // Join query operations
+    ExecuteJoinQuery(query string, columns []model.DatasetColumn) ([]map[string]interface{}, error)
+    CountJoinQuery(countQuery string) (int64, error)
 }
 
 type datasetRepository struct {
@@ -229,4 +233,47 @@ func (r *datasetRepository) GetTableData(tableName string, columns []model.Datas
 func (r *datasetRepository) DropDynamicTable(tableName string) error {
     dropSQL := fmt.Sprintf("DROP TABLE IF EXISTS %s", pq.QuoteIdentifier(tableName))
     return r.db.Exec(dropSQL).Error
+}
+
+// ExecuteJoinQuery executes a pre-built join query and returns results
+func (r *datasetRepository) ExecuteJoinQuery(query string, columns []model.DatasetColumn) ([]map[string]interface{}, error) {
+    // Execute query
+    rows, err := r.db.Raw(query).Rows()
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    // Parse results
+    var result []map[string]interface{}
+    for rows.Next() {
+        // Create slice of interface{} for scanning
+        values := make([]interface{}, len(columns))
+        valuePtrs := make([]interface{}, len(columns))
+        for i := range values {
+            valuePtrs[i] = &values[i]
+        }
+
+        if err := rows.Scan(valuePtrs...); err != nil {
+            return nil, err
+        }
+
+        // Build map
+        row := make(map[string]interface{})
+        for i, col := range columns {
+            row[col.ColumnName] = values[i]
+        }
+        result = append(result, row)
+    }
+
+    return result, nil
+}
+
+// CountJoinQuery executes a COUNT query for join results
+func (r *datasetRepository) CountJoinQuery(countQuery string) (int64, error) {
+    var total int64
+    if err := r.db.Raw(countQuery).Scan(&total).Error; err != nil {
+        return 0, err
+    }
+    return total, nil
 }

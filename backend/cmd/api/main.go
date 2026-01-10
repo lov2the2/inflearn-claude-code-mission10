@@ -196,6 +196,10 @@ func main() {
             datasets.GET("/:id", h.Dataset.GetDataset)
             datasets.GET("/:id/data", h.Dataset.GetDatasetData)
 
+            // Join query routes (User accessible)
+            datasets.POST("/query", h.Dataset.ExecuteJoinQuery)
+            datasets.POST("/query/export", h.Dataset.ExportJoinQueryCSV)
+
             // Admin only: Delete
             datasets.DELETE("/:id", middleware.RequireAdmin(), h.Dataset.DeleteDataset)
         }

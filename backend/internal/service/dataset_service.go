@@ -14,6 +14,7 @@ import (
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/model"
     "start-kit-backend/internal/repository"
+    "start-kit-backend/internal/util"
 
     "github.com/google/uuid"
 )
@@ -24,6 +25,7 @@ type DatasetService interface {
     GetDataset(userID uint, id uuid.UUID) (*dto.DatasetResponse, error)
     GetDatasetData(userID uint, id uuid.UUID, params *dto.DatasetDataRequest) (*dto.DatasetDataResponse, error)
     DeleteDataset(userID uint, id uuid.UUID) error
+    ExecuteJoinQuery(userID uint, req *dto.JoinQueryRequest) (*dto.JoinQueryResponse, error)
 }
 
 type datasetService struct {
@@ -494,4 +496,154 @@ func convert_to_dataset_response(dataset *model.Dataset) *dto.DatasetResponse {
         CreatedAt:     dataset.CreatedAt,
         UpdatedAt:     dataset.UpdatedAt,
     }
+}
+
+// ExecuteJoinQuery executes a join query between two datasets
+func (s *datasetService) ExecuteJoinQuery(userID uint, req *dto.JoinQueryRequest) (*dto.JoinQueryResponse, error) {
+    start_time := time.Now()
+
+    // Set default pagination
+    if req.Page == 0 {
+        req.Page = 1
+    }
+    if req.Limit == 0 {
+        req.Limit = 50
+    }
+
+    // Parse dataset IDs
+    left_id, err := uuid.Parse(req.LeftDatasetID)
+    if err != nil {
+        return nil, apperror.Validation("invalid left_dataset_id")
+    }
+
+    right_id, err := uuid.Parse(req.RightDatasetID)
+    if err != nil {
+        return nil, apperror.Validation("invalid right_dataset_id")
+    }
+
+    // Fetch left dataset
+    left_dataset, err := s.repo.Dataset.FindByID(left_id)
+    if err != nil {
+        return nil, apperror.NotFound("left dataset not found")
+    }
+
+    // Verify ownership
+    if left_dataset.UserID != userID {
+        return nil, apperror.Forbidden("access denied to left dataset")
+    }
+
+    // Fetch right dataset
+    right_dataset, err := s.repo.Dataset.FindByID(right_id)
+    if err != nil {
+        return nil, apperror.NotFound("right dataset not found")
+    }
+
+    // Verify ownership
+    if right_dataset.UserID != userID {
+        return nil, apperror.Forbidden("access denied to right dataset")
+    }
+
+    // Build column whitelist for validation
+    left_column_map := make(map[string]model.DatasetColumn)
+    for _, col := range left_dataset.Columns {
+        left_column_map[col.ColumnName] = col
+    }
+
+    right_column_map := make(map[string]model.DatasetColumn)
+    for _, col := range right_dataset.Columns {
+        right_column_map[col.ColumnName] = col
+    }
+
+    // Validate select columns and build result column metadata
+    result_columns := make([]model.DatasetColumn, 0, len(req.SelectColumns))
+    for _, col_name := range req.SelectColumns {
+        if col, exists := left_column_map[col_name]; exists {
+            result_columns = append(result_columns, col)
+        } else if col, exists := right_column_map[col_name]; exists {
+            result_columns = append(result_columns, col)
+        } else {
+            return nil, apperror.Validation(fmt.Sprintf("column '%s' not found in either dataset", col_name))
+        }
+    }
+
+    // Create SafeQueryBuilder
+    builder := util.NewSafeQueryBuilder(
+        left_dataset.DynamicTableName,
+        right_dataset.DynamicTableName,
+        left_dataset.Columns,
+        right_dataset.Columns,
+    )
+
+    // Convert DTO conditions to builder format
+    builder_conditions := make([]struct {
+        LeftColumn  string
+        Operator    string
+        RightColumn string
+    }, len(req.Conditions))
+
+    for i, cond := range req.Conditions {
+        builder_conditions[i] = struct {
+            LeftColumn  string
+            Operator    string
+            RightColumn string
+        }{
+            LeftColumn:  cond.LeftColumn,
+            Operator:    cond.Operator,
+            RightColumn: cond.RightColumn,
+        }
+    }
+
+    // Build join query
+    join_query, err := builder.BuildJoinQuery(
+        req.JoinType,
+        builder_conditions,
+        req.SelectColumns,
+        req.Page,
+        req.Limit,
+    )
+    if err != nil {
+        return nil, err
+    }
+
+    // Build count query
+    count_query, err := builder.BuildCountQuery(req.JoinType, builder_conditions)
+    if err != nil {
+        return nil, err
+    }
+
+    // Execute count query
+    total, err := s.repo.Dataset.CountJoinQuery(count_query)
+    if err != nil {
+        return nil, apperror.Internal("failed to count join results")
+    }
+
+    // Execute join query
+    rows, err := s.repo.Dataset.ExecuteJoinQuery(join_query, result_columns)
+    if err != nil {
+        return nil, apperror.Internal("failed to execute join query")
+    }
+
+    // Build response columns
+    response_columns := make([]dto.DatasetColumnInfo, len(result_columns))
+    for i, col := range result_columns {
+        response_columns[i] = dto.DatasetColumnInfo{
+            ColumnName:  col.ColumnName,
+            DisplayName: col.DisplayName,
+            DataType:    col.DataType,
+            ColumnOrder: col.ColumnOrder,
+            Nullable:    col.Nullable,
+        }
+    }
+
+    // Calculate query time
+    query_time_ms := time.Since(start_time).Milliseconds()
+
+    return &dto.JoinQueryResponse{
+        Columns:     response_columns,
+        Rows:        rows,
+        Total:       total,
+        Page:        req.Page,
+        Limit:       req.Limit,
+        QueryTimeMs: query_time_ms,
+    }, nil
 }

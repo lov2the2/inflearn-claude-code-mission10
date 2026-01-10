@@ -1,6 +1,8 @@
 package handler
 
 import (
+    "encoding/csv"
+    "fmt"
     "net/http"
 
     "start-kit-backend/internal/apperror"
@@ -235,4 +237,116 @@ func (h *DatasetHandler) DeleteDataset(c *gin.Context) {
     }
 
     c.JSON(http.StatusOK, dto.NewSuccessResponse(nil, "Dataset deleted successfully"))
+}
+
+// ExecuteJoinQuery godoc
+// @Summary Execute join query
+// @Description Execute a join query between two datasets with conditions
+// @Tags datasets
+// @Accept json
+// @Produce json
+// @Param request body dto.JoinQueryRequest true "Join query request"
+// @Success 200 {object} dto.SuccessResponse{data=dto.JoinQueryResponse}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 403 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Security BearerAuth
+// @Router /api/v1/datasets/query [post]
+func (h *DatasetHandler) ExecuteJoinQuery(c *gin.Context) {
+    userID := middleware.GetUserID(c)
+
+    var req dto.JoinQueryRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, dto.NewErrorResponse(err.Error()))
+        return
+    }
+
+    result, err := h.service.ExecuteJoinQuery(userID, &req)
+    if err != nil {
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
+        return
+    }
+
+    c.JSON(http.StatusOK, dto.NewSuccessResponse(result, "Join query executed successfully"))
+}
+
+// ExportJoinQueryCSV godoc
+// @Summary Export join query results to CSV
+// @Description Execute a join query and download results as CSV file
+// @Tags datasets
+// @Accept json
+// @Produce text/csv
+// @Param request body dto.JoinQueryRequest true "Join query request"
+// @Success 200 {file} file "CSV file"
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 403 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Security BearerAuth
+// @Router /api/v1/datasets/query/export [post]
+func (h *DatasetHandler) ExportJoinQueryCSV(c *gin.Context) {
+    userID := middleware.GetUserID(c)
+
+    var req dto.JoinQueryRequest
+    if err := c.ShouldBindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, dto.NewErrorResponse(err.Error()))
+        return
+    }
+
+    // Remove pagination limits for full export
+    req.Page = 1
+    req.Limit = 100000 // Max export limit
+
+    result, err := h.service.ExecuteJoinQuery(userID, &req)
+    if err != nil {
+        if appErr, ok := err.(*apperror.AppError); ok {
+            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
+        } else {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
+        }
+        return
+    }
+
+    // Set CSV headers
+    filename := fmt.Sprintf("join_query_results_%d.csv", result.QueryTimeMs)
+    c.Header("Content-Type", "text/csv")
+    c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
+
+    // Create CSV writer
+    writer := csv.NewWriter(c.Writer)
+    defer writer.Flush()
+
+    // Write header row
+    headers := make([]string, len(result.Columns))
+    for i, col := range result.Columns {
+        headers[i] = col.DisplayName
+    }
+    if err := writer.Write(headers); err != nil {
+        c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("failed to write CSV header"))
+        return
+    }
+
+    // Write data rows
+    for _, row := range result.Rows {
+        record := make([]string, len(result.Columns))
+        for i, col := range result.Columns {
+            val := row[col.ColumnName]
+            if val != nil {
+                record[i] = fmt.Sprintf("%v", val)
+            } else {
+                record[i] = ""
+            }
+        }
+        if err := writer.Write(record); err != nil {
+            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse("failed to write CSV row"))
+            return
+        }
+    }
 }

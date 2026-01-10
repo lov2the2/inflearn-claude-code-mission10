@@ -86,3 +86,35 @@ type DatasetDataResponse struct {
     Page    int                      `json:"page"`
     Limit   int                      `json:"limit"`
 }
+
+// ====================
+// Join Query DTOs
+// ====================
+
+// JoinCondition represents a join condition between two columns
+type JoinCondition struct {
+    LeftColumn  string `json:"left_column" binding:"required"`
+    Operator    string `json:"operator" binding:"required,oneof== != < > <= >="`
+    RightColumn string `json:"right_column" binding:"required"`
+}
+
+// JoinQueryRequest represents a request to execute a join query
+type JoinQueryRequest struct {
+    LeftDatasetID  string          `json:"left_dataset_id" binding:"required,uuid"`
+    RightDatasetID string          `json:"right_dataset_id" binding:"required,uuid"`
+    JoinType       string          `json:"join_type" binding:"required,oneof=inner left right full"`
+    Conditions     []JoinCondition `json:"conditions" binding:"required,min=1,dive"`
+    SelectColumns  []string        `json:"select_columns" binding:"required,min=1"`
+    Page           int             `json:"page" binding:"omitempty,min=1"`
+    Limit          int             `json:"limit" binding:"omitempty,min=1,max=100"`
+}
+
+// JoinQueryResponse represents the result of a join query
+type JoinQueryResponse struct {
+    Columns     []DatasetColumnInfo      `json:"columns"`
+    Rows        []map[string]interface{} `json:"rows"`
+    Total       int64                    `json:"total"`
+    Page        int                      `json:"page"`
+    Limit       int                      `json:"limit"`
+    QueryTimeMs int64                    `json:"query_time_ms"`
+}
