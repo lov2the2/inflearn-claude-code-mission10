@@ -28,8 +28,8 @@ cd "$PROJECT_ROOT"
 save_pid "$BACKEND_PID" backend
 
 # Wait for backend to be ready
-if wait_for_http "http://localhost:8080/health" 60; then
-    log_success "Backend started successfully on port 8080 (PID: $BACKEND_PID)"
+if wait_for_http "http://localhost:${BACKEND_PORT}/health" 60; then
+    log_success "Backend started successfully on port ${BACKEND_PORT} (PID: $BACKEND_PID)"
     log_info "Logs: $LOG_DIR/backend.log"
 else
     log_error "Backend failed to start. Check logs: $LOG_DIR/backend.log"

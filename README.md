@@ -148,6 +148,29 @@ make dev-frontend
 
 ## 환경 변수
 
+### 프로젝트 설정 (`.env`)
+프로젝트 루트의 `.env` 파일은 Docker 컨테이너 이름과 포트를 설정합니다:
+
+```env
+# 프로젝트 이름 (Docker 컨테이너 이름에 사용됨)
+PROJECT_NAME=starter-kit
+
+# 포트 설정 (다른 서비스와 충돌 시 변경)
+DB_PORT=5432
+BACKEND_PORT=8080
+FRONTEND_PORT=3000
+
+# 데이터베이스 설정
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=starter_kit
+```
+
+**참고**: `.env.example` 파일을 복사하여 시작할 수 있습니다:
+```bash
+cp .env.example .env
+```
+
 ### Backend (`backend/.env`)
 ```env
 PORT=8080
@@ -172,6 +195,87 @@ ALLOWED_ORIGINS=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:8080
 API_URL=http://localhost:8080
 ```
+
+## 다중 인스턴스 실행
+
+동일한 머신에서 여러 프로젝트 인스턴스를 동시에 실행할 수 있습니다:
+
+### 설정 방법
+
+1. **프로젝트 복사**
+```bash
+# 첫 번째 인스턴스
+cd ~/projects/starter-kit-instance1
+
+# 두 번째 인스턴스
+cd ~/projects/starter-kit-instance2
+```
+
+2. **각 인스턴스의 `.env` 파일 수정**
+
+**Instance 1** (`.env`):
+```env
+PROJECT_NAME=starter-kit-1
+DB_PORT=5432
+BACKEND_PORT=8080
+FRONTEND_PORT=3000
+DB_NAME=starter_kit_1
+```
+
+**Instance 2** (`.env`):
+```env
+PROJECT_NAME=starter-kit-2
+DB_PORT=5433
+BACKEND_PORT=8081
+FRONTEND_PORT=3001
+DB_NAME=starter_kit_2
+```
+
+3. **Backend와 Frontend 환경 변수도 업데이트**
+
+**Instance 2 Backend** (`backend/.env`):
+```env
+PORT=8081
+DB_PORT=5433
+DB_NAME=starter_kit_2
+# ... 나머지 설정
+```
+
+**Instance 2 Frontend** (`frontend/.env.local`):
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8081
+API_URL=http://localhost:8081
+```
+
+4. **각 인스턴스 실행**
+```bash
+# Instance 1
+cd ~/projects/starter-kit-instance1
+make start
+
+# Instance 2 (새 터미널)
+cd ~/projects/starter-kit-instance2
+make start
+```
+
+### 접속 주소
+
+**Instance 1**:
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8080
+- Swagger: http://localhost:8080/swagger/index.html
+
+**Instance 2**:
+- Frontend: http://localhost:3001
+- Backend: http://localhost:8081
+- Swagger: http://localhost:8081/swagger/index.html
+
+### 주의사항
+
+- 각 인스턴스는 고유한 `PROJECT_NAME`을 가져야 합니다 (Docker 컨테이너 충돌 방지)
+- 포트는 다른 서비스와 중복되지 않아야 합니다
+- 각 인스턴스는 별도의 PostgreSQL 데이터베이스를 사용합니다
+- Backend와 Frontend 환경 변수도 일치시켜야 합니다
 
 ## 사용 가능한 명령어
 

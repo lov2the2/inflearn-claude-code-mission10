@@ -172,6 +172,8 @@ starter-kit-mission/
 ├── .pids/                             # Process ID files
 ├── docker-compose.yml                 # PostgreSQL container
 ├── Makefile                           # Build automation
+├── .env                               # Project configuration (ports, container names)
+├── .env.example                       # Environment template
 └── README.md                          # User documentation
 ```
 
@@ -342,9 +344,110 @@ make clean
 | File | Purpose |
 |------|---------|
 | `docker-compose.yml` | PostgreSQL container definition |
-| `.env` | Backend environment variables (DB connection, JWT secret) |
+| `.env` | Project configuration (PROJECT_NAME, ports, DB settings) |
+| `.env.example` | Environment template for new instances |
+| `backend/.env` | Backend environment variables (DB connection, JWT secret) |
 | `.air.toml` | Backend hot-reload configuration |
 | `Makefile` | Build automation and task management |
+
+---
+
+## Environment Configuration
+
+### Project-level Configuration (`.env`)
+
+The root `.env` file controls project-wide settings:
+
+```env
+# Project identifier (used for Docker container naming)
+PROJECT_NAME=starter-kit
+
+# Port configuration (change if conflicts with other services)
+DB_PORT=5432
+BACKEND_PORT=8080
+FRONTEND_PORT=3000
+
+# Database settings
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_NAME=starter_kit
+```
+
+**Key Variables**:
+
+| Variable | Purpose | Default | Notes |
+|----------|---------|---------|-------|
+| `PROJECT_NAME` | Docker container prefix | `starter-kit` | Used in `docker-compose.yml` for unique container names |
+| `DB_PORT` | PostgreSQL port | `5432` | Exposed to host machine |
+| `BACKEND_PORT` | Backend API port | `8080` | Go server listening port |
+| `FRONTEND_PORT` | Frontend port | `3000` | Next.js dev server port |
+| `DB_USER` | PostgreSQL username | `postgres` | Database authentication |
+| `DB_PASSWORD` | PostgreSQL password | `postgres` | Database authentication |
+| `DB_NAME` | Database name | `starter_kit` | PostgreSQL database name |
+
+### Multi-Instance Support
+
+The environment variable system enables running multiple project instances on the same machine without conflicts.
+
+**Setup Process**:
+
+1. **Copy project to different directory**:
+```bash
+cp -r starter-kit-mission starter-kit-instance2
+cd starter-kit-instance2
+```
+
+2. **Update root `.env`**:
+```env
+PROJECT_NAME=starter-kit-2
+DB_PORT=5433
+BACKEND_PORT=8081
+FRONTEND_PORT=3001
+DB_NAME=starter_kit_2
+```
+
+3. **Update `backend/.env`**:
+```env
+PORT=8081
+DB_PORT=5433
+DB_NAME=starter_kit_2
+# ... other settings
+```
+
+4. **Update `frontend/.env.local`**:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8081
+API_URL=http://localhost:8081
+```
+
+5. **Start instance**:
+```bash
+make start
+```
+
+**Access URLs**:
+- Instance 1: Frontend (3000), Backend (8080), Swagger (8080/swagger)
+- Instance 2: Frontend (3001), Backend (8081), Swagger (8081/swagger)
+
+**Important Notes**:
+- Each instance requires unique `PROJECT_NAME` (prevents Docker container conflicts)
+- Ports must not overlap with other services or instances
+- Each instance maintains separate PostgreSQL database
+- Backend and frontend environment variables must match root `.env` ports
+
+### Environment File Hierarchy
+
+```
+.env                          # Project-wide: container names, ports
+├── backend/.env             # Backend-specific: JWT secrets, API config
+└── frontend/.env.local      # Frontend-specific: API URLs
+```
+
+**Configuration Flow**:
+1. Root `.env` defines ports and database settings
+2. `docker-compose.yml` reads `.env` for container configuration
+3. `backend/.env` inherits ports from root `.env` (must match)
+4. `frontend/.env.local` references backend port from root `.env`
 
 ---
 

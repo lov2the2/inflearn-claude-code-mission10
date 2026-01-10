@@ -7,6 +7,20 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PID_DIR="$PROJECT_ROOT/.pids"
 LOG_DIR="$PROJECT_ROOT/logs"
 
+# Load environment from root .env if exists
+if [ -f "$PROJECT_ROOT/.env" ]; then
+    set -a
+    source "$PROJECT_ROOT/.env"
+    set +a
+fi
+
+# Project configuration with defaults
+PROJECT_NAME="${PROJECT_NAME:-starter-kit}"
+DB_CONTAINER="${PROJECT_NAME}-db"
+DB_PORT="${DB_PORT:-5432}"
+BACKEND_PORT="${BACKEND_PORT:-8080}"
+FRONTEND_PORT="${FRONTEND_PORT:-3000}"
+
 # Colors for terminal output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -39,7 +53,7 @@ wait_for_postgres() {
     log_info "Waiting for PostgreSQL to be ready..."
 
     while true; do
-        if docker exec starter-kit-db pg_isready -U postgres > /dev/null 2>&1; then
+        if docker exec "$DB_CONTAINER" pg_isready -U postgres > /dev/null 2>&1; then
             return 0
         fi
 

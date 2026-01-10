@@ -37,3 +37,6 @@ node_modules/
 
 # claude
 .claude/settings.local.json
+
+# Root environment file (keep .env.example tracked)
+.env

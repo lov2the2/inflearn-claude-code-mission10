@@ -1,5 +1,18 @@
 .PHONY: help install-backend install-frontend install dev-db dev-backend dev-frontend dev clean migrate-create migrate-up migrate-down migrate-force migrate-version start stop start-db stop-db start-backend stop-backend start-frontend stop-frontend status logs
 
+# Load environment variables
+-include .env
+export
+
+# Defaults
+PROJECT_NAME ?= starter-kit
+DB_PORT ?= 5432
+DB_USER ?= postgres
+DB_PASSWORD ?= postgres
+DB_NAME ?= starter_kit
+DB_CONTAINER = $(PROJECT_NAME)-db
+DB_URL = postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:$(DB_PORT)/$(DB_NAME)?sslmode=disable
+
 help:
 	@echo "Available commands:"
 	@echo ""
@@ -56,17 +69,17 @@ migrate-create:
 	migrate create -ext sql -dir backend/migrations -seq $$name
 
 migrate-up:
-	migrate -path backend/migrations -database "postgresql://postgres:postgres@localhost:5432/starter_kit?sslmode=disable" up
+	migrate -path backend/migrations -database "$(DB_URL)" up
 
 migrate-down:
-	migrate -path backend/migrations -database "postgresql://postgres:postgres@localhost:5432/starter_kit?sslmode=disable" down 1
+	migrate -path backend/migrations -database "$(DB_URL)" down 1
 
 migrate-force:
 	@read -p "Enter version to force: " version; \
-	migrate -path backend/migrations -database "postgresql://postgres:postgres@localhost:5432/starter_kit?sslmode=disable" force $$version
+	migrate -path backend/migrations -database "$(DB_URL)" force $$version
 
 migrate-version:
-	migrate -path backend/migrations -database "postgresql://postgres:postgres@localhost:5432/starter_kit?sslmode=disable" version
+	migrate -path backend/migrations -database "$(DB_URL)" version
 
 dev-backend:
 	cd backend && air
@@ -106,7 +119,7 @@ stop-frontend:
 
 status:
 	@echo "Server Status:"
-	@echo "  Database:  $$(docker ps | grep -q starter-kit-db && echo '✓ Running' || echo '✗ Stopped')"
+	@echo "  Database:  $$(docker ps | grep -q $(DB_CONTAINER) && echo '✓ Running' || echo '✗ Stopped')"
 	@echo "  Backend:   $$([ -f .pids/backend.pid ] && kill -0 $$(cat .pids/backend.pid) 2>/dev/null && echo '✓ Running (PID: '$$(cat .pids/backend.pid)')' || echo '✗ Stopped')"
 	@echo "  Frontend:  $$([ -f .pids/frontend.pid ] && kill -0 $$(cat .pids/frontend.pid) 2>/dev/null && echo '✓ Running (PID: '$$(cat .pids/frontend.pid)')' || echo '✗ Stopped')"
 

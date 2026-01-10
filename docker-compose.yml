@@ -3,20 +3,21 @@ version: '3.8'
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: starter-kit-db
+    container_name: ${PROJECT_NAME:-starter-kit}-db
     environment:
-      POSTGRES_DB: starter_kit
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DB_NAME:-starter_kit}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
 volumes:
   postgres_data:
+    name: ${PROJECT_NAME:-starter-kit}_postgres_data
