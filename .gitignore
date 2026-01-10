@@ -4,6 +4,7 @@ backend/.env
 backend/docs/
 backend/api
 backend/bin/
+backend/bin/api/
 backend/coverage.out
 backend/coverage.html
 
