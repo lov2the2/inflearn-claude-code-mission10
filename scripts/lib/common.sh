@@ -14,6 +14,10 @@ if [ -f "$PROJECT_ROOT/.env" ]; then
     set +a
 fi
 
+# Ensure required directories exist
+mkdir -p "$PID_DIR"
+mkdir -p "$LOG_DIR"
+
 # Project configuration with defaults
 PROJECT_NAME="${PROJECT_NAME:-starter-kit}"
 DB_CONTAINER="${PROJECT_NAME}-db"
