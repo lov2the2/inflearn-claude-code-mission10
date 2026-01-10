@@ -110,10 +110,10 @@ backend/
 │   └── config/                        # Configuration management
 ├── pkg/
 │   └── database/                      # PostgreSQL connection
-├── migrations/                        # SQL migrations (3 files)
-│   ├── 000001_create_users_table.up.sql
-│   ├── 000002_create_refresh_tokens_table.up.sql
-│   └── 000003_create_activities_table.up.sql
+├── migrations/                        # SQL migrations (3 pairs, 6 files)
+│   ├── 000001_create_users_table.up.sql / .down.sql
+│   ├── 000002_create_refresh_tokens_table.up.sql / .down.sql
+│   └── 000003_create_activities_table.up.sql / .down.sql
 ├── docs/                              # Swagger auto-generated docs
 ├── go.mod / go.sum
 ├── .env                               # Environment variables

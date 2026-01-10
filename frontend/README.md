@@ -1,6 +1,6 @@
 # Frontend - Next.js + TypeScript
 
-Next.js 15, TypeScript, Tailwind CSS로 구축된 모던 React 프론트엔드입니다.
+Next.js 16, TypeScript, Tailwind CSS로 구축된 모던 React 프론트엔드입니다.
 
 ## 아키텍처
 
@@ -32,7 +32,7 @@ frontend/
 
 ## 기술 스택
 
-- **Framework**: Next.js 15.1.1 (App Router)
+- **Framework**: Next.js 16.1.1 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **UI Components**: shadcn/ui

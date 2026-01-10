@@ -1,6 +1,6 @@
 # Go + Next.js Full-stack Starter Kit
 
-Go 백엔드(Clean Architecture)와 Next.js 15 프론트엔드로 구성된 프로덕션 레디 모노레포 스타터 킷입니다.
+Go 백엔드(Clean Architecture)와 Next.js 16 프론트엔드로 구성된 프로덕션 레디 모노레포 스타터 킷입니다.
 
 ## 기능
 
@@ -52,7 +52,7 @@ POST /api/v1/auth/refresh
 - **개발 도구**: Air (live reload)
 
 ### Frontend
-- **프레임워크**: Next.js 15 (App Router)
+- **프레임워크**: Next.js 16 (App Router)
 - **언어**: TypeScript
 - **스타일링**: Tailwind CSS
 - **UI 컴포넌트**: shadcn/ui

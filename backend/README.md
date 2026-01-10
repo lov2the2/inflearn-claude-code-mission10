@@ -135,7 +135,8 @@ curl -X GET http://localhost:8080/api/v1/users/stats \
 ### 문서
 
 - Swagger UI: `http://localhost:8080/swagger/index.html`
-- OpenAPI Spec: `/backend/docs/swagger.yaml`
+- OpenAPI Spec (JSON): `http://localhost:8080/swagger/doc.json`
+- Generated docs: `/backend/docs/` (swagger.json, docs.go)
 
 ## 데이터베이스
 
