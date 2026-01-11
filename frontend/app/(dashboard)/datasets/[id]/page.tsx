@@ -46,7 +46,7 @@ export default function DatasetDetailPage() {
         data: dataset_data,
         isLoading: is_loading_data,
         error: data_error,
-    } = use_dataset_data(dataset_id, current_page, page_size)
+    } = use_dataset_data(dataset_id, { page: current_page, limit: page_size })
 
     /**
      * Handle CSV export
@@ -73,7 +73,7 @@ export default function DatasetDetailPage() {
      * Navigate to join builder with this dataset pre-selected
      */
     const handle_join = () => {
-        router.push(`/datasets/join?left=${dataset_id}`)
+        router.push(`/datasets/join?base=${dataset_id}`)
     }
 
     const total_pages = dataset_data ? Math.ceil(dataset_data.total / page_size) : 1

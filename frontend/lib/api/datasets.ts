@@ -7,6 +7,7 @@ import {
     CreateDatasetResponse,
     JoinQueryRequest,
     JoinQueryResponse,
+    DatasetDataParams,
 } from '@/types/dataset'
 
 export const datasetsApi = {
@@ -32,16 +33,24 @@ export const datasetsApi = {
     },
 
     /**
-     * Get dataset data with pagination
+     * Get dataset data with pagination, filtering, and sorting
      */
     getDatasetData: async (
         id: string,
-        page: number = 1,
-        limit: number = 50
+        params: DatasetDataParams = {}
     ): Promise<DatasetDataResponse> => {
+        const { page = 1, limit = 50, sort_by, sort_order, filters } = params
+
+        const query_params: Record<string, any> = { page, limit }
+        if (sort_by) query_params.sort_by = sort_by
+        if (sort_order) query_params.sort_order = sort_order
+        if (filters && filters.length > 0) {
+            query_params.filters = JSON.stringify(filters)
+        }
+
         const response = await apiClient.get<ApiResponse<DatasetDataResponse>>(
             `/api/v1/datasets/${id}/data`,
-            { params: { page, limit } }
+            { params: query_params }
         )
         return response.data.data
     },

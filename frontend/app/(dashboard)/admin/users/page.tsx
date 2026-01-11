@@ -90,8 +90,8 @@ export default function AdminUsersPage() {
                                 <UserPlus className="h-4 w-4" />
                                 Create User
                             </Button>
-                            <Button onClick={handleExport} isLoading={exporting} loadingText="Exporting..." variant="outline">
-                                Export CSV
+                            <Button onClick={handleExport} disabled={exporting} variant="outline">
+                                {exporting ? 'Exporting...' : 'Export CSV'}
                             </Button>
                             <Button onClick={() => setImportDialogOpen(true)} variant="outline">
                                 Import CSV

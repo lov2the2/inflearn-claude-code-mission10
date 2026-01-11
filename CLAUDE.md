@@ -1,8 +1,8 @@
 # Developer Context - Go + Next.js Starter Kit
 
 > **Project**: Full-stack Starter Kit with Clean Architecture
-> **Version**: 1.2.0
-> **Last Updated**: 2026-01-11
+> **Version**: 1.3.0
+> **Last Updated**: 2026-01-12
 
 ---
 
@@ -30,7 +30,9 @@ Production-ready full-stack starter kit combining:
 - JWT authentication with 15-minute access tokens and 7-day refresh tokens
 - Role-based access control (Admin/User roles)
 - Dataset management with CSV upload and dynamic table creation
-- Join query builder with multi-table support
+- Join query builder with multi-table support (up to 5 tables)
+- Advanced join types (INNER/LEFT/RIGHT/FULL/CROSS)
+- Server-side data filtering and sorting
 - CSV import/export with pagination
 - Docker Compose orchestration
 - Swagger API documentation
@@ -352,8 +354,11 @@ make clean
 - `POST /api/v1/auth/logout` - Logout (revoke refresh token)
 - `GET /api/v1/datasets` - List all datasets (paginated)
 - `GET /api/v1/datasets/{id}` - Get dataset metadata
-- `GET /api/v1/datasets/{id}/data` - Get dataset data (paginated)
-- `POST /api/v1/datasets/query` - Execute join query
+- `GET /api/v1/datasets/{id}/data` - Get dataset data (paginated, with filtering/sorting support)
+  - Query params: `page`, `limit`, `sort_by` (column name), `sort_order` (asc/desc), `filters` (JSON array)
+  - Filter format: `[{"column":"age","operator":">=","value":"18"}]`
+  - Operators: `=`, `!=`, `>`, `<`, `>=`, `<=`, `LIKE`
+- `POST /api/v1/datasets/query` - Execute join query (supports up to 5 tables with INNER/LEFT/RIGHT/FULL/CROSS join)
 - `POST /api/v1/datasets/query/export` - Export join query results to CSV
 
 **Protected (Admin)**:
@@ -615,4 +620,4 @@ This project follows system-wide standards defined in `~/.claude/CLAUDE.md`:
 ---
 
 **Maintained by**: Claude Code
-**Last Updated**: 2026-01-11
+**Last Updated**: 2026-01-12

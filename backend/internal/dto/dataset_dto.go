@@ -72,10 +72,20 @@ type DatasetListResponse struct {
 // Data Query DTOs
 // ====================
 
+// FilterCondition represents a filter condition for data queries
+type FilterCondition struct {
+    Column   string `json:"column"`
+    Operator string `json:"operator"` // =, !=, >, <, >=, <=, like
+    Value    string `json:"value"`
+}
+
 // DatasetDataRequest represents query parameters for dataset data
 type DatasetDataRequest struct {
-    Page  int `form:"page,default=1" binding:"omitempty,min=1"`
-    Limit int `form:"limit,default=50" binding:"omitempty,min=1,max=1000"`
+    Page      int    `form:"page,default=1" binding:"omitempty,min=1"`
+    Limit     int    `form:"limit,default=50" binding:"omitempty,min=1,max=1000"`
+    SortBy    string `form:"sort_by" binding:"omitempty"`
+    SortOrder string `form:"sort_order" binding:"omitempty,oneof=asc desc"`
+    Filters   string `form:"filters" binding:"omitempty"` // JSON encoded []FilterCondition
 }
 
 // DatasetDataResponse represents paginated dataset data
@@ -98,15 +108,21 @@ type JoinCondition struct {
     RightColumn string `json:"right_column" binding:"required"`
 }
 
-// JoinQueryRequest represents a request to execute a join query
+// JoinTableConfig represents configuration for joining a single table
+type JoinTableConfig struct {
+    DatasetID  string          `json:"dataset_id" binding:"required,uuid"`
+    JoinType   string          `json:"join_type" binding:"required,oneof=inner left right full cross"`
+    Conditions []JoinCondition `json:"conditions" binding:"dive"` // Empty for CROSS JOIN
+}
+
+// JoinQueryRequest represents a request to execute a multi-table join query
+// Supports up to 5 tables (1 base + 4 join tables)
 type JoinQueryRequest struct {
-    LeftDatasetID  string          `json:"left_dataset_id" binding:"required,uuid"`
-    RightDatasetID string          `json:"right_dataset_id" binding:"required,uuid"`
-    JoinType       string          `json:"join_type" binding:"required,oneof=inner left right full"`
-    Conditions     []JoinCondition `json:"conditions" binding:"required,min=1,dive"`
-    SelectColumns  []string        `json:"select_columns" binding:"required,min=1"`
-    Page           int             `json:"page" binding:"omitempty,min=1"`
-    Limit          int             `json:"limit" binding:"omitempty,min=1,max=100"`
+    BaseDatasetID string            `json:"base_dataset_id" binding:"required,uuid"`
+    JoinTables    []JoinTableConfig `json:"join_tables" binding:"required,min=1,max=4,dive"`
+    SelectColumns []string          `json:"select_columns" binding:"required,min=1"`
+    Page          int               `json:"page" binding:"omitempty,min=1"`
+    Limit         int               `json:"limit" binding:"omitempty,min=1,max=100"`
 }
 
 // JoinQueryResponse represents the result of a join query

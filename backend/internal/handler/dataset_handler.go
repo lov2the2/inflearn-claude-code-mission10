@@ -162,12 +162,15 @@ func (h *DatasetHandler) GetDataset(c *gin.Context) {
 
 // GetDatasetData godoc
 // @Summary Get dataset data
-// @Description Get paginated data rows from dataset
+// @Description Get paginated data rows from dataset with optional filtering and sorting
 // @Tags datasets
 // @Produce json
 // @Param id path string true "Dataset ID (UUID)"
 // @Param page query int false "Page number" default(1)
 // @Param limit query int false "Items per page" default(50)
+// @Param sort_by query string false "Column name to sort by"
+// @Param sort_order query string false "Sort order (asc or desc)" Enums(asc, desc)
+// @Param filters query string false "JSON encoded filter conditions"
 // @Success 200 {object} dto.SuccessResponse{data=dto.DatasetDataResponse}
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 401 {object} dto.ErrorResponse
@@ -240,12 +243,12 @@ func (h *DatasetHandler) DeleteDataset(c *gin.Context) {
 }
 
 // ExecuteJoinQuery godoc
-// @Summary Execute join query
-// @Description Execute a join query between two datasets with conditions
+// @Summary Execute multi-table join query
+// @Description Execute a join query across multiple datasets (up to 5 tables) with conditions. Supports INNER, LEFT, RIGHT, FULL, and CROSS JOIN types.
 // @Tags datasets
 // @Accept json
 // @Produce json
-// @Param request body dto.JoinQueryRequest true "Join query request"
+// @Param request body dto.JoinQueryRequest true "Multi-table join query request"
 // @Success 200 {object} dto.SuccessResponse{data=dto.JoinQueryResponse}
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 401 {object} dto.ErrorResponse

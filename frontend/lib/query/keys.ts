@@ -31,7 +31,7 @@ export const query_keys = {
             [...query_keys.datasets.all, 'list', { page, limit }] as const,
         detail: (id: string) =>
             [...query_keys.datasets.all, 'detail', id] as const,
-        data: (id: string, page: number, limit: number) =>
-            [...query_keys.datasets.all, 'data', id, { page, limit }] as const,
+        data: (id: string, params: Record<string, any>) =>
+            [...query_keys.datasets.all, 'data', id, params] as const,
     },
 } as const

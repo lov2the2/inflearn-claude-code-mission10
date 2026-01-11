@@ -27,6 +27,7 @@ type DatasetRepository interface {
     CreateDynamicTable(tableName string, columns []model.DatasetColumn) error
     InsertBatchData(tableName string, columns []model.DatasetColumn, rows [][]interface{}) error
     GetTableData(tableName string, columns []model.DatasetColumn, page, limit int) ([]map[string]interface{}, int64, error)
+    GetTableDataWithQuery(query string, countQuery string, queryParams []interface{}, countParams []interface{}, columns []model.DatasetColumn) ([]map[string]interface{}, int64, error)
     DropDynamicTable(tableName string) error
 
     // Join query operations
@@ -233,6 +234,44 @@ func (r *datasetRepository) GetTableData(tableName string, columns []model.Datas
 func (r *datasetRepository) DropDynamicTable(tableName string) error {
     dropSQL := fmt.Sprintf("DROP TABLE IF EXISTS %s", pq.QuoteIdentifier(tableName))
     return r.db.Exec(dropSQL).Error
+}
+
+// GetTableDataWithQuery executes custom query with parameters for filtering/sorting
+func (r *datasetRepository) GetTableDataWithQuery(query string, countQuery string, queryParams []interface{}, countParams []interface{}, columns []model.DatasetColumn) ([]map[string]interface{}, int64, error) {
+    // Count total rows with filter
+    var total int64
+    if err := r.db.Raw(countQuery, countParams...).Scan(&total).Error; err != nil {
+        return nil, 0, err
+    }
+
+    // Execute data query
+    rows, err := r.db.Raw(query, queryParams...).Rows()
+    if err != nil {
+        return nil, 0, err
+    }
+    defer rows.Close()
+
+    // Parse results
+    var result []map[string]interface{}
+    for rows.Next() {
+        values := make([]interface{}, len(columns))
+        valuePtrs := make([]interface{}, len(columns))
+        for i := range values {
+            valuePtrs[i] = &values[i]
+        }
+
+        if err := rows.Scan(valuePtrs...); err != nil {
+            return nil, 0, err
+        }
+
+        row := make(map[string]interface{})
+        for i, col := range columns {
+            row[col.ColumnName] = values[i]
+        }
+        result = append(result, row)
+    }
+
+    return result, total, nil
 }
 
 // ExecuteJoinQuery executes a pre-built join query and returns results

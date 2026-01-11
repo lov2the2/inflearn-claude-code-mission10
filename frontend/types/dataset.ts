@@ -49,11 +49,17 @@ export interface JoinCondition {
     right_column: string
 }
 
-export interface JoinQueryRequest {
-    left_dataset_id: string
-    right_dataset_id: string
-    join_type: 'inner' | 'left' | 'right' | 'full'
+// Configuration for a single join table
+export interface JoinTableConfig {
+    dataset_id: string
+    join_type: 'inner' | 'left' | 'right' | 'full' | 'cross'
     conditions: JoinCondition[]
+}
+
+// Multi-table join query request (supports up to 5 tables)
+export interface JoinQueryRequest {
+    base_dataset_id: string
+    join_tables: JoinTableConfig[]
     select_columns: string[]
     page?: number
     limit?: number
@@ -63,12 +69,30 @@ export interface JoinQueryResponse {
     columns: DatasetColumn[]
     rows: Record<string, any>[]
     total: number
+    page: number
+    limit: number
+    query_time_ms: number
 }
 
+// State for the join builder wizard
 export interface JoinBuilderState {
-    left_dataset_id: string | null
-    right_dataset_id: string | null
-    join_type: 'inner' | 'left' | 'right' | 'full'
-    conditions: JoinCondition[]
+    base_dataset_id: string | null
+    join_tables: JoinTableConfig[]
     selected_columns: string[]
+}
+
+// Filter condition for data queries
+export interface FilterCondition {
+    column: string
+    operator: '=' | '!=' | '>' | '<' | '>=' | '<=' | 'like'
+    value: string
+}
+
+// Parameters for fetching dataset data with filtering/sorting
+export interface DatasetDataParams {
+    page?: number
+    limit?: number
+    sort_by?: string
+    sort_order?: 'asc' | 'desc'
+    filters?: FilterCondition[]
 }

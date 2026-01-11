@@ -1,16 +1,19 @@
 'use client'
 
+import { JoinTableConfig } from '@/types/dataset'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Info } from 'lucide-react'
 
 interface JoinStepTypeProps {
-    join_type: 'inner' | 'left' | 'right' | 'full'
-    on_change: (type: 'inner' | 'left' | 'right' | 'full') => void
+    join_tables: JoinTableConfig[]
+    on_change: (join_tables: JoinTableConfig[]) => void
 }
 
-const JOIN_TYPE_INFO = {
+type JoinType = 'inner' | 'left' | 'right' | 'full' | 'cross'
+
+const JOIN_TYPE_INFO: Record<JoinType, { title: string; description: string; example: string }> = {
     inner: {
         title: 'INNER JOIN',
         description: 'Returns only rows that have matching values in both tables',
@@ -18,138 +21,116 @@ const JOIN_TYPE_INFO = {
     },
     left: {
         title: 'LEFT JOIN',
-        description: 'Returns all rows from the left table, and matched rows from the right table',
-        example: 'All left table records + matching right table records (NULL if no match)',
+        description: 'Returns all rows from the previous tables, and matched rows from this table',
+        example: 'All previous records + matching records (NULL if no match)',
     },
     right: {
         title: 'RIGHT JOIN',
-        description: 'Returns all rows from the right table, and matched rows from the left table',
-        example: 'All right table records + matching left table records (NULL if no match)',
+        description: 'Returns all rows from this table, and matched rows from previous tables',
+        example: 'All records from this table + matching previous records (NULL if no match)',
     },
     full: {
         title: 'FULL OUTER JOIN',
         description: 'Returns all rows when there is a match in either table',
         example: 'All records from both tables (NULL where no match exists)',
     },
+    cross: {
+        title: 'CROSS JOIN',
+        description: 'Returns the Cartesian product - every combination of rows',
+        example: 'Every row from one table combined with every row from another (no condition needed)',
+    },
 }
 
 /**
  * Step 2: Join type selection component
- * Allows users to select the type of join operation
+ * Allows users to select the type of join operation for each join table
  */
-export function JoinStepType({ join_type, on_change }: JoinStepTypeProps) {
+export function JoinStepType({ join_tables, on_change }: JoinStepTypeProps) {
+    const handle_type_change = (index: number, join_type: JoinType) => {
+        const updated = join_tables.map((table, i) =>
+            i === index ? { ...table, join_type, conditions: join_type === 'cross' ? [] : table.conditions } : table
+        )
+        on_change(updated)
+    }
+
+    if (join_tables.length === 0) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-gray-600 dark:text-gray-400">No join tables selected</p>
+            </div>
+        )
+    }
+
     return (
         <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Select Join Type</CardTitle>
-                    <CardDescription>Choose how the tables should be joined</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <RadioGroup value={join_type} onValueChange={(value) => on_change(value as any)}>
-                        <div className="space-y-4">
-                            {(Object.keys(JOIN_TYPE_INFO) as Array<keyof typeof JOIN_TYPE_INFO>).map((type) => {
-                                const info = JOIN_TYPE_INFO[type]
-                                const is_selected = join_type === type
+            {join_tables.map((table, index) => (
+                <Card key={index}>
+                    <CardHeader>
+                        <CardTitle>Join Table {index + 1} - Select Join Type</CardTitle>
+                        <CardDescription>
+                            Choose how this table should be joined with the previous tables
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <RadioGroup
+                            value={table.join_type}
+                            onValueChange={(value) => handle_type_change(index, value as JoinType)}
+                        >
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {(Object.keys(JOIN_TYPE_INFO) as JoinType[]).map((type) => {
+                                    const info = JOIN_TYPE_INFO[type]
+                                    const is_selected = table.join_type === type
 
-                                return (
-                                    <div
-                                        key={type}
-                                        className={`
-                                            relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer
-                                            transition-colors duration-200
-                                            ${
-                                                is_selected
-                                                    ? 'border-primary bg-primary/5'
-                                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                                            }
-                                        `}
-                                        onClick={() => on_change(type)}
-                                    >
-                                        <RadioGroupItem value={type} id={type} className="mt-1" />
-                                        <div className="flex-1">
-                                            <Label htmlFor={type} className="cursor-pointer">
-                                                <div className="font-semibold mb-1">{info.title}</div>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                                                    {info.description}
-                                                </p>
-                                                <div className="flex items-start gap-2 mt-2 p-2 bg-blue-50 dark:bg-blue-950/30 rounded-md">
-                                                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                                                    <p className="text-xs text-blue-800 dark:text-blue-300">
-                                                        {info.example}
+                                    return (
+                                        <div
+                                            key={type}
+                                            className={`
+                                                relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer
+                                                transition-colors duration-200
+                                                ${
+                                                    is_selected
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                                                }
+                                            `}
+                                            onClick={() => handle_type_change(index, type)}
+                                        >
+                                            <RadioGroupItem value={type} id={`${type}-${index}`} className="mt-1" />
+                                            <div className="flex-1">
+                                                <Label htmlFor={`${type}-${index}`} className="cursor-pointer">
+                                                    <div className="font-semibold mb-1">{info.title}</div>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                                        {info.description}
                                                     </p>
-                                                </div>
-                                            </Label>
+                                                </Label>
+                                            </div>
                                         </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </RadioGroup>
-                </CardContent>
-            </Card>
-
-            {/* Visual Diagram (Optional Enhancement) */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Visual Representation</CardTitle>
-                    <CardDescription>How the selected join type works</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center justify-center py-8">
-                        <div className="text-center">
-                            <div className="flex items-center justify-center gap-8 mb-4">
-                                {/* Left Circle */}
-                                <div className="relative">
-                                    <div
-                                        className={`
-                                            w-24 h-24 rounded-full border-4 flex items-center justify-center
-                                            ${
-                                                join_type === 'left' || join_type === 'inner' || join_type === 'full'
-                                                    ? 'border-primary bg-primary/20'
-                                                    : 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800'
-                                            }
-                                        `}
-                                    >
-                                        <span className="font-semibold text-sm">Left</span>
-                                    </div>
-                                </div>
-
-                                {/* Intersection */}
-                                <div
-                                    className={`
-                                        w-12 h-12 rounded-full border-4 flex items-center justify-center
-                                        ${
-                                            join_type === 'inner' || join_type === 'full'
-                                                ? 'border-primary bg-primary/40'
-                                                : 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800'
-                                        }
-                                    `}
-                                />
-
-                                {/* Right Circle */}
-                                <div className="relative">
-                                    <div
-                                        className={`
-                                            w-24 h-24 rounded-full border-4 flex items-center justify-center
-                                            ${
-                                                join_type === 'right' || join_type === 'inner' || join_type === 'full'
-                                                    ? 'border-primary bg-primary/20'
-                                                    : 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800'
-                                            }
-                                        `}
-                                    >
-                                        <span className="font-semibold text-sm">Right</span>
-                                    </div>
-                                </div>
+                                    )
+                                })}
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Highlighted areas show included data
+                        </RadioGroup>
+
+                        {/* Info about selected type */}
+                        <div className="mt-4 flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-md">
+                            <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                            <p className="text-sm text-blue-800 dark:text-blue-300">
+                                {JOIN_TYPE_INFO[table.join_type].example}
                             </p>
                         </div>
-                    </div>
-                </CardContent>
-            </Card>
+
+                        {/* Cross join warning */}
+                        {table.join_type === 'cross' && (
+                            <div className="mt-4 flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-md">
+                                <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                                <p className="text-sm text-amber-800 dark:text-amber-300">
+                                    CROSS JOIN does not require join conditions. Be careful with large tables as the result
+                                    can be very large (rows = table1_rows × table2_rows).
+                                </p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+            ))}
         </div>
     )
 }

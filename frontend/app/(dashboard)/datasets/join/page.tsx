@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { JoinBuilderState, JoinCondition, JoinQueryRequest } from '@/types/dataset'
+import { JoinBuilderState, JoinTableConfig, JoinQueryRequest } from '@/types/dataset'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { JoinStepTables } from '@/components/datasets/join-step-tables'
@@ -15,26 +15,24 @@ import { ChevronLeft, ChevronRight, Play, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 const STEPS = [
-    { id: 1, name: 'Select Tables', description: 'Choose datasets to join' },
-    { id: 2, name: 'Join Type', description: 'Select join operation' },
+    { id: 1, name: 'Select Tables', description: 'Choose datasets to join (up to 5)' },
+    { id: 2, name: 'Join Types', description: 'Select join operation for each table' },
     { id: 3, name: 'Join Conditions', description: 'Define matching criteria' },
     { id: 4, name: 'Select Columns', description: 'Choose result columns' },
     { id: 5, name: 'Execute & Results', description: 'Run query and view results' },
 ]
 
 /**
- * Join Builder Page Component
+ * Join Builder Page Component - Supports multi-table joins (up to 5 tables)
  */
 function JoinBuilderPageContent() {
     const search_params = useSearchParams()
-    const initial_left_id = search_params.get('left')
+    const initial_base_id = search_params.get('base')
 
     const [current_step, set_current_step] = useState(1)
     const [builder_state, set_builder_state] = useState<JoinBuilderState>({
-        left_dataset_id: initial_left_id,
-        right_dataset_id: null,
-        join_type: 'inner',
-        conditions: [],
+        base_dataset_id: initial_base_id,
+        join_tables: [],
         selected_columns: [],
     })
 
@@ -42,11 +40,11 @@ function JoinBuilderPageContent() {
     const export_join_mutation = use_export_join_query()
 
     // Validation checks
-    const can_proceed_step_1 = builder_state.left_dataset_id && builder_state.right_dataset_id
-    const can_proceed_step_2 = builder_state.join_type !== null
-    const can_proceed_step_3 =
-        builder_state.conditions.length > 0 &&
-        builder_state.conditions.every((c) => c.left_column && c.right_column && c.operator)
+    const can_proceed_step_1 = builder_state.base_dataset_id && builder_state.join_tables.length > 0
+    const can_proceed_step_2 = builder_state.join_tables.every((t) => t.join_type)
+    const can_proceed_step_3 = builder_state.join_tables.every(
+        (t) => t.join_type === 'cross' || (t.conditions.length > 0 && t.conditions.every((c) => c.left_column && c.right_column && c.operator))
+    )
     const can_proceed_step_4 = builder_state.selected_columns.length > 0
 
     const can_proceed = () => {
@@ -78,19 +76,16 @@ function JoinBuilderPageContent() {
 
     const handle_execute_join = () => {
         if (
-            !builder_state.left_dataset_id ||
-            !builder_state.right_dataset_id ||
-            builder_state.conditions.length === 0 ||
+            !builder_state.base_dataset_id ||
+            builder_state.join_tables.length === 0 ||
             builder_state.selected_columns.length === 0
         ) {
             return
         }
 
         const request: JoinQueryRequest = {
-            left_dataset_id: builder_state.left_dataset_id,
-            right_dataset_id: builder_state.right_dataset_id,
-            join_type: builder_state.join_type,
-            conditions: builder_state.conditions,
+            base_dataset_id: builder_state.base_dataset_id,
+            join_tables: builder_state.join_tables,
             select_columns: builder_state.selected_columns,
             page: 1,
             limit: 50,
@@ -101,23 +96,34 @@ function JoinBuilderPageContent() {
 
     const handle_export_join = () => {
         if (
-            !builder_state.left_dataset_id ||
-            !builder_state.right_dataset_id ||
-            builder_state.conditions.length === 0 ||
+            !builder_state.base_dataset_id ||
+            builder_state.join_tables.length === 0 ||
             builder_state.selected_columns.length === 0
         ) {
             return
         }
 
         const request: JoinQueryRequest = {
-            left_dataset_id: builder_state.left_dataset_id,
-            right_dataset_id: builder_state.right_dataset_id,
-            join_type: builder_state.join_type,
-            conditions: builder_state.conditions,
+            base_dataset_id: builder_state.base_dataset_id,
+            join_tables: builder_state.join_tables,
             select_columns: builder_state.selected_columns,
         }
 
         export_join_mutation.mutate(request)
+    }
+
+    // Get all dataset IDs for column selection
+    const get_all_dataset_ids = (): string[] => {
+        const ids: string[] = []
+        if (builder_state.base_dataset_id) {
+            ids.push(builder_state.base_dataset_id)
+        }
+        builder_state.join_tables.forEach((t) => {
+            if (t.dataset_id) {
+                ids.push(t.dataset_id)
+            }
+        })
+        return ids
     }
 
     return (
@@ -127,7 +133,7 @@ function JoinBuilderPageContent() {
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Join Builder</h1>
                     <p className="text-gray-600 dark:text-gray-400">
-                        Create joins between datasets with visual workflow
+                        Create multi-table joins with visual workflow (up to 5 tables)
                     </p>
                 </div>
                 <Link href="/datasets">
@@ -208,13 +214,13 @@ function JoinBuilderPageContent() {
             <div className="min-h-[400px]">
                 {current_step === 1 && (
                     <JoinStepTables
-                        left_dataset_id={builder_state.left_dataset_id}
-                        right_dataset_id={builder_state.right_dataset_id}
-                        on_change={(left_id, right_id) =>
+                        base_dataset_id={builder_state.base_dataset_id}
+                        join_tables={builder_state.join_tables}
+                        on_change={(base_id, join_tables) =>
                             set_builder_state((prev) => ({
                                 ...prev,
-                                left_dataset_id: left_id,
-                                right_dataset_id: right_id,
+                                base_dataset_id: base_id,
+                                join_tables,
                             }))
                         }
                     />
@@ -222,11 +228,11 @@ function JoinBuilderPageContent() {
 
                 {current_step === 2 && (
                     <JoinStepType
-                        join_type={builder_state.join_type}
-                        on_change={(type) =>
+                        join_tables={builder_state.join_tables}
+                        on_change={(join_tables) =>
                             set_builder_state((prev) => ({
                                 ...prev,
-                                join_type: type,
+                                join_tables,
                             }))
                         }
                     />
@@ -234,13 +240,12 @@ function JoinBuilderPageContent() {
 
                 {current_step === 3 && (
                     <JoinStepConditions
-                        left_dataset_id={builder_state.left_dataset_id}
-                        right_dataset_id={builder_state.right_dataset_id}
-                        conditions={builder_state.conditions}
-                        on_change={(conditions) =>
+                        base_dataset_id={builder_state.base_dataset_id}
+                        join_tables={builder_state.join_tables}
+                        on_change={(join_tables) =>
                             set_builder_state((prev) => ({
                                 ...prev,
-                                conditions,
+                                join_tables,
                             }))
                         }
                     />
@@ -248,8 +253,7 @@ function JoinBuilderPageContent() {
 
                 {current_step === 4 && (
                     <JoinStepColumns
-                        left_dataset_id={builder_state.left_dataset_id}
-                        right_dataset_id={builder_state.right_dataset_id}
+                        dataset_ids={get_all_dataset_ids()}
                         selected_columns={builder_state.selected_columns}
                         on_change={(columns) =>
                             set_builder_state((prev) => ({
@@ -303,9 +307,8 @@ function JoinBuilderPageContent() {
                                 onClick={handle_execute_join}
                                 disabled={
                                     execute_join_mutation.isPending ||
-                                    !builder_state.left_dataset_id ||
-                                    !builder_state.right_dataset_id ||
-                                    builder_state.conditions.length === 0
+                                    !builder_state.base_dataset_id ||
+                                    builder_state.join_tables.length === 0
                                 }
                             >
                                 <Play className="h-4 w-4 mr-2" />
@@ -317,9 +320,9 @@ function JoinBuilderPageContent() {
                     {/* Validation Messages */}
                     {current_step < STEPS.length && !can_proceed() && (
                         <div className="mt-4 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-md">
-                            {current_step === 1 && 'Please select both left and right tables'}
-                            {current_step === 2 && 'Please select a join type'}
-                            {current_step === 3 && 'Please complete all join conditions'}
+                            {current_step === 1 && 'Please select a base table and at least one join table'}
+                            {current_step === 2 && 'Please select join type for each table'}
+                            {current_step === 3 && 'Please complete all join conditions (not required for CROSS JOIN)'}
                             {current_step === 4 && 'Please select at least one column'}
                         </div>
                     )}
