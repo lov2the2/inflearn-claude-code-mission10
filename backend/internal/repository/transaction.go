@@ -21,6 +21,7 @@ func (r *Repository) WithTransaction(fn TxFunc) error {
         Token:    NewTokenRepository(tx),
         Activity: NewActivityRepository(tx),
         Session:  NewSessionRepository(tx),
+        Dataset:  NewDatasetRepository(tx),
     }
 
     // Execute the function with transactional repository

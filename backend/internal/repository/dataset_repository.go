@@ -118,7 +118,7 @@ func (r *datasetRepository) FindColumnsByDatasetID(datasetID uuid.UUID) ([]model
 func (r *datasetRepository) CreateDynamicTable(tableName string, columns []model.DatasetColumn) error {
     // Build CREATE TABLE statement
     var columnDefs []string
-    columnDefs = append(columnDefs, "id SERIAL PRIMARY KEY")
+    columnDefs = append(columnDefs, "_row_id SERIAL PRIMARY KEY")
 
     for _, col := range columns {
         colDef := fmt.Sprintf("%s %s", pq.QuoteIdentifier(col.ColumnName), col.DataType)
@@ -190,7 +190,7 @@ func (r *datasetRepository) GetTableData(tableName string, columns []model.Datas
     }
 
     selectSQL := fmt.Sprintf(
-        "SELECT %s FROM %s ORDER BY id LIMIT %d OFFSET %d",
+        "SELECT %s FROM %s ORDER BY _row_id LIMIT %d OFFSET %d",
         strings.Join(columnNames, ", "),
         pq.QuoteIdentifier(tableName),
         limit,

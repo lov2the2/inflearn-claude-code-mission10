@@ -77,6 +77,28 @@ func (b *SafeQueryBuilder) ValidateColumn(column_name string) (string, error) {
     return "", apperror.Validation(fmt.Sprintf("column '%s' not found in either dataset", column_name))
 }
 
+// ValidateLeftColumn checks if a column exists in the left table
+func (b *SafeQueryBuilder) ValidateLeftColumn(column_name string) (string, error) {
+    if _, exists := b.left_columns[column_name]; exists {
+        return fmt.Sprintf("%s.%s",
+            pq.QuoteIdentifier(b.left_table),
+            pq.QuoteIdentifier(column_name),
+        ), nil
+    }
+    return "", apperror.Validation(fmt.Sprintf("column '%s' not found in left dataset", column_name))
+}
+
+// ValidateRightColumn checks if a column exists in the right table
+func (b *SafeQueryBuilder) ValidateRightColumn(column_name string) (string, error) {
+    if _, exists := b.right_columns[column_name]; exists {
+        return fmt.Sprintf("%s.%s",
+            pq.QuoteIdentifier(b.right_table),
+            pq.QuoteIdentifier(column_name),
+        ), nil
+    }
+    return "", apperror.Validation(fmt.Sprintf("column '%s' not found in right dataset", column_name))
+}
+
 // ValidateOperator checks if the operator is allowed
 func (b *SafeQueryBuilder) ValidateOperator(operator string) error {
     if !b.allowed_operators[operator] {
@@ -131,14 +153,14 @@ func (b *SafeQueryBuilder) BuildJoinQuery(
             return "", err
         }
 
-        // Validate left column
-        left_qualified, err := b.ValidateColumn(cond.LeftColumn)
+        // Validate left column (must be from left table)
+        left_qualified, err := b.ValidateLeftColumn(cond.LeftColumn)
         if err != nil {
             return "", fmt.Errorf("left column validation failed: %w", err)
         }
 
-        // Validate right column
-        right_qualified, err := b.ValidateColumn(cond.RightColumn)
+        // Validate right column (must be from right table)
+        right_qualified, err := b.ValidateRightColumn(cond.RightColumn)
         if err != nil {
             return "", fmt.Errorf("right column validation failed: %w", err)
         }
@@ -153,7 +175,7 @@ func (b *SafeQueryBuilder) BuildJoinQuery(
 
     // Build final query
     query := fmt.Sprintf(
-        "SELECT %s FROM %s %s JOIN %s ON %s ORDER BY %s.id LIMIT %d OFFSET %d",
+        "SELECT %s FROM %s %s JOIN %s ON %s ORDER BY %s._row_id LIMIT %d OFFSET %d",
         strings.Join(select_parts, ", "),
         pq.QuoteIdentifier(b.left_table),
         join_type,
@@ -196,14 +218,14 @@ func (b *SafeQueryBuilder) BuildCountQuery(
             return "", err
         }
 
-        // Validate left column
-        left_qualified, err := b.ValidateColumn(cond.LeftColumn)
+        // Validate left column (must be from left table)
+        left_qualified, err := b.ValidateLeftColumn(cond.LeftColumn)
         if err != nil {
             return "", fmt.Errorf("left column validation failed: %w", err)
         }
 
-        // Validate right column
-        right_qualified, err := b.ValidateColumn(cond.RightColumn)
+        // Validate right column (must be from right table)
+        right_qualified, err := b.ValidateRightColumn(cond.RightColumn)
         if err != nil {
             return "", fmt.Errorf("right column validation failed: %w", err)
         }
