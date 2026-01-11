@@ -7,6 +7,8 @@ Go 백엔드(Clean Architecture)와 Next.js 16 프론트엔드로 구성된 프�
 - 🔐 JWT 인증 및 RBAC (Admin/User 역할)
 - 🔄 Refresh Token 구현 및 자동 갱신
 - 📊 CSV 가져오기/내보내기 (백엔드 + 프론트엔드 UI)
+- 💾 데이터셋 관리 (CSV 업로드 및 동적 테이블 생성)
+- 🔗 조인 쿼리 빌더 (다중 테이블 조인 지원)
 - 📄 페이지네이션 지원
 - 📚 Swagger API 문서
 - 👥 Admin Panel UI (사용자 관리)
@@ -326,7 +328,50 @@ Swagger UI를 통해 API 문서를 확인할 수 있습니다:
 - **URL**: http://localhost:8080/swagger/index.html
 - **문서 생성**: `cd backend && swag init -g cmd/api/main.go`
 
-## 관리자 기능
+## 주요 기능 상세
+
+### 1. 데이터셋 관리
+
+CSV 파일을 업로드하여 동적으로 데이터베이스 테이블을 생성하고 관리할 수 있습니다.
+
+**기능:**
+- CSV 파일 업로드 및 자동 테이블 생성
+- 데이터셋 목록 조회 (페이지네이션)
+- 데이터셋 상세 정보 및 데이터 조회
+- 데이터셋 삭제 (테이블 포함)
+
+**API 엔드포인트:**
+- `POST /api/v1/datasets/upload` - CSV 업로드 및 테이블 생성 (Admin)
+- `GET /api/v1/datasets` - 데이터셋 목록 조회 (User)
+- `GET /api/v1/datasets/{id}` - 데이터셋 상세 조회 (User)
+- `GET /api/v1/datasets/{id}/data` - 데이터 조회 (User)
+- `DELETE /api/v1/datasets/{id}` - 데이터셋 삭제 (Admin)
+
+**프론트엔드:**
+- 데이터셋 목록: `http://localhost:3000/datasets`
+- 데이터셋 상세: `http://localhost:3000/datasets/{id}`
+- 업로드 다이얼로그를 통한 CSV 파일 업로드 (Admin 전용)
+
+### 2. 조인 쿼리 빌더
+
+여러 데이터셋을 조인하여 복잡한 쿼리를 수행할 수 있는 인터랙티브 쿼리 빌더입니다.
+
+**기능:**
+- 다중 테이블 조인 (INNER, LEFT, RIGHT, FULL OUTER)
+- 동적 조인 조건 설정
+- 컬럼 선택 및 결과 미리보기
+- 조인 결과 CSV 내보내기
+
+**API 엔드포인트:**
+- `POST /api/v1/datasets/query` - 조인 쿼리 실행 (User)
+- `POST /api/v1/datasets/query/export` - 조인 결과 CSV 내보내기 (User)
+
+**프론트엔드:**
+- 조인 쿼리 빌더: `http://localhost:3000/datasets/join`
+- 드래그 앤 드롭 방식의 직관적인 UI
+- 실시간 쿼리 결과 미리보기
+
+### 3. 관리자 기능
 
 관리자는 전용 엔드포인트 및 UI를 통해 사용자를 관리할 수 있습니다:
 
@@ -394,6 +439,8 @@ make migrate-force
 - Admin Panel UI (사용자 목록, 역할 관리, 삭제)
 - 페이지네이션 지원
 - CSV 가져오기/내보내기 (백엔드 + 프론트엔드)
+- 데이터셋 관리 (CSV 업로드, 동적 테이블 생성, CRUD)
+- 조인 쿼리 빌더 (다중 테이블 조인, CSV 내보내기)
 - Swagger/OpenAPI 문서
 - 프론트엔드 인증 플로우
 - 데이터베이스 모델 및 마이그레이션

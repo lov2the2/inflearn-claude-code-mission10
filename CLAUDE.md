@@ -1,7 +1,7 @@
 # Developer Context - Go + Next.js Starter Kit
 
 > **Project**: Full-stack Starter Kit with Clean Architecture
-> **Version**: 1.1.0
+> **Version**: 1.2.0
 > **Last Updated**: 2026-01-11
 
 ---
@@ -29,6 +29,8 @@ Production-ready full-stack starter kit combining:
 **Key Features**:
 - JWT authentication with 15-minute access tokens and 7-day refresh tokens
 - Role-based access control (Admin/User roles)
+- Dataset management with CSV upload and dynamic table creation
+- Join query builder with multi-table support
 - CSV import/export with pagination
 - Docker Compose orchestration
 - Swagger API documentation
@@ -90,30 +92,39 @@ backend/
 │   │   ├── user_handler.go           # User CRUD operations
 │   │   ├── admin_handler.go          # Admin-specific operations
 │   │   ├── csv_handler.go            # CSV import/export
+│   │   ├── dataset_handler.go        # Dataset CRUD and join query operations
 │   │   ├── health_handler.go         # Health check endpoint
 │   │   └── handler.go                # Base handler struct
 │   ├── service/                       # Business logic layer
 │   │   ├── auth_service.go
-│   │   └── user_service.go
+│   │   ├── user_service.go
+│   │   └── dataset_service.go        # Dataset management and join queries
 │   ├── repository/                    # Data access layer
 │   │   ├── user_repository.go
-│   │   └── refresh_token_repository.go
+│   │   ├── refresh_token_repository.go
+│   │   └── dataset_repository.go     # Dataset CRUD and dynamic table operations
 │   ├── model/                         # Domain entities
 │   │   ├── user.go
-│   │   └── refresh_token.go
+│   │   ├── refresh_token.go
+│   │   └── dataset.go                # Dataset metadata model
 │   ├── middleware/                    # HTTP middleware
 │   │   ├── auth.go                   # JWT validation
 │   │   ├── rbac.go                   # Role authorization
 │   │   └── cors.go                   # CORS policy
 │   ├── dto/                           # Data transfer objects
+│   │   ├── dataset_dto.go            # Dataset request/response DTOs
+│   │   └── ...
 │   ├── util/                          # Utilities (JWT, password hashing)
+│   │   ├── query_builder.go          # SQL join query builder
+│   │   └── ...
 │   └── config/                        # Configuration management
 ├── pkg/
 │   └── database/                      # PostgreSQL connection
-├── migrations/                        # SQL migrations (3 pairs, 6 files)
+├── migrations/                        # SQL migrations (4 pairs, 8 files)
 │   ├── 000001_create_users_table.up.sql / .down.sql
 │   ├── 000002_create_refresh_tokens_table.up.sql / .down.sql
-│   └── 000003_create_activities_table.up.sql / .down.sql
+│   ├── 000003_create_activities_table.up.sql / .down.sql
+│   └── 000004_create_datasets_tables.up.sql / .down.sql
 ├── docs/                              # Swagger auto-generated docs
 ├── go.mod / go.sum
 ├── .env                               # Environment variables
@@ -131,23 +142,44 @@ frontend/
 │   ├── (dashboard)/                   # Protected routes
 │   │   ├── page.tsx                  # Main dashboard
 │   │   ├── profile/page.tsx          # User profile
+│   │   ├── datasets/                 # Dataset management
+│   │   │   ├── page.tsx              # Dataset list page
+│   │   │   ├── [id]/page.tsx         # Dataset detail page
+│   │   │   └── join/page.tsx         # Join query builder page
 │   │   └── admin/
 │   │       └── users/page.tsx        # Admin user management
 │   ├── api/                           # API route handlers
 │   └── layout.tsx                     # Root layout
 ├── components/                        # Reusable React components
 │   ├── ui/                            # shadcn/ui components
+│   ├── datasets/                      # Dataset-specific components
+│   │   ├── dataset-list.tsx          # Dataset table component
+│   │   ├── dataset-upload-dialog.tsx # CSV upload dialog
+│   │   ├── dataset-detail.tsx        # Dataset data viewer
+│   │   ├── join-query-builder.tsx    # Interactive join builder
+│   │   └── ...
 │   └── ...
 ├── lib/
 │   ├── api/                           # API client (Axios)
-│   │   └── client.ts                 # HTTP client with interceptors
+│   │   ├── client.ts                 # HTTP client with interceptors
+│   │   └── datasets.ts               # Dataset API methods
 │   ├── hooks/                         # Custom React hooks
-│   │   └── useAuth.ts                # Authentication hook
+│   │   ├── useAuth.ts                # Authentication hook
+│   │   ├── queries/                  # React Query hooks
+│   │   │   ├── use-dataset-list.ts   # Dataset list query
+│   │   │   ├── use-dataset-detail.ts # Dataset detail query
+│   │   │   └── use-dataset-data.ts   # Dataset data query
+│   │   └── mutations/                # Mutation hooks
+│   │       ├── use-upload-dataset.ts # Dataset upload mutation
+│   │       └── use-delete-dataset.ts # Dataset delete mutation
 │   ├── schemas/                       # Zod validation schemas
-│   │   └── auth.ts                   # Auth form schemas
+│   │   ├── auth.ts                   # Auth form schemas
+│   │   └── dataset.ts                # Dataset form schemas
 │   └── config/                        # Frontend configuration
 ├── actions/                           # Server actions
 ├── types/                             # TypeScript type definitions
+│   ├── dataset.ts                    # Dataset type definitions
+│   └── ...
 ├── public/                            # Static assets
 ├── package.json
 ├── tsconfig.json
@@ -318,6 +350,11 @@ make clean
 - `GET /api/v1/users/activity` - Get activity log (paginated)
 - `GET /api/v1/users/stats` - Get user statistics
 - `POST /api/v1/auth/logout` - Logout (revoke refresh token)
+- `GET /api/v1/datasets` - List all datasets (paginated)
+- `GET /api/v1/datasets/{id}` - Get dataset metadata
+- `GET /api/v1/datasets/{id}/data` - Get dataset data (paginated)
+- `POST /api/v1/datasets/query` - Execute join query
+- `POST /api/v1/datasets/query/export` - Export join query results to CSV
 
 **Protected (Admin)**:
 - `GET /api/v1/admin/users` - List users (paginated)
@@ -326,6 +363,8 @@ make clean
 - `DELETE /api/v1/admin/users/{id}` - Delete user
 - `GET /api/v1/admin/users/export` - Export users to CSV
 - `POST /api/v1/admin/users/import` - Import users from CSV
+- `POST /api/v1/datasets/upload` - Upload CSV and create dataset table
+- `DELETE /api/v1/datasets/{id}` - Delete dataset and its table
 
 ---
 
@@ -340,20 +379,34 @@ make clean
 | `internal/middleware/rbac.go` | Role authorization | Admin/User role checks |
 | `internal/handler/auth_handler.go` | Auth endpoints | Login, register, refresh token logic |
 | `internal/handler/user_handler.go` | User management | CRUD, CSV import/export, pagination |
+| `internal/handler/dataset_handler.go` | Dataset management | CSV upload, dataset CRUD, join query execution |
 | `internal/service/user_service.go` | User business logic | Password hashing, validation, CSV processing |
+| `internal/service/dataset_service.go` | Dataset business logic | CSV parsing, table creation, join query building |
 | `internal/repository/user_repository.go` | User data access | GORM database operations |
+| `internal/repository/dataset_repository.go` | Dataset data access | Dynamic table creation, raw SQL execution |
 | `internal/util/jwt.go` | JWT utilities | Token generation and parsing |
+| `internal/util/query_builder.go` | Query builder | Dynamic SQL join query construction |
 
 ### Frontend Critical Files
 
 | File | Purpose | Key Logic |
 |------|---------|-----------|
 | `lib/api/client.ts` | Axios HTTP client | Request/response interceptors, auth headers, auto-refresh |
+| `lib/api/datasets.ts` | Dataset API client | Upload, list, detail, query, delete operations |
 | `lib/hooks/useAuth.ts` | Authentication hook | Login/logout state management |
+| `lib/hooks/queries/use-dataset-*.ts` | Dataset query hooks | React Query hooks for dataset operations |
+| `lib/hooks/mutations/use-*-dataset.ts` | Dataset mutation hooks | Upload and delete mutations |
 | `lib/schemas/auth.ts` | Zod validation | Login/register form validation |
+| `lib/schemas/dataset.ts` | Zod validation | Dataset upload and join query validation |
 | `app/(auth)/login/page.tsx` | Login page | Form submission, error handling |
 | `app/(dashboard)/page.tsx` | Main dashboard | Protected route, user data display |
+| `app/(dashboard)/datasets/page.tsx` | Dataset list | Dataset table, upload dialog, pagination |
+| `app/(dashboard)/datasets/[id]/page.tsx` | Dataset detail | Dataset data viewer with pagination |
+| `app/(dashboard)/datasets/join/page.tsx` | Join query builder | Interactive multi-table join interface |
 | `app/(dashboard)/admin/users/page.tsx` | Admin panel | User table, CSV import/export, pagination |
+| `components/datasets/dataset-list.tsx` | Dataset table | TanStack Table with sorting and pagination |
+| `components/datasets/join-query-builder.tsx` | Join builder | Dynamic join condition form |
+| `types/dataset.ts` | Dataset types | TypeScript type definitions |
 
 ### Infrastructure Files
 
