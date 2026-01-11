@@ -77,44 +77,44 @@ function JoinBuilderPageContent() {
     }
 
     const handle_execute_join = () => {
-        if (!builder_state.left_dataset_id || !builder_state.right_dataset_id) {
-            return
-        }
-
-        // For now, use the first condition (backend expects single left_column/right_column)
-        // TODO: Update backend to support multiple conditions
-        const first_condition = builder_state.conditions[0]
-        if (!first_condition) {
+        if (
+            !builder_state.left_dataset_id ||
+            !builder_state.right_dataset_id ||
+            builder_state.conditions.length === 0 ||
+            builder_state.selected_columns.length === 0
+        ) {
             return
         }
 
         const request: JoinQueryRequest = {
             left_dataset_id: builder_state.left_dataset_id,
             right_dataset_id: builder_state.right_dataset_id,
-            left_column: first_condition.left_column,
-            right_column: first_condition.right_column,
             join_type: builder_state.join_type,
+            conditions: builder_state.conditions,
+            select_columns: builder_state.selected_columns,
+            page: 1,
+            limit: 50,
         }
 
         execute_join_mutation.mutate(request)
     }
 
     const handle_export_join = () => {
-        if (!builder_state.left_dataset_id || !builder_state.right_dataset_id) {
-            return
-        }
-
-        const first_condition = builder_state.conditions[0]
-        if (!first_condition) {
+        if (
+            !builder_state.left_dataset_id ||
+            !builder_state.right_dataset_id ||
+            builder_state.conditions.length === 0 ||
+            builder_state.selected_columns.length === 0
+        ) {
             return
         }
 
         const request: JoinQueryRequest = {
             left_dataset_id: builder_state.left_dataset_id,
             right_dataset_id: builder_state.right_dataset_id,
-            left_column: first_condition.left_column,
-            right_column: first_condition.right_column,
             join_type: builder_state.join_type,
+            conditions: builder_state.conditions,
+            select_columns: builder_state.selected_columns,
         }
 
         export_join_mutation.mutate(request)

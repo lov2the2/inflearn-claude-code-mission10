@@ -83,7 +83,7 @@ export const datasetsApi = {
      */
     executeJoinQuery: async (request: JoinQueryRequest): Promise<JoinQueryResponse> => {
         const response = await apiClient.post<ApiResponse<JoinQueryResponse>>(
-            '/api/v1/datasets/join',
+            '/api/v1/datasets/query',
             request
         )
         return response.data.data
@@ -94,7 +94,7 @@ export const datasetsApi = {
      */
     exportJoinQuery: async (request: JoinQueryRequest): Promise<Blob> => {
         const response = await apiClient.post(
-            '/api/v1/datasets/join/export',
+            '/api/v1/datasets/query/export',
             request,
             { responseType: 'blob' }
         )

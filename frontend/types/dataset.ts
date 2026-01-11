@@ -52,9 +52,11 @@ export interface JoinCondition {
 export interface JoinQueryRequest {
     left_dataset_id: string
     right_dataset_id: string
-    left_column: string
-    right_column: string
     join_type: 'inner' | 'left' | 'right' | 'full'
+    conditions: JoinCondition[]
+    select_columns: string[]
+    page?: number
+    limit?: number
 }
 
 export interface JoinQueryResponse {
