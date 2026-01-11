@@ -43,6 +43,12 @@ export interface CreateDatasetResponse {
     rows_imported: number
 }
 
+export interface JoinCondition {
+    left_column: string
+    operator: '=' | '!=' | '<' | '>' | '<=' | '>='
+    right_column: string
+}
+
 export interface JoinQueryRequest {
     left_dataset_id: string
     right_dataset_id: string
@@ -55,4 +61,12 @@ export interface JoinQueryResponse {
     columns: DatasetColumn[]
     rows: Record<string, any>[]
     total: number
+}
+
+export interface JoinBuilderState {
+    left_dataset_id: string | null
+    right_dataset_id: string | null
+    join_type: 'inner' | 'left' | 'right' | 'full'
+    conditions: JoinCondition[]
+    selected_columns: string[]
 }
