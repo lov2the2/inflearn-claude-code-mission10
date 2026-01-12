@@ -1,4 +1,4 @@
-.PHONY: help generate-env install-backend install-frontend install dev-db dev-backend dev-frontend dev clean migrate-create migrate-up migrate-down migrate-force migrate-version start stop start-db stop-db start-backend stop-backend start-frontend stop-frontend status logs
+.PHONY: help generate-env install-backend install-frontend install dev-db dev-backend dev-frontend dev clean migrate-create migrate-up migrate-down migrate-force migrate-version start stop start-db stop-db start-backend stop-backend start-frontend stop-frontend status logs backup-db restore-db list-backups setup-auto-backup disable-auto-backup auto-backup-status
 
 # Load environment variables
 -include .env
@@ -45,6 +45,14 @@ help:
 	@echo "  make migrate-up         - Run all pending migrations"
 	@echo "  make migrate-down       - Rollback last migration"
 	@echo "  make migrate-version    - Show current migration version"
+	@echo ""
+	@echo "Backup:"
+	@echo "  make backup-db          - Create database backup"
+	@echo "  make restore-db         - Restore from latest backup (or FILE=backup.sql)"
+	@echo "  make list-backups       - List all available backups"
+	@echo "  make setup-auto-backup  - Enable automatic daily backups"
+	@echo "  make disable-auto-backup - Disable automatic backups"
+	@echo "  make auto-backup-status - Show auto-backup status"
 	@echo ""
 	@echo "Testing:"
 	@echo "  make test               - Run all tests"
@@ -149,3 +157,26 @@ test-coverage:
 	cd backend && go test ./... -coverprofile=coverage.out
 	cd backend && go tool cover -html=coverage.out -o coverage.html
 	@echo "Coverage report generated: backend/coverage.html"
+
+# Database backup commands
+backup-db:
+	@bash scripts/backup-db.sh
+
+restore-db:
+	@if [ -n "$(FILE)" ]; then \
+		bash scripts/restore-db.sh -f "$(FILE)"; \
+	else \
+		bash scripts/restore-db.sh; \
+	fi
+
+list-backups:
+	@bash scripts/list-backups.sh
+
+setup-auto-backup:
+	@bash scripts/setup-auto-backup.sh install
+
+disable-auto-backup:
+	@bash scripts/setup-auto-backup.sh uninstall
+
+auto-backup-status:
+	@bash scripts/setup-auto-backup.sh status
