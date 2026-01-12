@@ -1,9 +1,6 @@
-export interface User {
-    id: number
-    email: string
-    name: string
-    role: string
-}
+import type { User } from './user'
+
+export type { User }
 
 export interface RegisterRequest {
     email: string

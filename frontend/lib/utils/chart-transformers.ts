@@ -3,13 +3,11 @@ import { ACTIVITY_TYPES } from '@/types/analytics'
 import type {
     LoginTrendDataPoint,
     ActivityDistributionData as FrontendDistribution,
-    MonthlyStatData
-} from '@/types/analytics'
-import type {
+    MonthlyStatData,
     LoginTrendData,
-    ActivityDistributionData as BackendDistribution,
+    ActivityDistributionDataRaw as BackendDistribution,
     MonthlyStatsData
-} from '@/lib/api/user'
+} from '@/types'
 
 /**
  * Transform backend login trend data to frontend chart format

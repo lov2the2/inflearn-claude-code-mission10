@@ -2,7 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/ui/data-table'
-import { UserActivity } from '@/lib/api/user'
+import { UserActivity, ActivityTableProps } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
 import { ArrowUpDown } from 'lucide-react'
@@ -50,10 +50,6 @@ const columns: ColumnDef<UserActivity>[] = [
         cell: ({ row }) => <span className="font-mono text-xs">{row.getValue('ipAddress')}</span>,
     },
 ]
-
-export interface ActivityTableProps {
-    data: UserActivity[]
-}
 
 /**
  * Displays user activity logs in a sortable data table

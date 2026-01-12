@@ -1,6 +1,6 @@
 'use client'
 
-import { User } from '@/lib/api/admin'
+import { User } from '@/types/user'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 interface DeleteUserDialogProps {

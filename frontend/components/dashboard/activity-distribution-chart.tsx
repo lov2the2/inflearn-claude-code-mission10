@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 import { useActivityDistribution } from '@/lib/hooks/use-analytics'
+import type { ActivityDistributionData } from '@/types/analytics'
 
 /**
  * Activity Distribution Chart Component
@@ -97,7 +98,7 @@ export function ActivityDistributionChart() {
                             dataKey="value"
                             paddingAngle={2}
                         >
-                            {data.map((entry, index) => (
+                            {data.map((entry: ActivityDistributionData, index: number) => (
                                 <Cell
                                     key={`cell-${index}`}
                                     fill={entry.color}

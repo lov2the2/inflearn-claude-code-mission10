@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { getUserStats, UserStats } from '@/lib/api/user'
+import { getUserStats } from '@/lib/api/user'
+import { UserStats } from '@/types'
 import { query_keys } from '@/lib/query/keys'
 
 /**

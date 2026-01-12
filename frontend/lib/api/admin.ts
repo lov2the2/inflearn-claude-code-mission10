@@ -1,60 +1,15 @@
 import apiClient from './client'
-import { ApiResponse } from '@/types/api'
-
-export interface User {
-    id: number
-    email: string
-    name: string
-    role: string
-}
-
-export interface UserDetail extends User {
-    created_at: string
-    updated_at: string
-}
-
-export interface ListUsersParams {
-    page?: number
-    limit?: number
-    search?: string
-    role?: 'admin' | 'user' | ''
-}
-
-export interface ListUsersResponse {
-    users: User[]
-    total: number
-    page: number
-    limit: number
-}
-
-export interface CSVImportError {
-    row: number
-    email?: string
-    field?: string
-    message: string
-}
-
-export interface CSVImportResult {
-    success_count: number
-    failure_count: number
-    created_count: number
-    updated_count: number
-    total_rows: number
-    default_password?: string
-    errors?: CSVImportError[]
-}
-
-export interface CreateUserRequest {
-    email: string
-    name: string
-    password?: string
-    role: 'admin' | 'user'
-}
-
-export interface CreateUserResponse {
-    user: User
-    generated_password?: string
-}
+import {
+    ApiResponse,
+    User,
+    UserDetail,
+    ListUsersParams,
+    ListUsersResponse,
+    CSVImportError,
+    CSVImportResult,
+    CreateUserRequest,
+    CreateUserResponse,
+} from '@/types'
 
 export const adminApi = {
     listUsers: async (params: ListUsersParams = {}): Promise<ListUsersResponse> => {

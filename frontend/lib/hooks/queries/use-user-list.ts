@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { adminApi, ListUsersResponse } from '@/lib/api/admin'
+import { adminApi } from '@/lib/api/admin'
+import { ListUsersResponse } from '@/types'
 import { query_keys } from '@/lib/query/keys'
 
 /**

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Eye } from 'lucide-react'
-import { User } from '@/lib/api/admin'
+import { User } from '@/types'
 import { RoleUpdateDialog } from './role-update-dialog'
 import { DeleteUserDialog } from './delete-user-dialog'
 import { Button } from '@/components/ui/button'

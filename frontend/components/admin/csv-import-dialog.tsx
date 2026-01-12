@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { use_import_csv } from '@/lib/hooks/mutations/use-import-csv'
+import { CSVImportError } from '@/types/admin'
 import { Button } from '@/components/ui/button'
 import {
     Dialog,
@@ -139,7 +140,7 @@ export function CSVImportDialog({ open, onOpenChange }: CSVImportDialogProps) {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200">
-                                            {import_mutation.data.errors.map((error, idx) => (
+                                            {import_mutation.data.errors?.map((error: CSVImportError, idx: number) => (
                                                 <tr key={idx}>
                                                     <td className="px-3 py-2">{error.row}</td>
                                                     <td className="px-3 py-2">{error.email || '-'}</td>

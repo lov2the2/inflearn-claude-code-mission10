@@ -1,35 +1,14 @@
 import apiClient from './client'
 import { API_CONFIG } from '@/lib/config/api'
-
-export interface UserProfile {
-    id: number
-    email: string
-    name: string
-    role: string
-    createdAt: string
-}
-
-export interface UserActivity {
-    id: number
-    action: string
-    description: string
-    timestamp: string
-    ipAddress: string
-}
-
-export interface UserStats {
-    totalLogins: number
-    lastLoginAt: string
-    accountAgeInDays: number
-    totalActions: number
-}
-
-export interface PaginatedResponse<T> {
-    data: T[]
-    total: number
-    page: number
-    limit: number
-}
+import {
+    UserProfile,
+    UserActivity,
+    UserStats,
+    PaginatedResponse,
+    LoginTrendData,
+    ActivityDistributionDataRaw,
+    MonthlyStatsData,
+} from '@/types'
 
 /**
  * Fetches current user's profile information
@@ -110,22 +89,6 @@ export async function updateUserPassword(
 // Analytics Chart Data Endpoints
 // ============================================================
 
-export interface LoginTrendData {
-    date: string
-    logins: number
-}
-
-export interface ActivityDistributionData {
-    action: string
-    count: number
-}
-
-export interface MonthlyStatsData {
-    month: string
-    logins: number
-    actions: number
-}
-
 /**
  * Fetches login trend data for the last 7 days
  * @returns Array of daily login counts
@@ -141,8 +104,8 @@ export async function getLoginTrend(): Promise<LoginTrendData[]> {
  * Fetches activity distribution breakdown by action type
  * @returns Array of activity counts grouped by action
  */
-export async function getActivityDistribution(): Promise<ActivityDistributionData[]> {
-    const response = await apiClient.get<{ data: ActivityDistributionData[] }>(
+export async function getActivityDistribution(): Promise<ActivityDistributionDataRaw[]> {
+    const response = await apiClient.get<{ data: ActivityDistributionDataRaw[] }>(
         `${API_CONFIG.ENDPOINTS.USER.ACTIVITY}/distribution`
     )
     return response.data.data

@@ -1,16 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { LucideIcon } from 'lucide-react'
-
-export interface StatsCardProps {
-    title: string
-    value: string | number
-    icon: LucideIcon
-    description?: string
-    trend?: {
-        value: number
-        isPositive: boolean
-    }
-}
+import { StatsCardProps } from '@/types'
 
 /**
  * Displays a single statistic with icon and optional trend indicator

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { User } from '@/lib/api/admin'
+import { User } from '@/types'
 import { FormDialog } from '@/components/ui/form-dialog'
 import { Label } from '@/components/ui/label'
 import {

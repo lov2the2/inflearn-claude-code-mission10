@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { getUserProfile, UserProfile } from '@/lib/api/user'
+import { getUserProfile } from '@/lib/api/user'
+import { UserProfile } from '@/types'
 import { query_keys } from '@/lib/query/keys'
 
 /**

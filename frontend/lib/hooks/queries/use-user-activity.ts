@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { getUserActivity, UserActivity, PaginatedResponse } from '@/lib/api/user'
+import { getUserActivity } from '@/lib/api/user'
+import { UserActivity, PaginatedResponse } from '@/types'
 import { query_keys } from '@/lib/query/keys'
 
 /**
