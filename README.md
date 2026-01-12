@@ -452,6 +452,402 @@ make migrate-force
 - E2E 테스트
 - 배포 문서
 
+## 트러블슈팅
+
+### 일반적인 설치 문제
+
+#### Docker 컨테이너 시작 실패
+
+**문제**: `make dev-db` 또는 `make start` 실행 시 PostgreSQL 컨테이너가 시작되지 않습니다.
+
+**원인**:
+- 포트 충돌 (다른 프로세스가 5432 포트 사용 중)
+- Docker Desktop이 실행되지 않음
+- 이전 컨테이너가 남아있음
+
+**해결 방법**:
+```bash
+# Docker Desktop 실행 확인
+docker --version
+
+# 실행 중인 컨테이너 확인
+docker ps -a
+
+# 충돌하는 컨테이너 제거
+docker rm -f starter-kit-db
+
+# 포트 사용 확인 (macOS/Linux)
+lsof -i :5432
+
+# 포트 변경이 필요한 경우
+# .env 파일에서 DB_PORT 변경 후 재시작
+vi .env
+make clean
+make install
+make start
+```
+
+#### npm install 실패
+
+**문제**: `make install-frontend` 또는 `npm install` 실행 시 에러 발생
+
+**원인**:
+- Node.js 버전 불일치
+- npm 캐시 손상
+- 네트워크 연결 문제
+
+**해결 방법**:
+```bash
+# Node.js 버전 확인 (18+ 필요)
+node --version
+
+# npm 캐시 정리
+cd frontend
+rm -rf node_modules package-lock.json
+npm cache clean --force
+
+# 재설치
+npm install
+
+# 권한 문제인 경우 (Linux/macOS)
+sudo chown -R $USER:$USER ~/.npm
+```
+
+#### go mod download 실패
+
+**문제**: `make install-backend` 또는 `go mod download` 실행 시 에러 발생
+
+**원인**:
+- Go 버전 불일치
+- GOPROXY 설정 문제
+- 네트워크 연결 문제
+
+**해결 방법**:
+```bash
+# Go 버전 확인 (1.21+ 필요)
+go version
+
+# Go 모듈 캐시 정리
+cd backend
+go clean -modcache
+
+# 재다운로드
+go mod download
+go mod tidy
+
+# 프록시 설정 (중국/제한된 네트워크 환경)
+go env -w GOPROXY=https://goproxy.io,direct
+```
+
+### 데이터베이스 연결 문제
+
+#### PostgreSQL 연결 거부
+
+**문제**: 백엔드 시작 시 "connection refused" 에러 발생
+
+**원인**:
+- PostgreSQL 컨테이너가 시작되지 않음
+- 포트 불일치
+- 데이터베이스가 준비되지 않음
+
+**해결 방법**:
+```bash
+# 컨테이너 상태 확인
+docker ps | grep postgres
+
+# 컨테이너가 없는 경우 시작
+make dev-db
+
+# 컨테이너 로그 확인
+docker logs starter-kit-db
+
+# 데이터베이스 연결 테스트
+docker exec -it starter-kit-db psql -U postgres -d starter_kit
+
+# 환경 변수 확인
+cd backend
+cat .env | grep DB_
+
+# 포트 불일치 시 수정
+# Root .env에서 DB_PORT 확인 후 backend/.env와 일치시킴
+vi ../.env
+vi .env
+```
+
+#### 마이그레이션 실패
+
+**문제**: `make migrate-up` 실행 시 에러 발생
+
+**원인**:
+- 데이터베이스 연결 문제
+- 마이그레이션 파일 손상
+- 이전 마이그레이션 실패로 인한 상태 불일치
+
+**해결 방법**:
+```bash
+# 현재 마이그레이션 버전 확인
+make migrate-version
+
+# 데이터베이스 연결 확인
+docker exec -it starter-kit-db psql -U postgres -d starter_kit -c "\dt"
+
+# 마이그레이션 강제 버전 설정 (주의: 데이터 손실 가능)
+make migrate-force
+# 프롬프트에서 원하는 버전 입력 (예: 4)
+
+# 완전히 새로 시작하는 경우
+make clean
+docker volume rm starter-kit-db-data
+make install
+make start
+```
+
+### 인증 관련 문제
+
+#### JWT 토큰 만료
+
+**문제**: API 요청 시 401 Unauthorized 에러 발생
+
+**원인**:
+- Access token 만료 (15분)
+- Refresh token 만료 (7일)
+- 토큰 저장소 손상
+
+**해결 방법**:
+```bash
+# 브라우저 개발자 도구에서 확인
+# Application → Local Storage → 토큰 확인
+
+# 자동 갱신이 작동하지 않는 경우
+# 1. 로그아웃 후 재로그인
+# 2. 브라우저 캐시 및 로컬 스토리지 정리
+
+# 수동 토큰 갱신 테스트
+curl -X POST http://localhost:8080/api/v1/auth/refresh \
+  -H "Content-Type: application/json" \
+  -d '{"refresh_token":"YOUR_REFRESH_TOKEN"}'
+
+# 모든 토큰이 만료된 경우
+# → 재로그인 필요
+```
+
+#### 로그인 실패
+
+**문제**: 올바른 자격 증명으로도 로그인이 되지 않습니다.
+
+**원인**:
+- CORS 설정 문제
+- 백엔드 서버가 시작되지 않음
+- 데이터베이스에 사용자가 없음
+
+**해결 방법**:
+```bash
+# 백엔드 상태 확인
+make status
+
+# Health check 확인
+curl http://localhost:8080/health
+
+# CORS 설정 확인 (backend/.env)
+cat backend/.env | grep ALLOWED_ORIGINS
+
+# 사용자 생성 테스트
+curl -X POST http://localhost:8080/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "password123",
+    "full_name": "Test User"
+  }'
+
+# 데이터베이스에서 사용자 확인
+docker exec -it starter-kit-db psql -U postgres -d starter_kit \
+  -c "SELECT id, username, email, role FROM users;"
+```
+
+### 개발 환경 문제
+
+#### Air 핫 리로드 안됨
+
+**문제**: 백엔드 코드 변경 시 자동으로 재시작되지 않습니다.
+
+**원인**:
+- Air가 설치되지 않음
+- `.air.toml` 설정 문제
+- 파일 권한 문제
+
+**해결 방법**:
+```bash
+# Air 설치 확인
+which air
+
+# Air 재설치
+go install github.com/air-verse/air@latest
+
+# .air.toml 설정 확인
+cd backend
+cat .air.toml
+
+# 수동으로 Air 실행
+cd backend
+air
+
+# 파일 권한 확인 (Linux/macOS)
+ls -la backend/tmp/
+
+# Air 프로세스 종료 후 재시작
+pkill -f air
+make dev-backend
+```
+
+#### Next.js 빌드 에러
+
+**문제**: 프론트엔드 시작 또는 빌드 시 에러 발생
+
+**원인**:
+- TypeScript 타입 에러
+- 의존성 버전 충돌
+- .env.local 파일 누락
+
+**해결 방법**:
+```bash
+# TypeScript 타입 체크
+cd frontend
+npm run type-check
+
+# 빌드 에러 확인
+npm run build
+
+# 환경 변수 확인
+cat .env.local
+
+# .env.local이 없는 경우 생성
+echo "NEXT_PUBLIC_API_URL=http://localhost:8080" > .env.local
+echo "API_URL=http://localhost:8080" >> .env.local
+
+# 의존성 재설치
+rm -rf node_modules .next
+npm install
+
+# 캐시 정리 후 재시작
+rm -rf .next
+npm run dev
+```
+
+#### 포트 충돌
+
+**문제**: "Port already in use" 에러 발생
+
+**원인**:
+- 이전 프로세스가 포트를 사용 중
+- 다른 애플리케이션과 포트 충돌
+
+**해결 방법**:
+```bash
+# 포트 사용 프로세스 확인 (macOS/Linux)
+lsof -i :8080  # 백엔드 포트
+lsof -i :3000  # 프론트엔드 포트
+lsof -i :5432  # PostgreSQL 포트
+
+# 프로세스 종료
+kill -9 <PID>
+
+# 또는 make stop 사용
+make stop
+
+# 포트 변경이 필요한 경우
+# 1. Root .env 수정
+vi .env
+# 2. 재설치
+make clean
+make install
+make start
+```
+
+### 일반적인 해결 방법
+
+#### 완전히 새로 시작
+
+모든 것을 초기화하고 다시 시작하려면:
+
+```bash
+# 1. 모든 서비스 중지
+make stop
+
+# 2. Docker 컨테이너 및 볼륨 제거
+make clean
+docker volume rm starter-kit-db-data
+
+# 3. 빌드 아티팩트 제거
+rm -rf backend/tmp backend/docs
+rm -rf frontend/.next frontend/node_modules
+
+# 4. 환경 변수 재설정
+cp .env.example .env
+vi .env  # 필요한 경우 포트 수정
+
+# 5. 재설치 및 시작
+make install
+make start
+```
+
+#### 로그 확인
+
+문제 진단을 위한 로그 확인:
+
+```bash
+# 최근 로그 확인
+make logs
+
+# 특정 서비스 로그 확인
+tail -f logs/backend.log
+tail -f logs/frontend.log
+
+# Docker 컨테이너 로그
+docker logs starter-kit-db
+docker logs -f starter-kit-db  # 실시간 로그
+
+# 전체 로그 확인
+cat logs/backend.log
+cat logs/frontend.log
+```
+
+#### 상태 확인
+
+시스템 상태를 빠르게 확인:
+
+```bash
+# 모든 서비스 상태
+make status
+
+# Health check
+curl http://localhost:8080/health
+
+# 데이터베이스 연결 테스트
+docker exec -it starter-kit-db psql -U postgres -d starter_kit -c "SELECT 1;"
+
+# 프론트엔드 접속 테스트
+curl http://localhost:3000
+```
+
+### 추가 도움말
+
+위 방법으로 해결되지 않는 경우:
+
+1. **GitHub Issues 확인**: 유사한 문제가 보고되었는지 확인
+2. **로그 분석**: `logs/` 디렉토리의 전체 로그 확인
+3. **환경 검증**:
+   - Go 버전: `go version` (1.21+)
+   - Node.js 버전: `node --version` (18+)
+   - Docker 버전: `docker --version`
+4. **문서 참고**:
+   - `CLAUDE.md`: 개발자 컨텍스트
+   - `backend/README.md`: 백엔드 상세 문서
+   - `frontend/README.md`: 프론트엔드 상세 문서
+
+---
+
 ## 기여하기
 
 이것은 스타터 킷 템플릿입니다. 자유롭게:
