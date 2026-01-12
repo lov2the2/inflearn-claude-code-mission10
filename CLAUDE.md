@@ -204,6 +204,19 @@ starter-kit-mission/
 │   ├── backend.log
 │   └── frontend.log
 ├── .pids/                             # Process ID files
+├── docs/                              # Project documentation
+│   ├── prd.md                        # Product Requirements Document
+│   ├── refactoring-analysis.md       # Refactoring analysis (planned)
+│   └── documentation-review.md       # Documentation review (planned)
+├── .claude/
+│   └── agents/                        # Claude Code agent configurations
+│       ├── architecture-analyzer.md   # Architecture analysis agent
+│       ├── backend-api-developer.md   # Backend API development agent
+│       ├── docs-refiner.md           # Documentation refinement agent
+│       ├── frontend-dev.md           # Frontend development agent
+│       ├── prd-generator.md          # PRD generation agent
+│       ├── prd-validator.md          # PRD validation agent
+│       └── software-tester.md        # Testing agent
 ├── docker-compose.yml                 # PostgreSQL container
 ├── Makefile                           # Build automation
 ├── .env                               # Project configuration (ports, container names)
@@ -613,6 +626,8 @@ This project follows system-wide standards defined in `~/.claude/CLAUDE.md`:
 - **Backend README**: `backend/README.md` - Detailed backend documentation (Korean)
 - **Frontend README**: `frontend/README.md` - Detailed frontend documentation (Korean)
 - **Root README**: `README.md` - User-facing documentation (Korean)
+- **PRD Document**: `docs/prd.md` - Product Requirements Document (English)
+- **Cookie Auth Migration**: `frontend/COOKIE_AUTH_MIGRATION.md` - HttpOnly cookie migration guide (English)
 - **Swagger UI**: http://localhost:8080/swagger/index.html (when running)
 - **API Base URL**: http://localhost:8080/api/v1
 - **Frontend Dev**: http://localhost:3000
