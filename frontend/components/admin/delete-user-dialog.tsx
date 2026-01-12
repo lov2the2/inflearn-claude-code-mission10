@@ -1,60 +1,34 @@
 'use client'
 
-import { useState } from 'react'
-import { toast } from 'sonner'
 import { User } from '@/lib/api/admin'
-import { Button } from '@/components/ui/button'
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 interface DeleteUserDialogProps {
     user: User
-    onConfirm: () => void
+    onConfirm: () => Promise<void>
     onCancel: () => void
+    isLoading?: boolean
 }
 
-export function DeleteUserDialog({ user, onConfirm, onCancel }: DeleteUserDialogProps) {
-    const [isDeleting, setIsDeleting] = useState(false)
-
-    const handleConfirm = async () => {
-        setIsDeleting(true)
-        try {
-            await onConfirm()
-            toast.success('User deleted successfully')
-            onCancel()
-        } catch (error) {
-            toast.error('Failed to delete user')
-        } finally {
-            setIsDeleting(false)
-        }
-    }
-
+export function DeleteUserDialog({ user, onConfirm, onCancel, isLoading = false }: DeleteUserDialogProps) {
     return (
-        <Dialog open={true} onOpenChange={onCancel}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Delete User</DialogTitle>
-                    <DialogDescription>
-                        Are you sure you want to delete {user.name} ({user.email})?
-                        This action cannot be undone.
-                    </DialogDescription>
-                </DialogHeader>
-
-                <DialogFooter>
-                    <Button variant="outline" onClick={onCancel} disabled={isDeleting}>
-                        Cancel
-                    </Button>
-                    <Button variant="destructive" onClick={handleConfirm} isLoading={isDeleting}>
-                        Delete User
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        <ConfirmationDialog
+            open={true}
+            onOpenChange={(open) => !open && onCancel()}
+            title="Delete User"
+            description={
+                <>
+                    Are you sure you want to delete <strong>{user.name}</strong> ({user.email})?
+                    <br />
+                    <br />
+                    This action cannot be undone.
+                </>
+            }
+            confirmLabel="Delete User"
+            variant="destructive"
+            onConfirm={onConfirm}
+            isLoading={isLoading}
+            loadingText="Deleting..."
+        />
     )
 }

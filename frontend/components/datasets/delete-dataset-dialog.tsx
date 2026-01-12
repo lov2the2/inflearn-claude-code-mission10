@@ -1,15 +1,7 @@
 'use client'
 
 import { use_delete_dataset } from '@/lib/hooks/mutations/use-delete-dataset'
-import { Button } from '@/components/ui/button'
-import {
-    AlertDialog,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 interface DeleteDatasetDialogProps {
     open: boolean
@@ -26,53 +18,47 @@ export function DeleteDatasetDialog({
 }: DeleteDatasetDialogProps) {
     const delete_mutation = use_delete_dataset()
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (!dataset_id) return
 
-        delete_mutation.mutate(dataset_id, {
-            onSuccess: () => {
-                onOpenChange(false)
-            },
+        await new Promise<void>((resolve, reject) => {
+            delete_mutation.mutate(dataset_id, {
+                onSuccess: () => {
+                    onOpenChange(false)
+                    resolve()
+                },
+                onError: (error) => {
+                    reject(error)
+                },
+            })
         })
     }
 
     return (
-        <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Dataset</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Are you sure you want to delete <strong>{dataset_name}</strong>?
-                        <br />
-                        <br />
-                        This will permanently delete:
-                        <ul className="list-disc list-inside mt-2 space-y-1">
-                            <li>Dataset metadata</li>
-                            <li>All data rows in the dynamic table</li>
-                            <li>Column definitions</li>
-                        </ul>
-                        <br />
-                        <strong className="text-red-600">This action cannot be undone.</strong>
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <Button
-                        variant="outline"
-                        onClick={() => onOpenChange(false)}
-                        disabled={delete_mutation.isPending}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="destructive"
-                        onClick={handleDelete}
-                        isLoading={delete_mutation.isPending}
-                        loadingText="Deleting..."
-                    >
-                        Delete
-                    </Button>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+        <ConfirmationDialog
+            open={open}
+            onOpenChange={onOpenChange}
+            title="Delete Dataset"
+            description={
+                <>
+                    Are you sure you want to delete <strong>{dataset_name}</strong>?
+                    <br />
+                    <br />
+                    This will permanently delete:
+                    <ul className="list-disc list-inside mt-2 space-y-1">
+                        <li>Dataset metadata</li>
+                        <li>All data rows in the dynamic table</li>
+                        <li>Column definitions</li>
+                    </ul>
+                    <br />
+                    <strong className="text-red-600">This action cannot be undone.</strong>
+                </>
+            }
+            confirmLabel="Delete"
+            variant="destructive"
+            onConfirm={handleDelete}
+            isLoading={delete_mutation.isPending}
+            loadingText="Deleting..."
+        />
     )
 }

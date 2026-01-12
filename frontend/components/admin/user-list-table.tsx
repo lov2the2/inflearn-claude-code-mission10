@@ -114,8 +114,8 @@ export function UserListTable({ users, onRoleUpdate, onDelete }: UserListTablePr
             {selectedUser && dialogType === 'role' && (
                 <RoleUpdateDialog
                     user={selectedUser}
-                    onConfirm={(newRole) => {
-                        onRoleUpdate(selectedUser.id, newRole)
+                    onConfirm={async (newRole) => {
+                        await onRoleUpdate(selectedUser.id, newRole)
                         setDialogType(null)
                     }}
                     onCancel={() => setDialogType(null)}
@@ -125,8 +125,8 @@ export function UserListTable({ users, onRoleUpdate, onDelete }: UserListTablePr
             {selectedUser && dialogType === 'delete' && (
                 <DeleteUserDialog
                     user={selectedUser}
-                    onConfirm={() => {
-                        onDelete(selectedUser.id)
+                    onConfirm={async () => {
+                        await onDelete(selectedUser.id)
                         setDialogType(null)
                     }}
                     onCancel={() => setDialogType(null)}

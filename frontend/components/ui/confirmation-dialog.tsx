@@ -1,3 +1,4 @@
+import { ReactNode } from 'react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './dialog'
 import { Button } from './button'
 
@@ -5,12 +6,13 @@ export interface ConfirmationDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     title: string
-    description: string
+    description: string | ReactNode
     confirmLabel?: string
     cancelLabel?: string
     variant?: 'default' | 'destructive'
     onConfirm: () => void | Promise<void>
     isLoading?: boolean
+    loadingText?: string
 }
 
 /**
@@ -42,6 +44,7 @@ export function ConfirmationDialog({
     variant = 'default',
     onConfirm,
     isLoading = false,
+    loadingText = 'Processing...',
 }: ConfirmationDialogProps) {
     const handleConfirm = async () => {
         await onConfirm()
@@ -55,7 +58,9 @@ export function ConfirmationDialog({
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>{description}</DialogDescription>
+                    <DialogDescription asChild={typeof description !== 'string'}>
+                        {typeof description === 'string' ? description : <div>{description}</div>}
+                    </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
                     <Button
@@ -68,9 +73,11 @@ export function ConfirmationDialog({
                     <Button
                         variant={variant}
                         onClick={handleConfirm}
+                        isLoading={isLoading}
+                        loadingText={loadingText}
                         disabled={isLoading}
                     >
-                        {isLoading ? 'Processing...' : confirmLabel}
+                        {confirmLabel}
                     </Button>
                 </DialogFooter>
             </DialogContent>
