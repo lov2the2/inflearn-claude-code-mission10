@@ -40,3 +40,7 @@ node_modules/
 
 # Root environment file (keep .env.example tracked)
 .env
+
+# Database backups
+backups/*.sql
+!backups/.gitkeep
