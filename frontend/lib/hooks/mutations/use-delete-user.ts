@@ -1,7 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminApi } from '@/lib/api/admin'
 import { query_keys } from '@/lib/query/keys'
-import { toast } from 'sonner'
+import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 
 /**
  * Mutation hook for deleting user
@@ -9,23 +8,10 @@ import { toast } from 'sonner'
  * @returns Mutation object with mutate function and states
  */
 export function use_delete_user() {
-    const query_client = useQueryClient()
-
-    return useMutation({
+    return useApiMutation({
         mutationFn: (user_id: number) => adminApi.deleteUser(user_id),
-
-        onSuccess: () => {
-            // Invalidate all user list queries
-            query_client.invalidateQueries({
-                queryKey: query_keys.admin.users.all()
-            })
-
-            toast.success('User deleted successfully')
-        },
-
-        onError: (error) => {
-            console.error('Failed to delete user:', error)
-            toast.error('Failed to delete user')
-        },
+        invalidateKeys: query_keys.admin.users.all(),
+        successMessage: 'User deleted successfully',
+        errorMessage: 'Failed to delete user'
     })
 }

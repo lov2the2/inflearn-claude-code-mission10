@@ -1,7 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { datasetsApi } from '@/lib/api/datasets'
 import { query_keys } from '@/lib/query/keys'
-import { toast } from 'sonner'
+import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 
 interface UploadDatasetParams {
     file: File
@@ -15,26 +14,12 @@ interface UploadDatasetParams {
  * @returns Mutation object with mutate function and states
  */
 export function use_upload_dataset() {
-    const query_client = useQueryClient()
-
-    return useMutation({
+    return useApiMutation({
         mutationFn: ({ file, display_name, description }: UploadDatasetParams) =>
             datasetsApi.uploadDataset(file, display_name, description),
-
-        onSuccess: (result) => {
-            // Invalidate dataset list cache
-            query_client.invalidateQueries({
-                queryKey: query_keys.datasets.all
-            })
-
-            toast.success(
-                `Dataset "${result.dataset.display_name}" created with ${result.rows_imported} rows`
-            )
-        },
-
-        onError: (error) => {
-            console.error('Failed to upload dataset:', error)
-            toast.error('Failed to upload dataset')
-        },
+        invalidateKeys: query_keys.datasets.all,
+        successMessage: (result) =>
+            `Dataset "${result.dataset.display_name}" created with ${result.rows_imported} rows`,
+        errorMessage: 'Failed to upload dataset'
     })
 }

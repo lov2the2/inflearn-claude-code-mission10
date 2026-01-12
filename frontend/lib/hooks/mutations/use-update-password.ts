@@ -1,6 +1,5 @@
-import { useMutation } from '@tanstack/react-query'
 import { updateUserPassword } from '@/lib/api/user'
-import { toast } from 'sonner'
+import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 
 interface UpdatePasswordParams {
     current_password: string
@@ -9,19 +8,15 @@ interface UpdatePasswordParams {
 }
 
 export function useUpdatePassword() {
-    return useMutation({
+    return useApiMutation({
         mutationFn: (params: UpdatePasswordParams) =>
             updateUserPassword(
                 params.current_password,
                 params.new_password,
                 params.confirm_password
             ),
-        onSuccess: () => {
-            toast.success('Password changed successfully!')
-        },
-        onError: (error: any) => {
-            const errorMessage = error.response?.data?.error || 'Failed to change password'
-            toast.error(errorMessage)
-        }
+        successMessage: 'Password changed successfully!',
+        errorMessage: (error: any) =>
+            error.response?.data?.error || 'Failed to change password'
     })
 }

@@ -1,7 +1,6 @@
-import { useMutation } from '@tanstack/react-query'
 import { datasetsApi } from '@/lib/api/datasets'
 import { JoinQueryRequest } from '@/types/dataset'
-import { toast } from 'sonner'
+import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 
 /**
  * Mutation hook for join query execution
@@ -9,14 +8,10 @@ import { toast } from 'sonner'
  * @returns Mutation object with mutate function and states
  */
 export function use_join_query() {
-    return useMutation({
+    return useApiMutation({
         mutationFn: (request: JoinQueryRequest) =>
             datasetsApi.executeJoinQuery(request),
-
-        onError: (error) => {
-            console.error('Failed to execute join query:', error)
-            toast.error('Failed to execute join query')
-        },
+        errorMessage: 'Failed to execute join query'
     })
 }
 
@@ -26,11 +21,12 @@ export function use_join_query() {
  * @returns Mutation object with mutate function and states
  */
 export function use_export_join_query() {
-    return useMutation({
+    return useApiMutation({
         mutationFn: (request: JoinQueryRequest) =>
             datasetsApi.exportJoinQuery(request),
-
-        onSuccess: (blob) => {
+        successMessage: 'Join result exported successfully',
+        errorMessage: 'Failed to export join result',
+        onSuccess: (blob: Blob) => {
             // Create download link
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
@@ -40,13 +36,6 @@ export function use_export_join_query() {
             link.click()
             document.body.removeChild(link)
             window.URL.revokeObjectURL(url)
-
-            toast.success('Join result exported successfully')
-        },
-
-        onError: (error) => {
-            console.error('Failed to export join result:', error)
-            toast.error('Failed to export join result')
-        },
+        }
     })
 }

@@ -1,34 +1,22 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { adminApi, CreateUserRequest } from '@/lib/api/admin'
+import { adminApi } from '@/lib/api/admin'
+import { CreateUserRequest } from '@/types'
 import { query_keys } from '@/lib/query/keys'
-import { toast } from 'sonner'
+import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 
 /**
  * Create new user mutation hook
  * Invalidates user list after successful creation
  */
 export function use_create_user() {
-    const query_client = useQueryClient()
-
-    return useMutation({
+    return useApiMutation({
         mutationFn: (data: CreateUserRequest) => adminApi.createUser(data),
-        onSuccess: (data) => {
-            query_client.invalidateQueries({
-                queryKey: query_keys.admin.users.all()
-            })
-
-            if (data.generated_password) {
-                toast.success(
-                    `User created successfully. Generated password: ${data.generated_password}`,
-                    { duration: 10000 }
-                )
-            } else {
-                toast.success('User created successfully')
-            }
-        },
-        onError: (error: any) => {
-            const message = error.response?.data?.error || 'Failed to create user'
-            toast.error(message)
-        }
+        invalidateKeys: query_keys.admin.users.all(),
+        successMessage: (data) =>
+            data.generated_password
+                ? `User created successfully. Generated password: ${data.generated_password}`
+                : 'User created successfully',
+        successDuration: 10000, // 10 seconds for password message
+        errorMessage: (error: any) =>
+            error.response?.data?.error || 'Failed to create user'
     })
 }

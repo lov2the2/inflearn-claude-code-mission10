@@ -1,7 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { datasetsApi } from '@/lib/api/datasets'
 import { query_keys } from '@/lib/query/keys'
-import { toast } from 'sonner'
+import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 
 /**
  * Mutation hook for dataset deletion
@@ -9,23 +8,10 @@ import { toast } from 'sonner'
  * @returns Mutation object with mutate function and states
  */
 export function use_delete_dataset() {
-    const query_client = useQueryClient()
-
-    return useMutation({
+    return useApiMutation({
         mutationFn: (id: string) => datasetsApi.deleteDataset(id),
-
-        onSuccess: () => {
-            // Invalidate dataset list cache
-            query_client.invalidateQueries({
-                queryKey: query_keys.datasets.all
-            })
-
-            toast.success('Dataset deleted successfully')
-        },
-
-        onError: (error) => {
-            console.error('Failed to delete dataset:', error)
-            toast.error('Failed to delete dataset')
-        },
+        invalidateKeys: query_keys.datasets.all,
+        successMessage: 'Dataset deleted successfully',
+        errorMessage: 'Failed to delete dataset'
     })
 }

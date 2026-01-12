@@ -1,7 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminApi } from '@/lib/api/admin'
 import { query_keys } from '@/lib/query/keys'
-import { toast } from 'sonner'
+import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 
 interface UpdateRoleParams {
     user_id: number
@@ -14,24 +13,12 @@ interface UpdateRoleParams {
  * @returns Mutation object with mutate function and states
  */
 export function use_update_role() {
-    const query_client = useQueryClient()
-
-    return useMutation({
+    return useApiMutation({
         mutationFn: ({ user_id, new_role }: UpdateRoleParams) =>
             adminApi.updateUserRole(user_id, new_role),
-
-        onSuccess: (_, variables) => {
-            // Invalidate all user list queries to trigger refetch
-            query_client.invalidateQueries({
-                queryKey: query_keys.admin.users.all()
-            })
-
-            toast.success(`User role updated to ${variables.new_role} successfully`)
-        },
-
-        onError: (error) => {
-            console.error('Failed to update role:', error)
-            toast.error('Failed to update user role')
-        },
+        invalidateKeys: query_keys.admin.users.all(),
+        successMessage: (_, variables) =>
+            `User role updated to ${variables.new_role} successfully`,
+        errorMessage: 'Failed to update user role'
     })
 }
