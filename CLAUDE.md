@@ -1,8 +1,8 @@
 # Developer Context - Go + Next.js Starter Kit
 
 > **Project**: Full-stack Starter Kit with Clean Architecture
-> **Version**: 1.4.0
-> **Last Updated**: 2026-01-12
+> **Version**: 1.5.0
+> **Last Updated**: 2026-01-13
 
 ---
 
@@ -43,6 +43,13 @@ Production-ready full-stack starter kit combining:
 - Reusable UI components (form-dialog, confirmation-dialog)
 - Generic API mutation hook for consistent error handling
 - Claude Code agent configurations for specialized development tasks
+
+**Database Backup/Restore System (v1.5.0)**:
+- Automated database backup and restore functionality
+- Scheduled auto-backup with retention policy (keep last 5 backups)
+- Manual backup and restore commands via Makefile
+- Pre-restore backup for safety
+- Cross-platform support (macOS launchd, Linux cron)
 
 ---
 
@@ -230,11 +237,20 @@ starter-kit-mission/
 │   ├── start-db.sh                   # DB only
 │   ├── start-backend.sh              # Backend only
 │   ├── start-frontend.sh             # Frontend only
-│   └── lib/common.sh                 # Shared functions
+│   ├── backup-db.sh                  # Database backup
+│   ├── restore-db.sh                 # Database restore
+│   ├── list-backups.sh               # List available backups
+│   ├── setup-auto-backup.sh          # Setup auto-backup scheduler
+│   └── lib/
+│       ├── common.sh                 # Shared functions
+│       └── backup.sh                 # Backup utility functions
 ├── logs/                              # Runtime logs
 │   ├── backend.log
 │   └── frontend.log
 ├── .pids/                             # Process ID files
+├── backups/                           # Database backups (git-ignored)
+│   ├── .gitkeep
+│   └── *.sql                         # Timestamped backup files
 ├── docs/                              # Project documentation
 │   ├── prd.md                        # Product Requirements Document
 │   ├── refactoring-analysis.md       # Refactoring analysis (planned)
@@ -347,6 +363,38 @@ make migrate-version
 # Create new migration (prompts for name)
 make migrate-create
 ```
+
+### Database Backup and Restore
+
+```bash
+# Create database backup
+make backup-db                 # Creates timestamped backup in backups/
+
+# List available backups
+make list-backups              # Shows all backup files with sizes
+
+# Restore from latest backup
+make restore-db                # Restores from most recent backup
+
+# Restore from specific backup
+make restore-db FILE=backups/2026-01-13_120000.sql
+
+# Setup auto-backup (daily at 02:00)
+make setup-auto-backup         # Uses launchd (macOS) or cron (Linux)
+
+# Check auto-backup status
+make auto-backup-status        # Shows if auto-backup is enabled
+
+# Disable auto-backup
+make disable-auto-backup       # Removes scheduled backup
+```
+
+**Backup Details**:
+- **Location**: `backups/` directory (git-ignored)
+- **Format**: Plain SQL (pg_dump)
+- **Naming**: `YYYY-MM-DD_HHmmss.sql` (timestamp-based)
+- **Retention**: Auto-backup keeps last 5 backups
+- **Safety**: Pre-restore backup created automatically
 
 ### Cleanup
 
@@ -488,6 +536,11 @@ make clean
 | `backend/.env` | Backend environment variables (DB connection, JWT secret) |
 | `.air.toml` | Backend hot-reload configuration |
 | `Makefile` | Build automation and task management |
+| `scripts/backup-db.sh` | Manual database backup script |
+| `scripts/restore-db.sh` | Database restore script with safety checks |
+| `scripts/list-backups.sh` | List available backup files |
+| `scripts/setup-auto-backup.sh` | Auto-backup scheduler (launchd/cron) |
+| `scripts/lib/backup.sh` | Backup utility functions and retention policy |
 
 ---
 
