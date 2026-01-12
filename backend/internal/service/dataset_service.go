@@ -223,12 +223,8 @@ func (s *datasetService) ListDatasets(userID uint, params *dto.DatasetListReques
         }
     }
 
-    return &dto.DatasetListResponse{
-        Data:  items,
-        Total: total,
-        Page:  params.Page,
-        Limit: params.Limit,
-    }, nil
+    response := dto.NewPaginatedResponse(items, total, params.Page, params.Limit)
+    return &response, nil
 }
 
 // GetDataset returns dataset metadata

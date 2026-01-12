@@ -11,12 +11,7 @@ type ListUsersRequest struct {
 }
 
 // ListUsersResponse represents the response for listing users
-type ListUsersResponse struct {
-    Users []UserResponse `json:"users"`
-    Total int64          `json:"total"`
-    Page  int            `json:"page"`
-    Limit int            `json:"limit"`
-}
+type ListUsersResponse = PaginatedResponse[[]UserResponse]
 
 // UserDetailResponse represents detailed user information including timestamps
 type UserDetailResponse struct {

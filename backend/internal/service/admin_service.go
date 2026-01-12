@@ -48,12 +48,8 @@ func (s *adminService) ListUsers(params *dto.ListUsersRequest) (*dto.ListUsersRe
         }
     }
 
-    return &dto.ListUsersResponse{
-        Users: userResponses,
-        Total: total,
-        Page:  params.Page,
-        Limit: params.Limit,
-    }, nil
+    response := dto.NewPaginatedResponse(userResponses, total, params.Page, params.Limit)
+    return &response, nil
 }
 
 func (s *adminService) GetUser(userID uint) (*dto.UserDetailResponse, error) {

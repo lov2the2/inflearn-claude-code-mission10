@@ -61,12 +61,7 @@ type DatasetListItem struct {
 }
 
 // DatasetListResponse represents paginated datasets
-type DatasetListResponse struct {
-    Data  []DatasetListItem `json:"data"`
-    Total int64             `json:"total"`
-    Page  int               `json:"page"`
-    Limit int               `json:"limit"`
-}
+type DatasetListResponse = PaginatedResponse[[]DatasetListItem]
 
 // ====================
 // Data Query DTOs
