@@ -3,7 +3,7 @@ import { updateUserProfile, UserProfile } from '@/lib/api/user'
 import { query_keys } from '@/lib/query/keys'
 import { toast } from 'sonner'
 
-export function use_update_profile() {
+export function useUpdateProfile() {
     const queryClient = useQueryClient()
 
     return useMutation({

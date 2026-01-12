@@ -8,7 +8,7 @@ interface UpdatePasswordParams {
     confirm_password: string
 }
 
-export function use_update_password() {
+export function useUpdatePassword() {
     return useMutation({
         mutationFn: (params: UpdatePasswordParams) =>
             updateUserPassword(

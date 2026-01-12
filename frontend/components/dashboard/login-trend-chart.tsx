@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts'
-import { use_login_trend } from '@/lib/hooks/use_analytics'
+import { useLoginTrend } from '@/lib/hooks/use-analytics'
 import { TrendingUp } from 'lucide-react'
 
 /**
@@ -11,7 +11,7 @@ import { TrendingUp } from 'lucide-react'
  * Fetches real activity data from backend
  */
 export function LoginTrendChart() {
-    const { data, isLoading, error } = use_login_trend()
+    const { data, isLoading, error } = useLoginTrend()
 
     // Loading state
     if (isLoading) {

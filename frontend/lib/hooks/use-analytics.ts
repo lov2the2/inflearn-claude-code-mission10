@@ -9,7 +9,7 @@ import {
 /**
  * Hook to fetch and transform login trend data
  */
-export function use_login_trend() {
+export function useLoginTrend() {
     return useQuery({
         queryKey: ['login-trend'],
         queryFn: async () => {
@@ -24,7 +24,7 @@ export function use_login_trend() {
 /**
  * Hook to fetch and transform activity distribution data
  */
-export function use_activity_distribution() {
+export function useActivityDistribution() {
     return useQuery({
         queryKey: ['activity-distribution'],
         queryFn: async () => {
@@ -39,7 +39,7 @@ export function use_activity_distribution() {
 /**
  * Hook to fetch and transform monthly statistics data
  */
-export function use_monthly_stats() {
+export function useMonthlyStats() {
     return useQuery({
         queryKey: ['monthly-stats'],
         queryFn: async () => {

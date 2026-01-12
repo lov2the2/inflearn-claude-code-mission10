@@ -11,7 +11,7 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts'
-import { use_monthly_stats } from '@/lib/hooks/use_analytics'
+import { useMonthlyStats } from '@/lib/hooks/use-analytics'
 import { CHART_COLORS } from '@/types/analytics'
 
 /**
@@ -20,7 +20,7 @@ import { CHART_COLORS } from '@/types/analytics'
  * Fetches real activity data from backend
  */
 export function MonthlyStatsChart() {
-    const { data, isLoading, error } = use_monthly_stats()
+    const { data, isLoading, error } = useMonthlyStats()
 
     // Loading state
     if (isLoading) {

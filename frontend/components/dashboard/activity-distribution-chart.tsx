@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
-import { use_activity_distribution } from '@/lib/hooks/use_analytics'
+import { useActivityDistribution } from '@/lib/hooks/use-analytics'
 
 /**
  * Activity Distribution Chart Component
@@ -10,7 +10,7 @@ import { use_activity_distribution } from '@/lib/hooks/use_analytics'
  * Fetches real activity data from backend
  */
 export function ActivityDistributionChart() {
-    const { data, isLoading, error } = use_activity_distribution()
+    const { data, isLoading, error } = useActivityDistribution()
 
     // Loading state
     if (isLoading) {

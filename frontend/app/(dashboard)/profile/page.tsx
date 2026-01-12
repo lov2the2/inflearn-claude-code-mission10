@@ -8,15 +8,15 @@ import { Separator } from '@/components/ui/separator'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { use_user_profile } from '@/lib/hooks/queries/use-user-profile'
-import { use_update_profile } from '@/lib/hooks/mutations/use_update_profile'
-import { use_update_password } from '@/lib/hooks/mutations/use_update_password'
+import { useUpdateProfile } from '@/lib/hooks/mutations/use-update-profile'
+import { useUpdatePassword } from '@/lib/hooks/mutations/use-update-password'
 import { profileEditSchema, passwordChangeSchema, ProfileEditFormData, PasswordChangeFormData } from '@/lib/schemas/profile'
 import { Loader2, User, Lock } from 'lucide-react'
 
 export default function ProfilePage() {
     const { data: profile, isLoading: profile_loading } = use_user_profile()
-    const update_profile = use_update_profile()
-    const update_password = use_update_password()
+    const update_profile = useUpdateProfile()
+    const update_password = useUpdatePassword()
 
     const profile_form = useForm<ProfileEditFormData>({
         resolver: zodResolver(profileEditSchema),
