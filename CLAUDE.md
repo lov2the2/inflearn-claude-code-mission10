@@ -1,7 +1,7 @@
 # Developer Context - Go + Next.js Starter Kit
 
 > **Project**: Full-stack Starter Kit with Clean Architecture
-> **Version**: 1.3.0
+> **Version**: 1.4.0
 > **Last Updated**: 2026-01-12
 
 ---
@@ -36,6 +36,13 @@ Production-ready full-stack starter kit combining:
 - CSV import/export with pagination
 - Docker Compose orchestration
 - Swagger API documentation
+
+**Phase 2 Refactoring (v1.4.0)**:
+- Unified DTO structure with common base types
+- Type-safe frontend with comprehensive TypeScript definitions
+- Reusable UI components (form-dialog, confirmation-dialog)
+- Generic API mutation hook for consistent error handling
+- Claude Code agent configurations for specialized development tasks
 
 ---
 
@@ -114,7 +121,11 @@ backend/
 │   │   ├── rbac.go                   # Role authorization
 │   │   └── cors.go                   # CORS policy
 │   ├── dto/                           # Data transfer objects
+│   │   ├── common.go                 # Common DTOs (pagination, error response)
+│   │   ├── admin_dto.go              # Admin-specific DTOs
+│   │   ├── auth_dto.go               # Authentication DTOs
 │   │   ├── dataset_dto.go            # Dataset request/response DTOs
+│   │   ├── user_dto.go               # User DTOs
 │   │   └── ...
 │   ├── util/                          # Utilities (JWT, password hashing)
 │   │   ├── query_builder.go          # SQL join query builder
@@ -154,34 +165,54 @@ frontend/
 │   └── layout.tsx                     # Root layout
 ├── components/                        # Reusable React components
 │   ├── ui/                            # shadcn/ui components
+│   │   ├── form-dialog.tsx           # Reusable form dialog component
+│   │   ├── confirmation-dialog.tsx   # Confirmation dialog component
+│   │   └── ...
 │   ├── datasets/                      # Dataset-specific components
 │   │   ├── dataset-list.tsx          # Dataset table component
-│   │   ├── dataset-upload-dialog.tsx # CSV upload dialog
+│   │   ├── upload-dataset-dialog.tsx # CSV upload dialog
+│   │   ├── delete-dataset-dialog.tsx # Dataset deletion confirmation
 │   │   ├── dataset-detail.tsx        # Dataset data viewer
 │   │   ├── join-query-builder.tsx    # Interactive join builder
 │   │   └── ...
+│   ├── admin/                         # Admin-specific components
+│   │   ├── create-user-dialog.tsx    # User creation dialog
+│   │   ├── delete-user-dialog.tsx    # User deletion confirmation
+│   │   ├── role-update-dialog.tsx    # Role update dialog
+│   │   └── csv-import-dialog.tsx     # CSV import dialog
 │   └── ...
 ├── lib/
 │   ├── api/                           # API client (Axios)
 │   │   ├── client.ts                 # HTTP client with interceptors
-│   │   └── datasets.ts               # Dataset API methods
+│   │   ├── datasets.ts               # Dataset API methods
+│   │   ├── admin.ts                  # Admin API methods
+│   │   └── ...
 │   ├── hooks/                         # Custom React hooks
 │   │   ├── useAuth.ts                # Authentication hook
+│   │   ├── use-api-mutation.ts       # Generic API mutation hook
 │   │   ├── queries/                  # React Query hooks
 │   │   │   ├── use-dataset-list.ts   # Dataset list query
 │   │   │   ├── use-dataset-detail.ts # Dataset detail query
 │   │   │   └── use-dataset-data.ts   # Dataset data query
 │   │   └── mutations/                # Mutation hooks
 │   │       ├── use-upload-dataset.ts # Dataset upload mutation
-│   │       └── use-delete-dataset.ts # Dataset delete mutation
+│   │       ├── use-delete-dataset.ts # Dataset delete mutation
+│   │       ├── use-create-user.ts    # User creation mutation
+│   │       └── ...
 │   ├── schemas/                       # Zod validation schemas
 │   │   ├── auth.ts                   # Auth form schemas
 │   │   └── dataset.ts                # Dataset form schemas
 │   └── config/                        # Frontend configuration
 ├── actions/                           # Server actions
 ├── types/                             # TypeScript type definitions
-│   ├── dataset.ts                    # Dataset type definitions
-│   └── ...
+│   ├── index.ts                      # Type exports
+│   ├── api.ts                        # Common API types
+│   ├── auth.ts                       # Authentication types
+│   ├── user.ts                       # User types
+│   ├── admin.ts                      # Admin types
+│   ├── dataset.ts                    # Dataset types
+│   ├── analytics.ts                  # Analytics types
+│   └── ui.ts                         # UI component types
 ├── public/                            # Static assets
 ├── package.json
 ├── tsconfig.json
@@ -397,11 +428,15 @@ make clean
 | `internal/middleware/rbac.go` | Role authorization | Admin/User role checks |
 | `internal/handler/auth_handler.go` | Auth endpoints | Login, register, refresh token logic |
 | `internal/handler/user_handler.go` | User management | CRUD, CSV import/export, pagination |
+| `internal/handler/admin_handler.go` | Admin operations | User management, role updates, CSV operations |
 | `internal/handler/dataset_handler.go` | Dataset management | CSV upload, dataset CRUD, join query execution |
 | `internal/service/user_service.go` | User business logic | Password hashing, validation, CSV processing |
 | `internal/service/dataset_service.go` | Dataset business logic | CSV parsing, table creation, join query building |
 | `internal/repository/user_repository.go` | User data access | GORM database operations |
 | `internal/repository/dataset_repository.go` | Dataset data access | Dynamic table creation, raw SQL execution |
+| `internal/dto/common.go` | Common DTOs | Pagination, error responses, base response structure |
+| `internal/dto/admin_dto.go` | Admin DTOs | User management request/response types |
+| `internal/dto/dataset_dto.go` | Dataset DTOs | Dataset operations request/response types |
 | `internal/util/jwt.go` | JWT utilities | Token generation and parsing |
 | `internal/util/query_builder.go` | Query builder | Dynamic SQL join query construction |
 
@@ -411,9 +446,12 @@ make clean
 |------|---------|-----------|
 | `lib/api/client.ts` | Axios HTTP client | Request/response interceptors, auth headers, auto-refresh |
 | `lib/api/datasets.ts` | Dataset API client | Upload, list, detail, query, delete operations |
+| `lib/api/admin.ts` | Admin API client | User management, role updates, CSV import/export |
 | `lib/hooks/useAuth.ts` | Authentication hook | Login/logout state management |
+| `lib/hooks/use-api-mutation.ts` | Generic mutation hook | Reusable API mutation with error handling and toast |
 | `lib/hooks/queries/use-dataset-*.ts` | Dataset query hooks | React Query hooks for dataset operations |
 | `lib/hooks/mutations/use-*-dataset.ts` | Dataset mutation hooks | Upload and delete mutations |
+| `lib/hooks/mutations/use-create-user.ts` | User creation hook | Admin user creation mutation |
 | `lib/schemas/auth.ts` | Zod validation | Login/register form validation |
 | `lib/schemas/dataset.ts` | Zod validation | Dataset upload and join query validation |
 | `app/(auth)/login/page.tsx` | Login page | Form submission, error handling |
@@ -422,9 +460,23 @@ make clean
 | `app/(dashboard)/datasets/[id]/page.tsx` | Dataset detail | Dataset data viewer with pagination |
 | `app/(dashboard)/datasets/join/page.tsx` | Join query builder | Interactive multi-table join interface |
 | `app/(dashboard)/admin/users/page.tsx` | Admin panel | User table, CSV import/export, pagination |
+| `components/ui/form-dialog.tsx` | Generic form dialog | Reusable dialog component for forms |
+| `components/ui/confirmation-dialog.tsx` | Confirmation dialog | Reusable confirmation dialog with customizable actions |
 | `components/datasets/dataset-list.tsx` | Dataset table | TanStack Table with sorting and pagination |
+| `components/datasets/upload-dataset-dialog.tsx` | Dataset upload | CSV file upload with validation |
+| `components/datasets/delete-dataset-dialog.tsx` | Dataset deletion | Confirmation dialog for dataset deletion |
 | `components/datasets/join-query-builder.tsx` | Join builder | Dynamic join condition form |
-| `types/dataset.ts` | Dataset types | TypeScript type definitions |
+| `components/admin/create-user-dialog.tsx` | User creation | Admin dialog for creating new users |
+| `components/admin/delete-user-dialog.tsx` | User deletion | Confirmation dialog for user deletion |
+| `components/admin/role-update-dialog.tsx` | Role update | Dialog for updating user roles |
+| `components/admin/csv-import-dialog.tsx` | CSV import | Dialog for importing users from CSV |
+| `types/index.ts` | Type exports | Central export point for all types |
+| `types/api.ts` | Common API types | API response, pagination, error types |
+| `types/auth.ts` | Authentication types | User, session, token types |
+| `types/user.ts` | User types | User profile, activity types |
+| `types/admin.ts` | Admin types | Admin-specific operation types |
+| `types/dataset.ts` | Dataset types | Dataset, join query types |
+| `types/ui.ts` | UI component types | Common UI component prop types |
 
 ### Infrastructure Files
 
