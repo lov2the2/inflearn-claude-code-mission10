@@ -5,7 +5,6 @@ import (
     "fmt"
     "net/http"
 
-    "start-kit-backend/internal/apperror"
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/middleware"
     "start-kit-backend/internal/service"
@@ -15,6 +14,7 @@ import (
 )
 
 type DatasetHandler struct {
+    BaseHandler
     service service.DatasetService
 }
 
@@ -78,11 +78,7 @@ func (h *DatasetHandler) UploadCSV(c *gin.Context) {
     // Process upload
     dataset, err := h.service.UploadCSV(userID, file, req)
     if err != nil {
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -113,11 +109,7 @@ func (h *DatasetHandler) ListDatasets(c *gin.Context) {
 
     datasets, err := h.service.ListDatasets(userID, &params)
     if err != nil {
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -149,11 +141,7 @@ func (h *DatasetHandler) GetDataset(c *gin.Context) {
 
     dataset, err := h.service.GetDataset(userID, id)
     if err != nil {
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -196,11 +184,7 @@ func (h *DatasetHandler) GetDatasetData(c *gin.Context) {
 
     data, err := h.service.GetDatasetData(userID, id, &params)
     if err != nil {
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -231,11 +215,7 @@ func (h *DatasetHandler) DeleteDataset(c *gin.Context) {
     }
 
     if err := h.service.DeleteDataset(userID, id); err != nil {
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -268,11 +248,7 @@ func (h *DatasetHandler) ExecuteJoinQuery(c *gin.Context) {
 
     result, err := h.service.ExecuteJoinQuery(userID, &req)
     if err != nil {
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -309,11 +285,7 @@ func (h *DatasetHandler) ExportJoinQueryCSV(c *gin.Context) {
 
     result, err := h.service.ExecuteJoinQuery(userID, &req)
     if err != nil {
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 

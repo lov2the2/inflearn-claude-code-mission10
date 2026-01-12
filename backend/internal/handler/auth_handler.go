@@ -4,7 +4,6 @@ import (
     "net/http"
     "time"
 
-    "start-kit-backend/internal/apperror"
     "start-kit-backend/internal/config"
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/middleware"
@@ -15,6 +14,7 @@ import (
 )
 
 type AuthHandler struct {
+    BaseHandler
     authService   service.AuthService
     cookieSecure  bool
     cookieDomain  string
@@ -78,12 +78,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
             Str("action", "register").
             Str("email", req.Email).
             Msg("User registration failed")
-
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -160,12 +155,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
             Str("action", "login").
             Str("email", req.Email).
             Msg("User login failed")
-
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -255,12 +245,7 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
             Err(err).
             Str("action", "refresh").
             Msg("Token refresh failed")
-
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -391,12 +376,7 @@ func (h *AuthHandler) GetSessions(c *gin.Context) {
             Str("action", "get_sessions").
             Uint("user_id", userID.(uint)).
             Msg("Failed to get user sessions")
-
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -459,12 +439,7 @@ func (h *AuthHandler) RevokeSession(c *gin.Context) {
             Uint("user_id", userID.(uint)).
             Str("session_id", req.SessionID).
             Msg("Failed to revoke session")
-
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -513,12 +488,7 @@ func (h *AuthHandler) LogoutAll(c *gin.Context) {
             Str("action", "logout_all").
             Uint("user_id", userID.(uint)).
             Msg("Failed to logout all sessions")
-
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 

@@ -4,7 +4,6 @@ import (
     "net/http"
     "strconv"
 
-    "start-kit-backend/internal/apperror"
     "start-kit-backend/internal/dto"
     "start-kit-backend/internal/middleware"
     "start-kit-backend/internal/model"
@@ -15,6 +14,7 @@ import (
 )
 
 type AdminHandler struct {
+    BaseHandler
     adminService service.AdminService
 }
 
@@ -73,11 +73,7 @@ func (h *AdminHandler) ListUsers(c *gin.Context) {
             Str("action", "list_users").
             Msg("Failed to fetch user list")
 
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -110,11 +106,7 @@ func (h *AdminHandler) GetUser(c *gin.Context) {
 
     user, err := h.adminService.GetUser(uint(userID))
     if err != nil {
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -154,11 +146,7 @@ func (h *AdminHandler) UpdateUserRole(c *gin.Context) {
     // Update role
     err = h.adminService.UpdateUserRole(uint(userID), model.UserRole(req.Role), adminID)
     if err != nil {
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -186,11 +174,7 @@ func (h *AdminHandler) CreateUser(c *gin.Context) {
 
     response, err := h.adminService.CreateUser(&req)
     if err != nil {
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
@@ -223,11 +207,7 @@ func (h *AdminHandler) DeleteUser(c *gin.Context) {
     // Delete user
     err = h.adminService.DeleteUser(uint(userID), adminID)
     if err != nil {
-        if appErr, ok := err.(*apperror.AppError); ok {
-            c.JSON(appErr.StatusCode, dto.NewAppErrorResponse(appErr))
-        } else {
-            c.JSON(http.StatusInternalServerError, dto.NewErrorResponse(err.Error()))
-        }
+        h.SendErrorResponse(c, err)
         return
     }
 
