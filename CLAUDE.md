@@ -700,6 +700,46 @@ make start
 - **Language**: English for all code, comments, and commit messages
 - **Readability**: Use descriptive names, avoid abbreviations
 
+### API Naming Conventions and Type Consistency
+
+**Critical Rule**: Backend and frontend types MUST use consistent naming conventions.
+
+**Backend (Go)**:
+- JSON field names use snake_case (Go standard with `json:"field_name"` struct tags)
+- Examples: `created_at`, `ip_address`, `total_logins`, `table_name`
+
+**Frontend (TypeScript)**:
+- ALL type definitions must match backend snake_case naming
+- Never use camelCase for fields that come from API responses
+- Examples: `created_at`, `ip_address`, `total_logins`, `table_name`
+
+**Common Mistakes to Avoid**:
+```typescript
+// ❌ WRONG: Using camelCase for API response types
+interface UserProfile {
+    createdAt: string;      // Backend sends created_at
+    ipAddress: string;      // Backend sends ip_address
+}
+
+// ✅ CORRECT: Matching backend snake_case
+interface UserProfile {
+    created_at: string;     // Matches backend
+    ip_address: string;     // Matches backend
+}
+```
+
+**Type Consistency Checklist**:
+- [ ] All TypeScript types in `frontend/types/` use snake_case for API fields
+- [ ] Component props accessing API data use snake_case field names
+- [ ] Table column `accessorKey` values match snake_case field names
+- [ ] No transformation between camelCase and snake_case in API client
+
+**Related Files**:
+- `frontend/types/user.ts` - User-related types
+- `frontend/types/dataset.ts` - Dataset types
+- `frontend/types/auth.ts` - Authentication types
+- Backend DTOs in `backend/internal/dto/` - Source of truth for field names
+
 ### Commit Message Format
 
 ```
