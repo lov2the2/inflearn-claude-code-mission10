@@ -45,9 +45,9 @@ const columns: ColumnDef<UserActivity>[] = [
         },
     },
     {
-        accessorKey: 'ipAddress',
+        accessorKey: 'ip_address',
         header: 'IP Address',
-        cell: ({ row }) => <span className="font-mono text-xs">{row.getValue('ipAddress')}</span>,
+        cell: ({ row }) => <span className="font-mono text-xs">{row.getValue('ip_address')}</span>,
     },
 ]
 

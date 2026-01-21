@@ -168,7 +168,7 @@ export default function DatasetDetailPage() {
                             <div>
                                 <p className="text-gray-600 dark:text-gray-400">Table Name</p>
                                 <p className="font-mono text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded mt-1">
-                                    {dataset.dynamic_table_name}
+                                    {dataset.table_name}
                                 </p>
                             </div>
                             <div>

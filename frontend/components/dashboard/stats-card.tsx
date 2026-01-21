@@ -9,7 +9,7 @@ import { StatsCardProps } from '@/types'
  * ```tsx
  * <StatsCard
  *   title="Total Logins"
- *   value={stats.totalLogins}
+ *   value={stats.total_logins}
  *   icon={LogIn}
  *   description="All-time logins"
  * />
