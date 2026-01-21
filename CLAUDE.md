@@ -702,36 +702,39 @@ make start
 
 ### API Naming Conventions and Type Consistency
 
-**Critical Rule**: Backend and frontend types MUST use consistent naming conventions.
+**Critical Rule**: Backend and frontend types MUST use consistent camelCase naming conventions for all JSON API fields.
 
 **Backend (Go)**:
-- JSON field names use snake_case (Go standard with `json:"field_name"` struct tags)
-- Examples: `created_at`, `ip_address`, `total_logins`, `table_name`
+- JSON field names use camelCase (standard for JSON APIs with `json:"fieldName"` struct tags)
+- Examples: `createdAt`, `ipAddress`, `totalLogins`, `tableName`, `userId`, `lastLoginAt`
 
 **Frontend (TypeScript)**:
-- ALL type definitions must match backend snake_case naming
-- Never use camelCase for fields that come from API responses
-- Examples: `created_at`, `ip_address`, `total_logins`, `table_name`
+- ALL type definitions must use camelCase for API response fields
+- Never use snake_case for fields that come from API responses
+- Examples: `createdAt`, `ipAddress`, `totalLogins`, `tableName`, `userId`, `lastLoginAt`
 
 **Common Mistakes to Avoid**:
 ```typescript
-// ❌ WRONG: Using camelCase for API response types
+// ❌ WRONG: Using snake_case for API response types
 interface UserProfile {
-    createdAt: string;      // Backend sends created_at
-    ipAddress: string;      // Backend sends ip_address
+    created_at: string;     // Backend sends createdAt
+    ip_address: string;     // Backend sends ipAddress
+    total_logins: number;   // Backend sends totalLogins
 }
 
-// ✅ CORRECT: Matching backend snake_case
+// ✅ CORRECT: Using camelCase consistently
 interface UserProfile {
-    created_at: string;     // Matches backend
-    ip_address: string;     // Matches backend
+    createdAt: string;      // Matches backend camelCase
+    ipAddress: string;      // Matches backend camelCase
+    totalLogins: number;    // Matches backend camelCase
 }
 ```
 
 **Type Consistency Checklist**:
-- [ ] All TypeScript types in `frontend/types/` use snake_case for API fields
-- [ ] Component props accessing API data use snake_case field names
-- [ ] Table column `accessorKey` values match snake_case field names
+- [ ] All TypeScript types in `frontend/types/` use camelCase for API fields
+- [ ] Component props accessing API data use camelCase field names
+- [ ] Table column `accessorKey` values match camelCase field names
+- [ ] Backend Go struct tags use camelCase: `json:"fieldName"`
 - [ ] No transformation between camelCase and snake_case in API client
 
 **Related Files**:
