@@ -20,7 +20,7 @@ export interface UserProfile {
     email: string
     name: string
     role: string
-    createdAt: string
+    created_at: string
 }
 
 export interface UserActivity {
@@ -28,14 +28,14 @@ export interface UserActivity {
     action: string
     description: string
     timestamp: string
-    ipAddress: string
+    ip_address: string
 }
 
 export interface UserStats {
-    totalLogins: number
-    lastLoginAt: string
-    accountAgeInDays: number
-    totalActions: number
+    total_logins: number
+    last_login_at: string
+    account_age_in_days: number
+    total_actions: number
 }
 
 export interface PaginatedResponse<T> {

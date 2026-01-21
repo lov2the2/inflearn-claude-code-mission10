@@ -13,9 +13,10 @@ export interface DatasetColumn {
 
 export interface Dataset {
     id: string
+    user_id: number
+    table_name: string
     display_name: string
     description: string
-    dynamic_table_name: string
     row_count: number
     file_size_bytes: number
     columns: DatasetColumn[]
