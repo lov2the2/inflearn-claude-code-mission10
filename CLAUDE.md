@@ -134,6 +134,8 @@ backend/
 │   │   ├── dataset_dto.go            # Dataset request/response DTOs
 │   │   ├── user_dto.go               # User DTOs
 │   │   └── ...
+│   ├── seed/                          # Database seeding
+│   │   └── admin_seed.go             # Initial admin user seeding
 │   ├── util/                          # Utilities (JWT, password hashing)
 │   │   ├── query_builder.go          # SQL join query builder
 │   │   └── ...
@@ -500,7 +502,7 @@ make clean
 
 | File | Purpose | Key Logic |
 |------|---------|-----------|
-| `cmd/api/main.go` | Application entry point | Server initialization, router setup, middleware chain |
+| `cmd/api/main.go` | Application entry point | Server initialization, router setup, middleware chain, admin seeding |
 | `internal/middleware/auth.go` | JWT authentication | Token validation from HttpOnly cookies, user context injection |
 | `internal/middleware/rbac.go` | Role authorization | Admin/User role checks |
 | `internal/middleware/cors.go` | CORS policy | Credentials support, X-Request-ID header allowed |
@@ -512,11 +514,13 @@ make clean
 | `internal/service/dataset_service.go` | Dataset business logic | CSV parsing, table creation, join query building |
 | `internal/repository/user_repository.go` | User data access | GORM database operations |
 | `internal/repository/dataset_repository.go` | Dataset data access | Dynamic table creation, raw SQL execution |
+| `internal/seed/admin_seed.go` | Database seeding | Initial admin user creation (idempotent) |
 | `internal/dto/common.go` | Common DTOs | Pagination, error responses, base response structure |
 | `internal/dto/admin_dto.go` | Admin DTOs | User management request/response types |
 | `internal/dto/dataset_dto.go` | Dataset DTOs | Dataset operations request/response types |
 | `internal/util/jwt.go` | JWT utilities | Token generation and parsing |
 | `internal/util/query_builder.go` | Query builder | Dynamic SQL join query construction |
+| `internal/config/config.go` | Configuration | Environment variables, including admin seed config |
 
 ### Frontend Critical Files
 
@@ -611,6 +615,23 @@ DB_NAME=starter_kit
 | `DB_USER` | PostgreSQL username | `postgres` | Database authentication |
 | `DB_PASSWORD` | PostgreSQL password | `postgres` | Database authentication |
 | `DB_NAME` | Database name | `starter_kit` | PostgreSQL database name |
+
+### Backend-specific Configuration (`backend/.env`)
+
+In addition to the project-wide settings, the backend has additional configuration for Admin Seed functionality:
+
+| Variable | Purpose | Default | Notes |
+|----------|---------|---------|-------|
+| `ADMIN_EMAIL` | Initial admin email | `admin@example.com` | Used for automatic admin account creation |
+| `ADMIN_PASSWORD` | Initial admin password | `AdminPassword123!` | Must meet password requirements |
+| `ADMIN_NAME` | Initial admin full name | `Administrator` | Display name for admin account |
+
+**Admin Seed Behavior**:
+- Runs automatically on application startup
+- Creates initial admin account if it doesn't exist (idempotent)
+- Skips creation if email already exists
+- Skips creation if any admin environment variables are not set
+- Logs creation status to console
 
 ### Multi-Instance Support
 

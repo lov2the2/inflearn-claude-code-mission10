@@ -209,7 +209,18 @@ JWT_ACCESS_EXPIRY=15m
 JWT_REFRESH_EXPIRY=168h
 
 ALLOWED_ORIGINS=http://localhost:3000
+
+# Admin Seed (초기 관리자 계정 자동 생성)
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=AdminPassword123!
+ADMIN_NAME=Administrator
 ```
+
+**초기 관리자 계정 설정:**
+- `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` 환경 변수를 설정하면 애플리케이션 시작 시 자동으로 관리자 계정이 생성됩니다
+- 이미 존재하는 이메일인 경우 생성을 건너뜁니다 (중복 생성 방지)
+- 환경 변수가 설정되지 않은 경우 자동 생성을 건너뜁니다
+- 비밀번호는 애플리케이션의 비밀번호 요구사항을 충족해야 합니다
 
 ### Frontend (`frontend/.env.local`)
 ```env

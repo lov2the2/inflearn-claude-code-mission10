@@ -8,6 +8,7 @@ import (
     "start-kit-backend/internal/middleware"
     "start-kit-backend/internal/model"
     "start-kit-backend/internal/repository"
+    "start-kit-backend/internal/seed"
     "start-kit-backend/internal/service"
     "start-kit-backend/pkg/database"
     "start-kit-backend/pkg/logger"
@@ -76,6 +77,15 @@ func main() {
     }
 
     log.Info().Msg("Database migration completed")
+
+    // Seed initial admin user
+    if err := seed.SeedAdmin(db, seed.AdminSeedConfig{
+        Email:    cfg.AdminSeed.Email,
+        Password: cfg.AdminSeed.Password,
+        Name:     cfg.AdminSeed.Name,
+    }); err != nil {
+        log.Error().Err(err).Msg("Failed to seed admin user")
+    }
 
     // Parse JWT expiry durations
     jwtExpiry, err := time.ParseDuration(cfg.JWT.AccessExpiry)

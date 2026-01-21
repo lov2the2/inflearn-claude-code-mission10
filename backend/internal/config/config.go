@@ -8,11 +8,18 @@ import (
 )
 
 type Config struct {
-    Server   ServerConfig
-    Database DatabaseConfig
-    JWT      JWTConfig
-    CORS     CORSConfig
-    Cookie   CookieConfig
+    Server    ServerConfig
+    Database  DatabaseConfig
+    JWT       JWTConfig
+    CORS      CORSConfig
+    Cookie    CookieConfig
+    AdminSeed AdminSeedConfig
+}
+
+type AdminSeedConfig struct {
+    Email    string
+    Password string
+    Name     string
 }
 
 type ServerConfig struct {
@@ -76,6 +83,11 @@ func Load() *Config {
         Cookie: CookieConfig{
             Secure: getEnv("COOKIE_SECURE", "false") == "true",
             Domain: getEnv("COOKIE_DOMAIN", "localhost"),
+        },
+        AdminSeed: AdminSeedConfig{
+            Email:    getEnv("ADMIN_EMAIL", ""),
+            Password: getEnv("ADMIN_PASSWORD", ""),
+            Name:     getEnv("ADMIN_NAME", ""),
         },
     }
 }

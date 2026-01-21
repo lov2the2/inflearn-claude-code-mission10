@@ -75,7 +75,36 @@ JWT_SECRET=your-secret-key         # JWT signing key
 JWT_ACCESS_EXPIRY=15m              # Access token expiry
 JWT_REFRESH_EXPIRY=168h            # Refresh token expiry (7 days)
 ALLOWED_ORIGINS=http://localhost:3000  # CORS allowed origins (match frontend port)
+
+# Admin Seed (초기 관리자 계정 자동 생성)
+ADMIN_EMAIL=admin@example.com      # 초기 관리자 이메일
+ADMIN_PASSWORD=AdminPassword123!   # 초기 관리자 비밀번호
+ADMIN_NAME=Administrator           # 초기 관리자 이름
 ```
+
+### 초기 관리자 계정 자동 생성
+
+애플리케이션 시작 시 초기 관리자 계정을 자동으로 생성하는 기능을 제공합니다.
+
+**설정 방법:**
+1. `.env` 파일에 `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` 환경 변수 설정
+2. 애플리케이션 시작 시 자동으로 관리자 계정 생성
+
+**동작 방식:**
+- **중복 생성 방지 (Idempotent)**: 이미 해당 이메일로 계정이 존재하면 생성을 건너뜁니다
+- **환경 변수 미설정 시 Skip**: 관리자 환경 변수가 하나라도 없으면 자동 생성을 건너뜁니다
+- **비밀번호 요구사항**: 설정한 비밀번호는 애플리케이션의 비밀번호 정책을 따라야 합니다
+- **로그 출력**: 생성 결과 (성공/실패/Skip)가 콘솔에 출력됩니다
+
+**예제:**
+```env
+# .env 파일 설정
+ADMIN_EMAIL=admin@mycompany.com
+ADMIN_PASSWORD=SecurePassword123!
+ADMIN_NAME=System Administrator
+```
+
+애플리케이션 시작 시 자동으로 관리자 계정이 생성되며, 이후 이 계정으로 로그인하여 시스템을 관리할 수 있습니다.
 
 ## API 엔드포인트
 
