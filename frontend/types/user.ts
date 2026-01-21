@@ -11,8 +11,8 @@ export interface User {
 }
 
 export interface UserDetail extends User {
-    created_at: string
-    updated_at: string
+    createdAt: string
+    updatedAt: string
 }
 
 export interface UserProfile {
@@ -20,7 +20,7 @@ export interface UserProfile {
     email: string
     name: string
     role: string
-    created_at: string
+    createdAt: string
 }
 
 export interface UserActivity {
@@ -28,14 +28,14 @@ export interface UserActivity {
     action: string
     description: string
     timestamp: string
-    ip_address: string
+    ipAddress: string
 }
 
 export interface UserStats {
-    total_logins: number
-    last_login_at: string
-    account_age_in_days: number
-    total_actions: number
+    totalLogins: number
+    lastLoginAt: string
+    accountAgeInDays: number
+    totalActions: number
 }
 
 export interface PaginatedResponse<T> {

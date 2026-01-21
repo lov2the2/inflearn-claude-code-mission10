@@ -4,24 +4,24 @@
 
 export interface DatasetColumn {
     id: number
-    column_name: string
-    display_name: string
-    data_type: 'text' | 'integer' | 'numeric' | 'boolean' | 'timestamp'
-    column_order: number
+    columnName: string
+    displayName: string
+    dataType: 'text' | 'integer' | 'numeric' | 'boolean' | 'timestamp'
+    columnOrder: number
     nullable: boolean
 }
 
 export interface Dataset {
     id: string
-    user_id: number
-    table_name: string
-    display_name: string
+    userId: number
+    tableName: string
+    displayName: string
     description: string
-    row_count: number
-    file_size_bytes: number
+    rowCount: number
+    fileSizeBytes: number
     columns: DatasetColumn[]
-    created_at: string
-    updated_at: string
+    createdAt: string
+    updatedAt: string
 }
 
 export interface DatasetListResponse {
@@ -41,27 +41,27 @@ export interface DatasetDataResponse {
 
 export interface CreateDatasetResponse {
     dataset: Dataset
-    rows_imported: number
+    rowsImported: number
 }
 
 export interface JoinCondition {
-    left_column: string
+    leftColumn: string
     operator: '=' | '!=' | '<' | '>' | '<=' | '>='
-    right_column: string
+    rightColumn: string
 }
 
 // Configuration for a single join table
 export interface JoinTableConfig {
-    dataset_id: string
-    join_type: 'inner' | 'left' | 'right' | 'full' | 'cross'
+    datasetId: string
+    joinType: 'inner' | 'left' | 'right' | 'full' | 'cross'
     conditions: JoinCondition[]
 }
 
 // Multi-table join query request (supports up to 5 tables)
 export interface JoinQueryRequest {
-    base_dataset_id: string
-    join_tables: JoinTableConfig[]
-    select_columns: string[]
+    baseDatasetId: string
+    joinTables: JoinTableConfig[]
+    selectColumns: string[]
     page?: number
     limit?: number
 }
@@ -72,14 +72,14 @@ export interface JoinQueryResponse {
     total: number
     page: number
     limit: number
-    query_time_ms: number
+    queryTimeMs: number
 }
 
 // State for the join builder wizard
 export interface JoinBuilderState {
-    base_dataset_id: string | null
-    join_tables: JoinTableConfig[]
-    selected_columns: string[]
+    baseDatasetId: string | null
+    joinTables: JoinTableConfig[]
+    selectedColumns: string[]
 }
 
 // Filter condition for data queries
@@ -93,7 +93,7 @@ export interface FilterCondition {
 export interface DatasetDataParams {
     page?: number
     limit?: number
-    sort_by?: string
-    sort_order?: 'asc' | 'desc'
+    sortBy?: string
+    sortOrder?: 'asc' | 'desc'
     filters?: FilterCondition[]
 }

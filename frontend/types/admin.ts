@@ -27,12 +27,12 @@ export interface CSVImportError {
 }
 
 export interface CSVImportResult {
-    success_count: number
-    failure_count: number
-    created_count: number
-    updated_count: number
-    total_rows: number
-    default_password?: string
+    successCount: number
+    failureCount: number
+    createdCount: number
+    updatedCount: number
+    totalRows: number
+    defaultPassword?: string
     errors?: CSVImportError[]
 }
 
@@ -45,5 +45,5 @@ export interface CreateUserRequest {
 
 export interface CreateUserResponse {
     user: User
-    generated_password?: string
+    generatedPassword?: string
 }
