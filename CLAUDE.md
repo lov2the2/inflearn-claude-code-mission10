@@ -407,18 +407,19 @@ make clean
 
 ## Authentication
 
-### Token Flow
+### Token Flow (HttpOnly Cookie-based)
 
-1. **Login**: User submits credentials → Backend validates → Returns access + refresh tokens
-2. **Access**: Client includes `Authorization: Bearer <access_token>` in requests
-3. **Refresh**: When access token expires (401) → Client sends refresh token → New tokens issued
-4. **Auto-refresh**: Frontend automatically handles 401 responses and token renewal
+1. **Login/Register**: User submits credentials → Backend validates → Returns user data and sets HttpOnly cookies
+2. **Authentication**: Browser automatically includes cookies in all requests (no manual Authorization header)
+3. **Token Refresh**: Backend automatically handles token refresh via cookies (transparent to frontend)
+4. **Logout**: Frontend calls logout endpoint → Backend clears cookies
 
 ### Token Details
 
-- **Access Token**: 15 minutes expiry, used for API requests
-- **Refresh Token**: 7 days expiry, used to obtain new access tokens
-- **Storage**: Frontend stores in localStorage (consider HttpOnly cookies for production)
+- **Access Token**: 15 minutes expiry, stored in HttpOnly cookie (not accessible to JavaScript)
+- **Refresh Token**: 7 days expiry, stored in HttpOnly cookie (not accessible to JavaScript)
+- **User Data**: Stored in localStorage (non-sensitive data only)
+- **Security**: HttpOnly cookies prevent XSS attacks, SameSite flag prevents CSRF
 
 ### Role-Based Access Control (RBAC)
 
@@ -426,16 +427,44 @@ make clean
 - **User**: Limited access (own profile, basic features)
 
 **Implementation**:
-- `backend/internal/middleware/auth.go` - JWT validation
+- `backend/internal/middleware/auth.go` - JWT validation from HttpOnly cookies
 - `backend/internal/middleware/rbac.go` - Role authorization
-- Frontend: Protected routes check role before rendering
+- `backend/internal/middleware/cors.go` - CORS with credentials support and X-Request-ID header
+- Frontend: Automatic cookie handling via `withCredentials: true`, protected routes check user session
+
+### Authentication Implementation Details
+
+**Backend (Cookie-based)**:
+- Sets HttpOnly cookies on successful login/register with `Set-Cookie` header
+- Cookie attributes: `HttpOnly`, `Secure` (production), `SameSite=Lax`, `Path=/`
+- Returns `User` object in response body (no tokens in JSON)
+- Reads tokens from cookies automatically in middleware
+- CORS allows credentials (`Access-Control-Allow-Credentials: true`)
+- CORS allows `X-Request-ID` header (used by frontend for distributed tracing)
+
+**Frontend (Automatic cookie handling)**:
+- Axios client configured with `withCredentials: true`
+- Browser automatically sends cookies with every request
+- No manual token storage or Authorization header injection
+- Stores only user data in localStorage (non-sensitive)
+- 401 errors redirect to login (no token refresh logic needed)
+
+**Type Definitions**:
+- `AuthResponse`: Backend returns `User` object directly in `data` field
+- Frontend types: `User` (stored in localStorage), no `access_token` or `refresh_token` fields
+- `setSession(user: User)`: Stores only user data, not tokens
+
+**Common Issues Fixed**:
+1. **CORS header missing**: Added `X-Request-ID` to `Access-Control-Allow-Headers` in `backend/internal/middleware/cors.go`
+2. **Type mismatch**: Frontend expected `AuthResponse` with tokens, but backend returns `User` object directly
+3. **Session management**: Changed `setSession()` to accept `User` instead of `AuthResponse`
 
 ### API Endpoints
 
 **Public**:
-- `POST /api/v1/auth/register` - User registration
-- `POST /api/v1/auth/login` - User login
-- `POST /api/v1/auth/refresh` - Token refresh
+- `POST /api/v1/auth/register` - User registration (returns user data, sets cookies)
+- `POST /api/v1/auth/login` - User login (returns user data, sets cookies)
+- `POST /api/v1/auth/refresh` - Token refresh (automatic via cookies, not called by frontend)
 
 **Protected (User)**:
 - `GET /api/v1/users/profile` - Get current user profile
@@ -443,7 +472,7 @@ make clean
 - `PATCH /api/v1/users/password` - Change password
 - `GET /api/v1/users/activity` - Get activity log (paginated)
 - `GET /api/v1/users/stats` - Get user statistics
-- `POST /api/v1/auth/logout` - Logout (revoke refresh token)
+- `POST /api/v1/auth/logout` - Logout (clears cookies, no parameters needed)
 - `GET /api/v1/datasets` - List all datasets (paginated)
 - `GET /api/v1/datasets/{id}` - Get dataset metadata
 - `GET /api/v1/datasets/{id}/data` - Get dataset data (paginated, with filtering/sorting support)
@@ -472,9 +501,10 @@ make clean
 | File | Purpose | Key Logic |
 |------|---------|-----------|
 | `cmd/api/main.go` | Application entry point | Server initialization, router setup, middleware chain |
-| `internal/middleware/auth.go` | JWT authentication | Token validation, user context injection |
+| `internal/middleware/auth.go` | JWT authentication | Token validation from HttpOnly cookies, user context injection |
 | `internal/middleware/rbac.go` | Role authorization | Admin/User role checks |
-| `internal/handler/auth_handler.go` | Auth endpoints | Login, register, refresh token logic |
+| `internal/middleware/cors.go` | CORS policy | Credentials support, X-Request-ID header allowed |
+| `internal/handler/auth_handler.go` | Auth endpoints | Login, register, logout, session management (sets/clears HttpOnly cookies) |
 | `internal/handler/user_handler.go` | User management | CRUD, CSV import/export, pagination |
 | `internal/handler/admin_handler.go` | Admin operations | User management, role updates, CSV operations |
 | `internal/handler/dataset_handler.go` | Dataset management | CSV upload, dataset CRUD, join query execution |
@@ -492,7 +522,9 @@ make clean
 
 | File | Purpose | Key Logic |
 |------|---------|-----------|
-| `lib/api/client.ts` | Axios HTTP client | Request/response interceptors, auth headers, auto-refresh |
+| `lib/api/client.ts` | Axios HTTP client | `withCredentials: true` for automatic cookie handling, simplified 401 error handling |
+| `lib/auth/session.ts` | Session management | Stores only user data in localStorage (no tokens), `setSession(user)`, `clearSession()` |
+| `lib/api/auth.ts` | Auth API client | Login, register, logout (no token parameters needed) |
 | `lib/api/datasets.ts` | Dataset API client | Upload, list, detail, query, delete operations |
 | `lib/api/admin.ts` | Admin API client | User management, role updates, CSV import/export |
 | `lib/hooks/useAuth.ts` | Authentication hook | Login/logout state management |
@@ -533,7 +565,7 @@ make clean
 | `docker-compose.yml` | PostgreSQL container definition |
 | `.env` | Project configuration (PROJECT_NAME, ports, DB settings) |
 | `.env.example` | Environment template for new instances |
-| `backend/.env` | Backend environment variables (DB connection, JWT secret) |
+| `backend/.env` | Backend environment variables (DB connection, JWT secret, CORS settings) |
 | `.air.toml` | Backend hot-reload configuration |
 | `Makefile` | Build automation and task management |
 | `scripts/backup-db.sh` | Manual database backup script |

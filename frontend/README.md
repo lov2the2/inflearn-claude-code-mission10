@@ -91,21 +91,20 @@ API_URL=http://localhost:8080                # 서버 사이드 API URL (백엔�
 
 **로그인/회원가입:**
 - 유효성 검사가 포함된 폼 (react-hook-form + zod)
-- JWT 토큰 저장 (localStorage)
+- 사용자 정보 저장 (localStorage, 토큰은 쿠키에 저장)
 - 로그인 후 자동 리다이렉트
 - 사용자 피드백과 함께 에러 처리
 
-**자동 토큰 갱신:**
-- Axios 응답 인터셉터가 401 에러 감지
-- refresh token을 사용하여 access token 자동 갱신
-- 새 토큰으로 원래 요청 재시도
-- 동시 다중 갱신 호출을 방지하는 큐 메커니즘
+**자동 쿠키 처리 (HttpOnly Cookie 기반):**
+- 백엔드가 HttpOnly 쿠키로 토큰 저장 및 관리
+- `withCredentials: true` 설정으로 자동 쿠키 전송
+- 토큰 갱신은 백엔드에서 자동 처리 (프론트엔드 개입 불필요)
+- JavaScript에서 토큰 접근 불가 (XSS 공격 방지)
 
 **세션 관리:**
-- localStorage에 access token과 refresh token 저장
-- localStorage에 사용자 정보 캐싱
-- 로그아웃 시 세션 삭제
-- 토큰 갱신 실패 시 로그인 페이지로 자동 리다이렉트
+- localStorage에 사용자 정보만 저장 (토큰 제외)
+- 로그아웃 시 백엔드가 쿠키 삭제 및 프론트엔드 세션 정리
+- 401 에러 시 자동으로 로그인 페이지로 리다이렉트
 
 ### 보호된 라우트
 
@@ -449,9 +448,9 @@ describe('Button', () => {
 - 백엔드의 CORS 설정 확인
 
 **401 Unauthorized 에러:**
-- access token이 저장되어 있는지 확인: `localStorage.getItem('access_token')`
-- 다시 로그인 시도
-- 토큰 만료 시간 확인
+- 브라우저 개발자 도구 > Application > Cookies에서 쿠키 확인
+- 쿠키가 없으면 다시 로그인 시도
+- 백엔드 로그 확인 (토큰 유효성 검증 실패 원인)
 
 **페이지를 찾을 수 없음 (404):**
 - `app/` 디렉토리에 라우트가 존재하는지 확인
