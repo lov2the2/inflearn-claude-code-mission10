@@ -7,43 +7,43 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { use_user_profile } from '@/lib/hooks/queries/use-user-profile'
+import { useUserProfile } from '@/lib/hooks/queries/use-user-profile'
 import { useUpdateProfile } from '@/lib/hooks/mutations/use-update-profile'
 import { useUpdatePassword } from '@/lib/hooks/mutations/use-update-password'
 import { profileEditSchema, passwordChangeSchema, ProfileEditFormData, PasswordChangeFormData } from '@/lib/schemas/profile'
 import { Loader2, User, Lock } from 'lucide-react'
 
 export default function ProfilePage() {
-    const { data: profile, isLoading: profile_loading } = use_user_profile()
-    const update_profile = useUpdateProfile()
-    const update_password = useUpdatePassword()
+    const { data: profile, isLoading: profileLoading } = useUserProfile()
+    const updateProfile = useUpdateProfile()
+    const updatePassword = useUpdatePassword()
 
-    const profile_form = useForm<ProfileEditFormData>({
+    const profileForm = useForm<ProfileEditFormData>({
         resolver: zodResolver(profileEditSchema),
         values: {
             name: profile?.name || ''
         }
     })
 
-    const password_form = useForm<PasswordChangeFormData>({
+    const passwordForm = useForm<PasswordChangeFormData>({
         resolver: zodResolver(passwordChangeSchema),
         defaultValues: {
-            current_password: '',
-            new_password: '',
-            confirm_password: ''
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: ''
         }
     })
 
-    const on_profile_submit = async (data: ProfileEditFormData) => {
-        await update_profile.mutateAsync(data.name)
+    const onProfileSubmit = async (data: ProfileEditFormData) => {
+        await updateProfile.mutateAsync(data.name)
     }
 
-    const on_password_submit = async (data: PasswordChangeFormData) => {
-        await update_password.mutateAsync(data)
-        password_form.reset()
+    const onPasswordSubmit = async (data: PasswordChangeFormData) => {
+        await updatePassword.mutateAsync(data)
+        passwordForm.reset()
     }
 
-    if (profile_loading) {
+    if (profileLoading) {
         return (
             <div className="flex justify-center items-center min-h-[400px]">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -70,7 +70,7 @@ export default function ProfilePage() {
                     <CardDescription>Update your personal information</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={profile_form.handleSubmit(on_profile_submit)} className="space-y-4">
+                    <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="email">Email</Label>
                             <Input
@@ -89,12 +89,12 @@ export default function ProfilePage() {
                             <Label htmlFor="name">Name</Label>
                             <Input
                                 id="name"
-                                {...profile_form.register('name')}
-                                disabled={update_profile.isPending}
+                                {...profileForm.register('name')}
+                                disabled={updateProfile.isPending}
                             />
-                            {profile_form.formState.errors.name && (
+                            {profileForm.formState.errors.name && (
                                 <p className="text-sm text-red-500 dark:text-red-400">
-                                    {profile_form.formState.errors.name.message}
+                                    {profileForm.formState.errors.name.message}
                                 </p>
                             )}
                         </div>
@@ -111,7 +111,7 @@ export default function ProfilePage() {
 
                         <Button
                             type="submit"
-                            isLoading={update_profile.isPending}
+                            isLoading={updateProfile.isPending}
                             loadingText="Saving..."
                         >
                             Save Changes
@@ -134,33 +134,33 @@ export default function ProfilePage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={password_form.handleSubmit(on_password_submit)} className="space-y-4">
+                    <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="current_password">Current Password</Label>
+                            <Label htmlFor="currentPassword">Current Password</Label>
                             <Input
-                                id="current_password"
+                                id="currentPassword"
                                 type="password"
-                                {...password_form.register('current_password')}
-                                disabled={update_password.isPending}
+                                {...passwordForm.register('currentPassword')}
+                                disabled={updatePassword.isPending}
                             />
-                            {password_form.formState.errors.current_password && (
+                            {passwordForm.formState.errors.currentPassword && (
                                 <p className="text-sm text-red-500 dark:text-red-400">
-                                    {password_form.formState.errors.current_password.message}
+                                    {passwordForm.formState.errors.currentPassword.message}
                                 </p>
                             )}
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="new_password">New Password</Label>
+                            <Label htmlFor="newPassword">New Password</Label>
                             <Input
-                                id="new_password"
+                                id="newPassword"
                                 type="password"
-                                {...password_form.register('new_password')}
-                                disabled={update_password.isPending}
+                                {...passwordForm.register('newPassword')}
+                                disabled={updatePassword.isPending}
                             />
-                            {password_form.formState.errors.new_password && (
+                            {passwordForm.formState.errors.newPassword && (
                                 <p className="text-sm text-red-500 dark:text-red-400">
-                                    {password_form.formState.errors.new_password.message}
+                                    {passwordForm.formState.errors.newPassword.message}
                                 </p>
                             )}
                             <p className="text-xs text-muted-foreground">
@@ -169,23 +169,23 @@ export default function ProfilePage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="confirm_password">Confirm New Password</Label>
+                            <Label htmlFor="confirmPassword">Confirm New Password</Label>
                             <Input
-                                id="confirm_password"
+                                id="confirmPassword"
                                 type="password"
-                                {...password_form.register('confirm_password')}
-                                disabled={update_password.isPending}
+                                {...passwordForm.register('confirmPassword')}
+                                disabled={updatePassword.isPending}
                             />
-                            {password_form.formState.errors.confirm_password && (
+                            {passwordForm.formState.errors.confirmPassword && (
                                 <p className="text-sm text-red-500 dark:text-red-400">
-                                    {password_form.formState.errors.confirm_password.message}
+                                    {passwordForm.formState.errors.confirmPassword.message}
                                 </p>
                             )}
                         </div>
 
                         <Button
                             type="submit"
-                            isLoading={update_password.isPending}
+                            isLoading={updatePassword.isPending}
                             loadingText="Changing Password..."
                         >
                             Change Password

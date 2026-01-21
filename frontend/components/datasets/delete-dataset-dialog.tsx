@@ -1,28 +1,28 @@
 'use client'
 
-import { use_delete_dataset } from '@/lib/hooks/mutations/use-delete-dataset'
+import { useDeleteDataset } from '@/lib/hooks/mutations/use-delete-dataset'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
 
 interface DeleteDatasetDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    dataset_id: string | null
-    dataset_name: string
+    datasetId: string | null
+    datasetName: string
 }
 
 export function DeleteDatasetDialog({
     open,
     onOpenChange,
-    dataset_id,
-    dataset_name,
+    datasetId,
+    datasetName,
 }: DeleteDatasetDialogProps) {
-    const delete_mutation = use_delete_dataset()
+    const deleteMutation = useDeleteDataset()
 
     const handleDelete = async () => {
-        if (!dataset_id) return
+        if (!datasetId) return
 
         await new Promise<void>((resolve, reject) => {
-            delete_mutation.mutate(dataset_id, {
+            deleteMutation.mutate(datasetId, {
                 onSuccess: () => {
                     onOpenChange(false)
                     resolve()
@@ -41,7 +41,7 @@ export function DeleteDatasetDialog({
             title="Delete Dataset"
             description={
                 <>
-                    Are you sure you want to delete <strong>{dataset_name}</strong>?
+                    Are you sure you want to delete <strong>{datasetName}</strong>?
                     <br />
                     <br />
                     This will permanently delete:
@@ -57,7 +57,7 @@ export function DeleteDatasetDialog({
             confirmLabel="Delete"
             variant="destructive"
             onConfirm={handleDelete}
-            isLoading={delete_mutation.isPending}
+            isLoading={deleteMutation.isPending}
             loadingText="Deleting..."
         />
     )

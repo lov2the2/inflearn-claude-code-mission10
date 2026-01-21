@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { use_dataset_list } from '@/lib/hooks/queries/use-dataset-list'
+import { useDatasetList } from '@/lib/hooks/queries/use-dataset-list'
 import { Dataset, JoinTableConfig } from '@/types/dataset'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -11,9 +11,9 @@ import { Button } from '@/components/ui/button'
 import { Table2, Plus, Trash2 } from 'lucide-react'
 
 interface JoinStepTablesProps {
-    base_dataset_id: string | null
-    join_tables: JoinTableConfig[]
-    on_change: (base_id: string | null, join_tables: JoinTableConfig[]) => void
+    baseDatasetId: string | null
+    joinTables: JoinTableConfig[]
+    onChange: (baseId: string | null, joinTables: JoinTableConfig[]) => void
 }
 
 const MAX_JOIN_TABLES = 4 // Base + 4 = 5 total tables
@@ -23,60 +23,60 @@ const MAX_JOIN_TABLES = 4 // Base + 4 = 5 total tables
  * Allows users to select base dataset and multiple join tables (up to 5 total)
  */
 export function JoinStepTables({
-    base_dataset_id,
-    join_tables,
-    on_change,
+    baseDatasetId,
+    joinTables,
+    onChange,
 }: JoinStepTablesProps) {
-    const { data, isLoading, isError } = use_dataset_list(1, 100)
-    const [base_dataset, set_base_dataset] = useState<Dataset | null>(null)
+    const { data, isLoading, isError } = useDatasetList(1, 100)
+    const [baseDataset, setBaseDataset] = useState<Dataset | null>(null)
 
     // Update base dataset when ID changes
     useEffect(() => {
-        if (data?.datasets && base_dataset_id) {
-            const base = data.datasets.find((d) => d.id === base_dataset_id) || null
-            set_base_dataset(base)
+        if (data?.datasets && baseDatasetId) {
+            const base = data.datasets.find((d) => d.id === baseDatasetId) || null
+            setBaseDataset(base)
         } else {
-            set_base_dataset(null)
+            setBaseDataset(null)
         }
-    }, [base_dataset_id, data])
+    }, [baseDatasetId, data])
 
-    const handle_base_change = (dataset_id: string) => {
-        on_change(dataset_id, join_tables)
+    const handleBaseChange = (datasetId: string) => {
+        onChange(datasetId, joinTables)
     }
 
-    const handle_add_join_table = () => {
-        if (join_tables.length >= MAX_JOIN_TABLES) return
+    const handleAddJoinTable = () => {
+        if (joinTables.length >= MAX_JOIN_TABLES) return
 
-        const new_table: JoinTableConfig = {
-            dataset_id: '',
-            join_type: 'inner',
+        const newTable: JoinTableConfig = {
+            datasetId: '',
+            joinType: 'inner',
             conditions: [],
         }
-        on_change(base_dataset_id, [...join_tables, new_table])
+        onChange(baseDatasetId, [...joinTables, newTable])
     }
 
-    const handle_remove_join_table = (index: number) => {
-        const updated = join_tables.filter((_, i) => i !== index)
-        on_change(base_dataset_id, updated)
+    const handleRemoveJoinTable = (index: number) => {
+        const updated = joinTables.filter((_, i) => i !== index)
+        onChange(baseDatasetId, updated)
     }
 
-    const handle_join_table_dataset_change = (index: number, dataset_id: string) => {
-        const updated = join_tables.map((table, i) =>
-            i === index ? { ...table, dataset_id } : table
+    const handleJoinTableDatasetChange = (index: number, datasetId: string) => {
+        const updated = joinTables.map((table, i) =>
+            i === index ? { ...table, datasetId: datasetId } : table
         )
-        on_change(base_dataset_id, updated)
+        onChange(baseDatasetId, updated)
     }
 
-    const get_dataset_by_id = (id: string): Dataset | null => {
+    const getDatasetById = (id: string): Dataset | null => {
         return data?.datasets?.find((d) => d.id === id) || null
     }
 
     // Get selected dataset IDs to exclude from options
-    const get_selected_ids = (): Set<string> => {
+    const getSelectedIds = (): Set<string> => {
         const ids = new Set<string>()
-        if (base_dataset_id) ids.add(base_dataset_id)
-        join_tables.forEach((t) => {
-            if (t.dataset_id) ids.add(t.dataset_id)
+        if (baseDatasetId) ids.add(baseDatasetId)
+        joinTables.forEach((t) => {
+            if (t.datasetId) ids.add(t.datasetId)
         })
         return ids
     }
@@ -98,8 +98,8 @@ export function JoinStepTables({
         )
     }
 
-    const available_datasets = data.datasets || []
-    const selected_ids = get_selected_ids()
+    const availableDatasets = data.datasets || []
+    const selectedIds = getSelectedIds()
 
     return (
         <div className="space-y-6">
@@ -118,15 +118,15 @@ export function JoinStepTables({
                     <div className="space-y-2">
                         <Label htmlFor="base-dataset">Dataset</Label>
                         <Select
-                            value={base_dataset_id || undefined}
-                            onValueChange={handle_base_change}
+                            value={baseDatasetId || undefined}
+                            onValueChange={handleBaseChange}
                         >
                             <SelectTrigger id="base-dataset">
                                 <SelectValue placeholder="Select a dataset" />
                             </SelectTrigger>
                             <SelectContent>
-                                {available_datasets
-                                    .filter((d) => !selected_ids.has(d.id) || d.id === base_dataset_id)
+                                {availableDatasets
+                                    .filter((d) => !selectedIds.has(d.id) || d.id === baseDatasetId)
                                     .map((dataset) => (
                                         <SelectItem key={dataset.id} value={dataset.id}>
                                             {dataset.displayName} ({dataset.rowCount} rows)
@@ -136,20 +136,20 @@ export function JoinStepTables({
                         </Select>
                     </div>
 
-                    {base_dataset && (
+                    {baseDataset && (
                         <div className="mt-4 space-y-3">
                             <div>
                                 <p className="text-sm font-medium mb-1">Description</p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {base_dataset.description || 'No description'}
+                                    {baseDataset.description || 'No description'}
                                 </p>
                             </div>
                             <div>
                                 <p className="text-sm font-medium mb-2">
-                                    Columns ({base_dataset.columns.length})
+                                    Columns ({baseDataset.columns.length})
                                 </p>
                                 <div className="flex flex-wrap gap-2">
-                                    {base_dataset.columns
+                                    {baseDataset.columns
                                         .sort((a, b) => a.columnOrder - b.columnOrder)
                                         .map((col) => (
                                             <Badge key={col.id} variant="secondary" className="text-xs">
@@ -167,9 +167,9 @@ export function JoinStepTables({
             </Card>
 
             {/* Join Tables */}
-            {join_tables.map((join_table, index) => {
-                const dataset = join_table.dataset_id
-                    ? get_dataset_by_id(join_table.dataset_id)
+            {joinTables.map((joinTable, index) => {
+                const dataset = joinTable.datasetId
+                    ? getDatasetById(joinTable.datasetId)
                     : null
 
                 return (
@@ -188,7 +188,7 @@ export function JoinStepTables({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    onClick={() => handle_remove_join_table(index)}
+                                    onClick={() => handleRemoveJoinTable(index)}
                                     className="text-red-600 hover:text-red-700 hover:bg-red-100"
                                 >
                                     <Trash2 className="h-4 w-4" />
@@ -199,27 +199,27 @@ export function JoinStepTables({
                             <div className="space-y-2">
                                 <Label htmlFor={`join-dataset-${index}`}>Dataset</Label>
                                 <Select
-                                    value={join_table.dataset_id || undefined}
+                                    value={joinTable.datasetId || undefined}
                                     onValueChange={(id) =>
-                                        handle_join_table_dataset_change(index, id)
+                                        handleJoinTableDatasetChange(index, id)
                                     }
-                                    disabled={!base_dataset_id}
+                                    disabled={!baseDatasetId}
                                 >
                                     <SelectTrigger id={`join-dataset-${index}`}>
                                         <SelectValue
                                             placeholder={
-                                                base_dataset_id
+                                                baseDatasetId
                                                     ? 'Select a dataset'
                                                     : 'Select base table first'
                                             }
                                         />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {available_datasets
+                                        {availableDatasets
                                             .filter(
                                                 (d) =>
-                                                    !selected_ids.has(d.id) ||
-                                                    d.id === join_table.dataset_id
+                                                    !selectedIds.has(d.id) ||
+                                                    d.id === joinTable.datasetId
                                             )
                                             .map((ds) => (
                                                 <SelectItem key={ds.id} value={ds.id}>
@@ -267,20 +267,20 @@ export function JoinStepTables({
             })}
 
             {/* Add Join Table Button */}
-            {base_dataset_id && join_tables.length < MAX_JOIN_TABLES && (
+            {baseDatasetId && joinTables.length < MAX_JOIN_TABLES && (
                 <Button
                     variant="outline"
-                    onClick={handle_add_join_table}
+                    onClick={handleAddJoinTable}
                     className="w-full"
-                    disabled={available_datasets.length <= selected_ids.size}
+                    disabled={availableDatasets.length <= selectedIds.size}
                 >
                     <Plus className="h-4 w-4 mr-2" />
-                    Add Join Table ({join_tables.length + 1}/{MAX_JOIN_TABLES + 1} tables)
+                    Add Join Table ({joinTables.length + 1}/{MAX_JOIN_TABLES + 1} tables)
                 </Button>
             )}
 
             {/* Hint for empty state */}
-            {base_dataset_id && join_tables.length === 0 && (
+            {baseDatasetId && joinTables.length === 0 && (
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     <p>Click "Add Join Table" to add datasets to join</p>
                 </div>

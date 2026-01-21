@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { getLoginTrend, getActivityDistribution, getMonthlyStats } from '@/lib/api/user'
 import {
-    transform_login_trend,
-    transform_activity_distribution,
-    transform_monthly_stats
+    transformLoginTrend,
+    transformActivityDistribution,
+    transformMonthlyStats
 } from '@/lib/utils/chart-transformers'
 
 /**
@@ -14,7 +14,7 @@ export function useLoginTrend() {
         queryKey: ['login-trend'],
         queryFn: async () => {
             const data = await getLoginTrend()
-            return transform_login_trend(data)
+            return transformLoginTrend(data)
         },
         staleTime: 5 * 60 * 1000, // 5 minutes
         retry: 2,
@@ -29,7 +29,7 @@ export function useActivityDistribution() {
         queryKey: ['activity-distribution'],
         queryFn: async () => {
             const data = await getActivityDistribution()
-            return transform_activity_distribution(data)
+            return transformActivityDistribution(data)
         },
         staleTime: 5 * 60 * 1000,
         retry: 2,
@@ -44,7 +44,7 @@ export function useMonthlyStats() {
         queryKey: ['monthly-stats'],
         queryFn: async () => {
             const data = await getMonthlyStats()
-            return transform_monthly_stats(data)
+            return transformMonthlyStats(data)
         },
         staleTime: 10 * 60 * 1000, // 10 minutes
         retry: 2,

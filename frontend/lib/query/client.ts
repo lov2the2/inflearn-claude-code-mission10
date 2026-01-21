@@ -4,7 +4,7 @@ import { QueryClient } from '@tanstack/react-query'
  * Create QueryClient with optimized default options
  * Configured for production-ready caching and error handling
  */
-export function create_query_client(): QueryClient {
+export function createQueryClient(): QueryClient {
     return new QueryClient({
         defaultOptions: {
             queries: {
@@ -33,4 +33,4 @@ export function create_query_client(): QueryClient {
     })
 }
 
-export const query_client = create_query_client()
+export const queryClient = createQueryClient()

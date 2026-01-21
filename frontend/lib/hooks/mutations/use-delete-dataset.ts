@@ -1,5 +1,5 @@
 import { datasetsApi } from '@/lib/api/datasets'
-import { query_keys } from '@/lib/query/keys'
+import { queryKeys } from '@/lib/query/keys'
 import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 
 /**
@@ -7,10 +7,10 @@ import { useApiMutation } from '@/lib/hooks/use-api-mutation'
  * Handles dataset deletion and automatic cache invalidation
  * @returns Mutation object with mutate function and states
  */
-export function use_delete_dataset() {
+export function useDeleteDataset() {
     return useApiMutation({
         mutationFn: (id: string) => datasetsApi.deleteDataset(id),
-        invalidateKeys: query_keys.datasets.all,
+        invalidateKeys: queryKeys.datasets.all,
         successMessage: 'Dataset deleted successfully',
         errorMessage: 'Failed to delete dataset'
     })

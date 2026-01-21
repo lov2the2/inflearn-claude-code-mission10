@@ -1,5 +1,5 @@
 import { adminApi } from '@/lib/api/admin'
-import { query_keys } from '@/lib/query/keys'
+import { queryKeys } from '@/lib/query/keys'
 import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 
 /**
@@ -7,10 +7,10 @@ import { useApiMutation } from '@/lib/hooks/use-api-mutation'
  * Automatically invalidates user list cache on success
  * @returns Mutation object with mutate function and states
  */
-export function use_delete_user() {
+export function useDeleteUser() {
     return useApiMutation({
-        mutationFn: (user_id: number) => adminApi.deleteUser(user_id),
-        invalidateKeys: query_keys.admin.users.all(),
+        mutationFn: (userId: number) => adminApi.deleteUser(userId),
+        invalidateKeys: queryKeys.admin.users.all(),
         successMessage: 'User deleted successfully',
         errorMessage: 'Failed to delete user'
     })

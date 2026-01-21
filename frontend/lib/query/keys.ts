@@ -2,25 +2,25 @@
  * Centralized query key management
  * Follow hierarchical structure for easy invalidation
  */
-export const query_keys = {
+export const queryKeys = {
     // User-related queries
     user: {
         all: ['user'] as const,
-        profile: () => [...query_keys.user.all, 'profile'] as const,
-        stats: () => [...query_keys.user.all, 'stats'] as const,
+        profile: () => [...queryKeys.user.all, 'profile'] as const,
+        stats: () => [...queryKeys.user.all, 'stats'] as const,
         activity: (page: number, limit: number) =>
-            [...query_keys.user.all, 'activity', { page, limit }] as const,
+            [...queryKeys.user.all, 'activity', { page, limit }] as const,
     },
 
     // Admin-related queries
     admin: {
         all: ['admin'] as const,
         users: {
-            all: () => [...query_keys.admin.all, 'users'] as const,
+            all: () => [...queryKeys.admin.all, 'users'] as const,
             list: (page: number, limit: number, search: string, role: string) =>
-                [...query_keys.admin.users.all(), 'list', { page, limit, search, role }] as const,
+                [...queryKeys.admin.users.all(), 'list', { page, limit, search, role }] as const,
             detail: (id: number) =>
-                [...query_keys.admin.users.all(), 'detail', id] as const,
+                [...queryKeys.admin.users.all(), 'detail', id] as const,
         },
     },
 
@@ -28,10 +28,10 @@ export const query_keys = {
     datasets: {
         all: ['datasets'] as const,
         list: (page: number, limit: number) =>
-            [...query_keys.datasets.all, 'list', { page, limit }] as const,
+            [...queryKeys.datasets.all, 'list', { page, limit }] as const,
         detail: (id: string) =>
-            [...query_keys.datasets.all, 'detail', id] as const,
+            [...queryKeys.datasets.all, 'detail', id] as const,
         data: (id: string, params: Record<string, any>) =>
-            [...query_keys.datasets.all, 'data', id, params] as const,
+            [...queryKeys.datasets.all, 'data', id, params] as const,
     },
 } as const

@@ -10,7 +10,7 @@ import { JoinStepType } from '@/components/datasets/join-step-type'
 import { JoinStepConditions } from '@/components/datasets/join-step-conditions'
 import { JoinStepColumns } from '@/components/datasets/join-step-columns'
 import { JoinResult } from '@/components/datasets/join-result'
-import { use_join_query, use_export_join_query } from '@/lib/hooks/mutations/use-join-query'
+import { useJoinQuery, useExportJoinQuery } from '@/lib/hooks/mutations/use-join-query'
 import { ChevronLeft, ChevronRight, Play, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
@@ -26,101 +26,101 @@ const STEPS = [
  * Join Builder Page Component - Supports multi-table joins (up to 5 tables)
  */
 function JoinBuilderPageContent() {
-    const search_params = useSearchParams()
-    const initial_base_id = search_params.get('base')
+    const searchParams = useSearchParams()
+    const initialBaseId = searchParams.get('base')
 
-    const [current_step, set_current_step] = useState(1)
-    const [builder_state, set_builder_state] = useState<JoinBuilderState>({
-        base_dataset_id: initial_base_id,
-        join_tables: [],
-        selected_columns: [],
+    const [currentStep, setCurrentStep] = useState(1)
+    const [builderState, setBuilderState] = useState<JoinBuilderState>({
+        baseDatasetId: initialBaseId,
+        joinTables: [],
+        selectedColumns: [],
     })
 
-    const execute_join_mutation = use_join_query()
-    const export_join_mutation = use_export_join_query()
+    const executeJoinMutation = useJoinQuery()
+    const exportJoinMutation = useExportJoinQuery()
 
     // Validation checks
-    const can_proceed_step_1 = builder_state.base_dataset_id && builder_state.join_tables.length > 0
-    const can_proceed_step_2 = builder_state.join_tables.every((t) => t.join_type)
-    const can_proceed_step_3 = builder_state.join_tables.every(
-        (t) => t.join_type === 'cross' || (t.conditions.length > 0 && t.conditions.every((c) => c.left_column && c.right_column && c.operator))
+    const canProceedStep1 = builderState.baseDatasetId && builderState.joinTables.length > 0
+    const canProceedStep2 = builderState.joinTables.every((t) => t.joinType)
+    const canProceedStep3 = builderState.joinTables.every(
+        (t) => t.joinType === 'cross' || (t.conditions.length > 0 && t.conditions.every((c) => c.leftColumn && c.rightColumn && c.operator))
     )
-    const can_proceed_step_4 = builder_state.selected_columns.length > 0
+    const canProceedStep4 = builderState.selectedColumns.length > 0
 
-    const can_proceed = () => {
-        switch (current_step) {
+    const canProceed = () => {
+        switch (currentStep) {
             case 1:
-                return can_proceed_step_1
+                return canProceedStep1
             case 2:
-                return can_proceed_step_2
+                return canProceedStep2
             case 3:
-                return can_proceed_step_3
+                return canProceedStep3
             case 4:
-                return can_proceed_step_4
+                return canProceedStep4
             default:
                 return true
         }
     }
 
-    const handle_next = () => {
-        if (can_proceed() && current_step < STEPS.length) {
-            set_current_step(current_step + 1)
+    const handleNext = () => {
+        if (canProceed() && currentStep < STEPS.length) {
+            setCurrentStep(currentStep + 1)
         }
     }
 
-    const handle_previous = () => {
-        if (current_step > 1) {
-            set_current_step(current_step - 1)
+    const handlePrevious = () => {
+        if (currentStep > 1) {
+            setCurrentStep(currentStep - 1)
         }
     }
 
-    const handle_execute_join = () => {
+    const handleExecuteJoin = () => {
         if (
-            !builder_state.base_dataset_id ||
-            builder_state.join_tables.length === 0 ||
-            builder_state.selected_columns.length === 0
+            !builderState.baseDatasetId ||
+            builderState.joinTables.length === 0 ||
+            builderState.selectedColumns.length === 0
         ) {
             return
         }
 
         const request: JoinQueryRequest = {
-            base_dataset_id: builder_state.base_dataset_id,
-            join_tables: builder_state.join_tables,
-            select_columns: builder_state.selected_columns,
+            baseDatasetId: builderState.baseDatasetId,
+            joinTables: builderState.joinTables,
+            selectColumns: builderState.selectedColumns,
             page: 1,
             limit: 50,
         }
 
-        execute_join_mutation.mutate(request)
+        executeJoinMutation.mutate(request)
     }
 
-    const handle_export_join = () => {
+    const handleExportJoin = () => {
         if (
-            !builder_state.base_dataset_id ||
-            builder_state.join_tables.length === 0 ||
-            builder_state.selected_columns.length === 0
+            !builderState.baseDatasetId ||
+            builderState.joinTables.length === 0 ||
+            builderState.selectedColumns.length === 0
         ) {
             return
         }
 
         const request: JoinQueryRequest = {
-            base_dataset_id: builder_state.base_dataset_id,
-            join_tables: builder_state.join_tables,
-            select_columns: builder_state.selected_columns,
+            baseDatasetId: builderState.baseDatasetId,
+            joinTables: builderState.joinTables,
+            selectColumns: builderState.selectedColumns,
         }
 
-        export_join_mutation.mutate(request)
+        exportJoinMutation.mutate(request)
     }
 
     // Get all dataset IDs for column selection
-    const get_all_dataset_ids = (): string[] => {
+    const getAllDatasetIds = (): string[] => {
         const ids: string[] = []
-        if (builder_state.base_dataset_id) {
-            ids.push(builder_state.base_dataset_id)
+        if (builderState.baseDatasetId) {
+            ids.push(builderState.baseDatasetId)
         }
-        builder_state.join_tables.forEach((t) => {
-            if (t.dataset_id) {
-                ids.push(t.dataset_id)
+        builderState.joinTables.forEach((t) => {
+            if (t.datasetId) {
+                ids.push(t.datasetId)
             }
         })
         return ids
@@ -149,9 +149,9 @@ function JoinBuilderPageContent() {
                 <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                         {STEPS.map((step, index) => {
-                            const is_current = current_step === step.id
-                            const is_completed = current_step > step.id
-                            const is_last = index === STEPS.length - 1
+                            const isCurrent = currentStep === step.id
+                            const isCompleted = currentStep > step.id
+                            const isLast = index === STEPS.length - 1
 
                             return (
                                 <div key={step.id} className="flex items-center flex-1">
@@ -161,24 +161,24 @@ function JoinBuilderPageContent() {
                                                 w-10 h-10 rounded-full flex items-center justify-center font-semibold
                                                 transition-colors duration-200
                                                 ${
-                                                    is_current
+                                                    isCurrent
                                                         ? 'bg-primary text-primary-foreground'
-                                                        : is_completed
+                                                        : isCompleted
                                                         ? 'bg-green-600 text-white'
                                                         : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                                                 }
                                             `}
                                         >
-                                            {is_completed ? '✓' : step.id}
+                                            {isCompleted ? '✓' : step.id}
                                         </div>
                                         <div className="mt-2 text-center">
                                             <p
                                                 className={`
                                                     text-sm font-medium
                                                     ${
-                                                        is_current
+                                                        isCurrent
                                                             ? 'text-primary'
-                                                            : is_completed
+                                                            : isCompleted
                                                             ? 'text-green-600 dark:text-green-400'
                                                             : 'text-gray-500 dark:text-gray-400'
                                                     }
@@ -191,12 +191,12 @@ function JoinBuilderPageContent() {
                                             </p>
                                         </div>
                                     </div>
-                                    {!is_last && (
+                                    {!isLast && (
                                         <div
                                             className={`
                                                 flex-1 h-0.5 -mt-5
                                                 ${
-                                                    is_completed
+                                                    isCompleted
                                                         ? 'bg-green-600'
                                                         : 'bg-gray-200 dark:bg-gray-700'
                                                 }
@@ -212,65 +212,65 @@ function JoinBuilderPageContent() {
 
             {/* Step Content */}
             <div className="min-h-[400px]">
-                {current_step === 1 && (
+                {currentStep === 1 && (
                     <JoinStepTables
-                        base_dataset_id={builder_state.base_dataset_id}
-                        join_tables={builder_state.join_tables}
-                        on_change={(base_id, join_tables) =>
-                            set_builder_state((prev) => ({
+                        baseDatasetId={builderState.baseDatasetId}
+                        joinTables={builderState.joinTables}
+                        onChange={(baseId, joinTables) =>
+                            setBuilderState((prev) => ({
                                 ...prev,
-                                base_dataset_id: base_id,
-                                join_tables,
+                                baseDatasetId: baseId,
+                                joinTables,
                             }))
                         }
                     />
                 )}
 
-                {current_step === 2 && (
+                {currentStep === 2 && (
                     <JoinStepType
-                        join_tables={builder_state.join_tables}
-                        on_change={(join_tables) =>
-                            set_builder_state((prev) => ({
+                        joinTables={builderState.joinTables}
+                        onChange={(joinTables) =>
+                            setBuilderState((prev) => ({
                                 ...prev,
-                                join_tables,
+                                joinTables,
                             }))
                         }
                     />
                 )}
 
-                {current_step === 3 && (
+                {currentStep === 3 && (
                     <JoinStepConditions
-                        base_dataset_id={builder_state.base_dataset_id}
-                        join_tables={builder_state.join_tables}
-                        on_change={(join_tables) =>
-                            set_builder_state((prev) => ({
+                        baseDatasetId={builderState.baseDatasetId}
+                        joinTables={builderState.joinTables}
+                        onChange={(joinTables) =>
+                            setBuilderState((prev) => ({
                                 ...prev,
-                                join_tables,
+                                joinTables,
                             }))
                         }
                     />
                 )}
 
-                {current_step === 4 && (
+                {currentStep === 4 && (
                     <JoinStepColumns
-                        dataset_ids={get_all_dataset_ids()}
-                        selected_columns={builder_state.selected_columns}
-                        on_change={(columns) =>
-                            set_builder_state((prev) => ({
+                        datasetIds={getAllDatasetIds()}
+                        selectedColumns={builderState.selectedColumns}
+                        onChange={(columns) =>
+                            setBuilderState((prev) => ({
                                 ...prev,
-                                selected_columns: columns,
+                                selectedColumns: columns,
                             }))
                         }
                     />
                 )}
 
-                {current_step === 5 && (
+                {currentStep === 5 && (
                     <JoinResult
-                        result={execute_join_mutation.data || null}
-                        is_loading={execute_join_mutation.isPending}
-                        is_error={execute_join_mutation.isError}
-                        on_export={handle_export_join}
-                        is_exporting={export_join_mutation.isPending}
+                        result={executeJoinMutation.data || null}
+                        isLoading={executeJoinMutation.isPending}
+                        isError={executeJoinMutation.isError}
+                        onExport={handleExportJoin}
+                        isExporting={exportJoinMutation.isPending}
                     />
                 )}
             </div>
@@ -281,49 +281,49 @@ function JoinBuilderPageContent() {
                     <div className="flex items-center justify-between gap-4">
                         <Button
                             variant="outline"
-                            onClick={handle_previous}
-                            disabled={current_step === 1}
+                            onClick={handlePrevious}
+                            disabled={currentStep === 1}
                         >
                             <ChevronLeft className="h-4 w-4 mr-2" />
                             Previous
                         </Button>
 
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                            Step {current_step} of {STEPS.length}
+                            Step {currentStep} of {STEPS.length}
                         </div>
 
-                        {current_step < STEPS.length - 1 ? (
-                            <Button onClick={handle_next} disabled={!can_proceed()}>
+                        {currentStep < STEPS.length - 1 ? (
+                            <Button onClick={handleNext} disabled={!canProceed()}>
                                 Next
                                 <ChevronRight className="h-4 w-4 ml-2" />
                             </Button>
-                        ) : current_step === STEPS.length - 1 ? (
-                            <Button onClick={handle_next} disabled={!can_proceed()}>
+                        ) : currentStep === STEPS.length - 1 ? (
+                            <Button onClick={handleNext} disabled={!canProceed()}>
                                 Review & Execute
                                 <ChevronRight className="h-4 w-4 ml-2" />
                             </Button>
                         ) : (
                             <Button
-                                onClick={handle_execute_join}
+                                onClick={handleExecuteJoin}
                                 disabled={
-                                    execute_join_mutation.isPending ||
-                                    !builder_state.base_dataset_id ||
-                                    builder_state.join_tables.length === 0
+                                    executeJoinMutation.isPending ||
+                                    !builderState.baseDatasetId ||
+                                    builderState.joinTables.length === 0
                                 }
                             >
                                 <Play className="h-4 w-4 mr-2" />
-                                {execute_join_mutation.isPending ? 'Executing...' : 'Execute Join'}
+                                {executeJoinMutation.isPending ? 'Executing...' : 'Execute Join'}
                             </Button>
                         )}
                     </div>
 
                     {/* Validation Messages */}
-                    {current_step < STEPS.length && !can_proceed() && (
+                    {currentStep < STEPS.length && !canProceed() && (
                         <div className="mt-4 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-md">
-                            {current_step === 1 && 'Please select a base table and at least one join table'}
-                            {current_step === 2 && 'Please select join type for each table'}
-                            {current_step === 3 && 'Please complete all join conditions (not required for CROSS JOIN)'}
-                            {current_step === 4 && 'Please select at least one column'}
+                            {currentStep === 1 && 'Please select a base table and at least one join table'}
+                            {currentStep === 2 && 'Please select join type for each table'}
+                            {currentStep === 3 && 'Please complete all join conditions (not required for CROSS JOIN)'}
+                            {currentStep === 4 && 'Please select at least one column'}
                         </div>
                     )}
                 </CardContent>

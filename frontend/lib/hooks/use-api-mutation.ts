@@ -79,7 +79,7 @@ export function useApiMutation<TData = unknown, TError = any, TVariables = void>
     onError: customOnError,
     mutationOptions
 }: UseApiMutationOptions<TData, TError, TVariables>) {
-    const query_client = useQueryClient()
+    const queryClientInstance = useQueryClient()
 
     return useMutation<TData, TError, TVariables>({
         mutationFn,
@@ -92,10 +92,10 @@ export function useApiMutation<TData = unknown, TError = any, TVariables = void>
 
             // Invalidate specified query keys
             if (invalidateKeys) {
-                const keys_array = Array.isArray(invalidateKeys[0]) ? invalidateKeys : [invalidateKeys]
+                const keysArray = Array.isArray(invalidateKeys[0]) ? invalidateKeys : [invalidateKeys]
 
-                for (const key of keys_array as QueryKey[]) {
-                    await query_client.invalidateQueries({ queryKey: key })
+                for (const key of keysArray as QueryKey[]) {
+                    await queryClientInstance.invalidateQueries({ queryKey: key })
                 }
             }
 

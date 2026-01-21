@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { use_import_csv } from '@/lib/hooks/mutations/use-import-csv'
+import { useImportCsv } from '@/lib/hooks/mutations/use-import-csv'
 import { CSVImportError } from '@/types/admin'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,26 +22,26 @@ interface CSVImportDialogProps {
 
 export function CSVImportDialog({ open, onOpenChange }: CSVImportDialogProps) {
     const [file, setFile] = useState<File | null>(null)
-    const import_mutation = use_import_csv()
+    const importMutation = useImportCsv()
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setFile(e.target.files[0])
-            import_mutation.reset()
+            importMutation.reset()
         }
     }
 
     const handleImport = () => {
         if (!file) return
 
-        import_mutation.mutate(file, {
+        importMutation.mutate(file, {
             onSuccess: (result) => {
                 if (result.failureCount === 0) {
                     // All succeeded, close dialog after delay
                     setTimeout(() => {
                         onOpenChange(false)
                         setFile(null)
-                        import_mutation.reset()
+                        importMutation.reset()
                     }, 2000)
                 }
             },
@@ -51,7 +51,7 @@ export function CSVImportDialog({ open, onOpenChange }: CSVImportDialogProps) {
     const handleClose = () => {
         onOpenChange(false)
         setFile(null)
-        import_mutation.reset()
+        importMutation.reset()
     }
 
     return (
@@ -65,7 +65,7 @@ export function CSVImportDialog({ open, onOpenChange }: CSVImportDialogProps) {
                 </DialogHeader>
 
                 <div className="space-y-4">
-                    {!import_mutation.data && (
+                    {!importMutation.data && (
                         <>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -75,7 +75,7 @@ export function CSVImportDialog({ open, onOpenChange }: CSVImportDialogProps) {
                                     type="file"
                                     accept=".csv"
                                     onChange={handleFileChange}
-                                    disabled={import_mutation.isPending}
+                                    disabled={importMutation.isPending}
                                 />
                                 <p className="text-xs text-gray-500 mt-1">
                                     Format: email,name,role (max 10MB)
@@ -93,35 +93,35 @@ export function CSVImportDialog({ open, onOpenChange }: CSVImportDialogProps) {
                         </>
                     )}
 
-                    {import_mutation.data && (
+                    {importMutation.data && (
                         <div className="space-y-3">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-green-50 p-3 rounded">
                                     <p className="text-sm text-gray-600">Success</p>
                                     <p className="text-2xl font-bold text-green-600">
-                                        {import_mutation.data.successCount}
+                                        {importMutation.data.successCount}
                                     </p>
                                 </div>
                                 <div className="bg-red-50 p-3 rounded">
                                     <p className="text-sm text-gray-600">Failed</p>
                                     <p className="text-2xl font-bold text-red-600">
-                                        {import_mutation.data.failureCount}
+                                        {importMutation.data.failureCount}
                                     </p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 text-sm">
-                                <p>Created: <span className="font-medium">{import_mutation.data.createdCount}</span></p>
-                                <p>Updated: <span className="font-medium">{import_mutation.data.updatedCount}</span></p>
+                                <p>Created: <span className="font-medium">{importMutation.data.createdCount}</span></p>
+                                <p>Updated: <span className="font-medium">{importMutation.data.updatedCount}</span></p>
                             </div>
 
-                            {import_mutation.data.defaultPassword && (
+                            {importMutation.data.defaultPassword && (
                                 <div className="bg-yellow-50 border border-yellow-200 p-3 rounded">
                                     <p className="text-sm font-medium text-yellow-800 mb-1">
                                         Default Password for New Users:
                                     </p>
                                     <code className="text-sm bg-white px-2 py-1 rounded border">
-                                        {import_mutation.data.defaultPassword}
+                                        {importMutation.data.defaultPassword}
                                     </code>
                                     <p className="text-xs text-yellow-700 mt-1">
                                         Save this password! Users should change it on first login.
@@ -129,7 +129,7 @@ export function CSVImportDialog({ open, onOpenChange }: CSVImportDialogProps) {
                                 </div>
                             )}
 
-                            {import_mutation.data.errors && import_mutation.data.errors.length > 0 && (
+                            {importMutation.data.errors && importMutation.data.errors.length > 0 && (
                                 <div className="border rounded max-h-48 overflow-y-auto">
                                     <table className="min-w-full divide-y divide-gray-200 text-sm">
                                         <thead className="bg-gray-50">
@@ -140,7 +140,7 @@ export function CSVImportDialog({ open, onOpenChange }: CSVImportDialogProps) {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200">
-                                            {import_mutation.data.errors?.map((error: CSVImportError, idx: number) => (
+                                            {importMutation.data.errors?.map((error: CSVImportError, idx: number) => (
                                                 <tr key={idx}>
                                                     <td className="px-3 py-2">{error.row}</td>
                                                     <td className="px-3 py-2">{error.email || '-'}</td>
@@ -158,12 +158,12 @@ export function CSVImportDialog({ open, onOpenChange }: CSVImportDialogProps) {
                 </div>
 
                 <DialogFooter>
-                    {!import_mutation.data ? (
+                    {!importMutation.data ? (
                         <>
-                            <Button variant="outline" onClick={handleClose} disabled={import_mutation.isPending}>
+                            <Button variant="outline" onClick={handleClose} disabled={importMutation.isPending}>
                                 Cancel
                             </Button>
-                            <Button onClick={handleImport} isLoading={import_mutation.isPending} loadingText="Importing..." disabled={!file}>
+                            <Button onClick={handleImport} isLoading={importMutation.isPending} loadingText="Importing..." disabled={!file}>
                                 Import
                             </Button>
                         </>

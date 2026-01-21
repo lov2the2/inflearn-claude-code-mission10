@@ -7,8 +7,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Info } from 'lucide-react'
 
 interface JoinStepTypeProps {
-    join_tables: JoinTableConfig[]
-    on_change: (join_tables: JoinTableConfig[]) => void
+    joinTables: JoinTableConfig[]
+    onChange: (joinTables: JoinTableConfig[]) => void
 }
 
 type JoinType = 'inner' | 'left' | 'right' | 'full' | 'cross'
@@ -45,15 +45,15 @@ const JOIN_TYPE_INFO: Record<JoinType, { title: string; description: string; exa
  * Step 2: Join type selection component
  * Allows users to select the type of join operation for each join table
  */
-export function JoinStepType({ join_tables, on_change }: JoinStepTypeProps) {
-    const handle_type_change = (index: number, join_type: JoinType) => {
-        const updated = join_tables.map((table, i) =>
-            i === index ? { ...table, join_type, conditions: join_type === 'cross' ? [] : table.conditions } : table
+export function JoinStepType({ joinTables, onChange }: JoinStepTypeProps) {
+    const handleTypeChange = (index: number, joinType: JoinType) => {
+        const updated = joinTables.map((table, i) =>
+            i === index ? { ...table, joinType: joinType, conditions: joinType === 'cross' ? [] : table.conditions } : table
         )
-        on_change(updated)
+        onChange(updated)
     }
 
-    if (join_tables.length === 0) {
+    if (joinTables.length === 0) {
         return (
             <div className="text-center py-12">
                 <p className="text-gray-600 dark:text-gray-400">No join tables selected</p>
@@ -63,7 +63,7 @@ export function JoinStepType({ join_tables, on_change }: JoinStepTypeProps) {
 
     return (
         <div className="space-y-6">
-            {join_tables.map((table, index) => (
+            {joinTables.map((table, index) => (
                 <Card key={index}>
                     <CardHeader>
                         <CardTitle>Join Table {index + 1} - Select Join Type</CardTitle>
@@ -73,13 +73,13 @@ export function JoinStepType({ join_tables, on_change }: JoinStepTypeProps) {
                     </CardHeader>
                     <CardContent>
                         <RadioGroup
-                            value={table.join_type}
-                            onValueChange={(value) => handle_type_change(index, value as JoinType)}
+                            value={table.joinType}
+                            onValueChange={(value) => handleTypeChange(index, value as JoinType)}
                         >
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {(Object.keys(JOIN_TYPE_INFO) as JoinType[]).map((type) => {
                                     const info = JOIN_TYPE_INFO[type]
-                                    const is_selected = table.join_type === type
+                                    const isSelected = table.joinType === type
 
                                     return (
                                         <div
@@ -88,12 +88,12 @@ export function JoinStepType({ join_tables, on_change }: JoinStepTypeProps) {
                                                 relative flex items-start space-x-3 rounded-lg border p-4 cursor-pointer
                                                 transition-colors duration-200
                                                 ${
-                                                    is_selected
+                                                    isSelected
                                                         ? 'border-primary bg-primary/5'
                                                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                                                 }
                                             `}
-                                            onClick={() => handle_type_change(index, type)}
+                                            onClick={() => handleTypeChange(index, type)}
                                         >
                                             <RadioGroupItem value={type} id={`${type}-${index}`} className="mt-1" />
                                             <div className="flex-1">
@@ -114,12 +114,12 @@ export function JoinStepType({ join_tables, on_change }: JoinStepTypeProps) {
                         <div className="mt-4 flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-md">
                             <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                             <p className="text-sm text-blue-800 dark:text-blue-300">
-                                {JOIN_TYPE_INFO[table.join_type].example}
+                                {JOIN_TYPE_INFO[table.joinType].example}
                             </p>
                         </div>
 
                         {/* Cross join warning */}
-                        {table.join_type === 'cross' && (
+                        {table.joinType === 'cross' && (
                             <div className="mt-4 flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-md">
                                 <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
                                 <p className="text-sm text-amber-800 dark:text-amber-300">

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { datasetsApi } from '@/lib/api/datasets'
-import { query_keys } from '@/lib/query/keys'
+import { queryKeys } from '@/lib/query/keys'
 
 /**
  * Query hook for dataset list with pagination
@@ -8,9 +8,9 @@ import { query_keys } from '@/lib/query/keys'
  * @param limit Items per page (default: 10)
  * @returns Query result with datasets array and pagination info
  */
-export function use_dataset_list(page: number = 1, limit: number = 10) {
+export function useDatasetList(page: number = 1, limit: number = 10) {
     return useQuery({
-        queryKey: query_keys.datasets.list(page, limit),
+        queryKey: queryKeys.datasets.list(page, limit),
         queryFn: () => datasetsApi.listDatasets(page, limit),
     })
 }

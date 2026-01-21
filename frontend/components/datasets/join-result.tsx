@@ -9,10 +9,10 @@ import { Download, Table, AlertCircle } from 'lucide-react'
 
 interface JoinResultProps {
     result: JoinQueryResponse | null
-    is_loading: boolean
-    is_error: boolean
-    on_export: () => void
-    is_exporting: boolean
+    isLoading: boolean
+    isError: boolean
+    onExport: () => void
+    isExporting: boolean
 }
 
 /**
@@ -21,15 +21,15 @@ interface JoinResultProps {
  */
 export function JoinResult({
     result,
-    is_loading,
-    is_error,
-    on_export,
-    is_exporting,
+    isLoading,
+    isError,
+    onExport,
+    isExporting,
 }: JoinResultProps) {
-    const [current_page, set_current_page] = useState(1)
+    const [currentPage, setCurrentPage] = useState(1)
     const ROWS_PER_PAGE = 10
 
-    if (is_loading) {
+    if (isLoading) {
         return (
             <Card>
                 <CardHeader>
@@ -46,7 +46,7 @@ export function JoinResult({
         )
     }
 
-    if (is_error) {
+    if (isError) {
         return (
             <Card>
                 <CardHeader>
@@ -85,11 +85,11 @@ export function JoinResult({
     }
 
     // Paginate rows
-    const total_rows = result.rows.length
-    const total_pages = Math.ceil(total_rows / ROWS_PER_PAGE)
-    const start_index = (current_page - 1) * ROWS_PER_PAGE
-    const end_index = start_index + ROWS_PER_PAGE
-    const paginated_rows = result.rows.slice(start_index, end_index)
+    const totalRows = result.rows.length
+    const totalPages = Math.ceil(totalRows / ROWS_PER_PAGE)
+    const startIndex = (currentPage - 1) * ROWS_PER_PAGE
+    const endIndex = startIndex + ROWS_PER_PAGE
+    const paginatedRows = result.rows.slice(startIndex, endIndex)
 
     return (
         <div className="space-y-6">
@@ -102,23 +102,23 @@ export function JoinResult({
                                 Join Result
                             </CardTitle>
                             <CardDescription>
-                                {total_rows.toLocaleString()} rows • {result.columns.length} columns
+                                {totalRows.toLocaleString()} rows • {result.columns.length} columns
                             </CardDescription>
                         </div>
-                        <Button onClick={on_export} disabled={is_exporting || total_rows === 0}>
+                        <Button onClick={onExport} disabled={isExporting || totalRows === 0}>
                             <Download className="h-4 w-4 mr-2" />
-                            {is_exporting ? 'Exporting...' : 'Export CSV'}
+                            {isExporting ? 'Exporting...' : 'Export CSV'}
                         </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
-                    {total_rows > 0 ? (
+                    {totalRows > 0 ? (
                         <DynamicDataTable
                             columns={result.columns}
-                            rows={paginated_rows}
-                            current_page={current_page}
-                            total_pages={total_pages}
-                            on_page_change={set_current_page}
+                            rows={paginatedRows}
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
                         />
                     ) : (
                         <div className="text-center py-12 text-gray-500 dark:text-gray-400">
@@ -134,7 +134,7 @@ export function JoinResult({
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                         <div className="space-y-1">
                             <p className="text-sm text-gray-600 dark:text-gray-400">Total Rows</p>
-                            <p className="text-2xl font-bold">{total_rows.toLocaleString()}</p>
+                            <p className="text-2xl font-bold">{totalRows.toLocaleString()}</p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-sm text-gray-600 dark:text-gray-400">Columns</p>
@@ -143,7 +143,7 @@ export function JoinResult({
                         <div className="space-y-1">
                             <p className="text-sm text-gray-600 dark:text-gray-400">Current Page</p>
                             <p className="text-2xl font-bold">
-                                {current_page} / {total_pages}
+                                {currentPage} / {totalPages}
                             </p>
                         </div>
                         <div className="space-y-1">

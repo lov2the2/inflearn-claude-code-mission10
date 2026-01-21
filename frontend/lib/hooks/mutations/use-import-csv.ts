@@ -1,6 +1,6 @@
 import { adminApi } from '@/lib/api/admin'
 import { CSVImportResult } from '@/types'
-import { query_keys } from '@/lib/query/keys'
+import { queryKeys } from '@/lib/query/keys'
 import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 import { toast } from 'sonner'
 
@@ -9,10 +9,10 @@ import { toast } from 'sonner'
  * Handles file upload and automatic cache invalidation
  * @returns Mutation object with mutate function and states
  */
-export function use_import_csv() {
+export function useImportCsv() {
     return useApiMutation({
         mutationFn: (file: File) => adminApi.importCSV(file),
-        invalidateKeys: query_keys.admin.users.all(),
+        invalidateKeys: queryKeys.admin.users.all(),
         successMessage: (result: CSVImportResult) =>
             result.failureCount === 0
                 ? `Successfully imported ${result.successCount} users`

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { use_upload_dataset } from '@/lib/hooks/mutations/use-upload-dataset'
+import { useUploadDataset } from '@/lib/hooks/mutations/use-upload-dataset'
 import { FormDialog } from '@/components/ui/form-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,17 +16,17 @@ interface UploadDatasetDialogProps {
     onOpenChange: (open: boolean) => void
 }
 
-const upload_schema = z.object({
-    display_name: z.string().min(1, 'Display name is required').max(100),
+const uploadSchema = z.object({
+    displayName: z.string().min(1, 'Display name is required').max(100),
     description: z.string().max(500).optional(),
     file: z.instanceof(File, { message: 'CSV file is required' }),
 })
 
-type UploadFormData = z.infer<typeof upload_schema>
+type UploadFormData = z.infer<typeof uploadSchema>
 
 export function UploadDatasetDialog({ open, onOpenChange }: UploadDatasetDialogProps) {
     const [file, setFile] = useState<File | null>(null)
-    const upload_mutation = use_upload_dataset()
+    const uploadMutation = useUploadDataset()
 
     const {
         register,
@@ -35,23 +35,23 @@ export function UploadDatasetDialog({ open, onOpenChange }: UploadDatasetDialogP
         reset,
         setValue,
     } = useForm<UploadFormData>({
-        resolver: zodResolver(upload_schema),
+        resolver: zodResolver(uploadSchema),
     })
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            const selected_file = e.target.files[0]
-            setFile(selected_file)
-            setValue('file', selected_file)
-            upload_mutation.reset()
+            const selectedFile = e.target.files[0]
+            setFile(selectedFile)
+            setValue('file', selectedFile)
+            uploadMutation.reset()
         }
     }
 
     const onSubmit = (data: UploadFormData) => {
-        upload_mutation.mutate(
+        uploadMutation.mutate(
             {
                 file: data.file,
-                display_name: data.display_name,
+                displayName: data.displayName,
                 description: data.description || '',
             },
             {
@@ -68,7 +68,7 @@ export function UploadDatasetDialog({ open, onOpenChange }: UploadDatasetDialogP
         onOpenChange(false)
         reset()
         setFile(null)
-        upload_mutation.reset()
+        uploadMutation.reset()
     }
 
     return (
@@ -79,31 +79,31 @@ export function UploadDatasetDialog({ open, onOpenChange }: UploadDatasetDialogP
             description="Upload a CSV file to create a new dynamic dataset"
             onSubmit={handleSubmit(onSubmit)}
             submitLabel="Upload"
-            isLoading={upload_mutation.isPending}
+            isLoading={uploadMutation.isPending}
             loadingText="Uploading..."
             isValid={!!file}
             className="max-w-2xl"
-            hideFooter={!!upload_mutation.data}
+            hideFooter={!!uploadMutation.data}
             customFooter={
-                upload_mutation.data ? (
+                uploadMutation.data ? (
                     <Button type="button" onClick={handleClose} className="w-full">
                         Close
                     </Button>
                 ) : undefined
             }
         >
-            {!upload_mutation.data ? (
+            {!uploadMutation.data ? (
                 <>
                     <div>
-                        <Label htmlFor="display_name">Display Name *</Label>
+                        <Label htmlFor="displayName">Display Name *</Label>
                         <Input
-                            id="display_name"
-                            {...register('display_name')}
+                            id="displayName"
+                            {...register('displayName')}
                             placeholder="e.g., Sales Data 2024"
-                            disabled={upload_mutation.isPending}
+                            disabled={uploadMutation.isPending}
                         />
-                        {errors.display_name && (
-                            <p className="text-sm text-red-600 mt-1">{errors.display_name.message}</p>
+                        {errors.displayName && (
+                            <p className="text-sm text-red-600 mt-1">{errors.displayName.message}</p>
                         )}
                     </div>
 
@@ -114,7 +114,7 @@ export function UploadDatasetDialog({ open, onOpenChange }: UploadDatasetDialogP
                             {...register('description')}
                             placeholder="Brief description of the dataset"
                             rows={3}
-                            disabled={upload_mutation.isPending}
+                            disabled={uploadMutation.isPending}
                         />
                         {errors.description && (
                             <p className="text-sm text-red-600 mt-1">{errors.description.message}</p>
@@ -128,7 +128,7 @@ export function UploadDatasetDialog({ open, onOpenChange }: UploadDatasetDialogP
                             type="file"
                             accept=".csv"
                             onChange={handleFileChange}
-                            disabled={upload_mutation.isPending}
+                            disabled={uploadMutation.isPending}
                         />
                         {file && (
                             <p className="text-xs text-gray-500 mt-1">
@@ -154,9 +154,9 @@ export function UploadDatasetDialog({ open, onOpenChange }: UploadDatasetDialogP
                         ✓ Dataset created successfully!
                     </p>
                     <div className="space-y-1 text-sm text-green-700 dark:text-green-400">
-                        <p>Name: {upload_mutation.data.dataset.displayName}</p>
-                        <p>Rows imported: {upload_mutation.data.rowsImported.toLocaleString()}</p>
-                        <p>Columns: {upload_mutation.data.dataset.columns.length}</p>
+                        <p>Name: {uploadMutation.data.dataset.displayName}</p>
+                        <p>Rows imported: {uploadMutation.data.rowsImported.toLocaleString()}</p>
+                        <p>Columns: {uploadMutation.data.dataset.columns.length}</p>
                     </div>
                 </div>
             )}

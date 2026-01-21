@@ -41,16 +41,16 @@ export const datasetsApi = {
     ): Promise<DatasetDataResponse> => {
         const { page = 1, limit = 50, sortBy, sortOrder, filters } = params
 
-        const query_params: Record<string, any> = { page, limit }
-        if (sortBy) query_params.sort_by = sortBy
-        if (sortOrder) query_params.sort_order = sortOrder
+        const queryParams: Record<string, any> = { page, limit }
+        if (sortBy) queryParams.sort_by = sortBy
+        if (sortOrder) queryParams.sort_order = sortOrder
         if (filters && filters.length > 0) {
-            query_params.filters = JSON.stringify(filters)
+            queryParams.filters = JSON.stringify(filters)
         }
 
         const response = await apiClient.get<ApiResponse<DatasetDataResponse>>(
             `/api/v1/datasets/${id}/data`,
-            { params: query_params }
+            { params: queryParams }
         )
         return response.data.data
     },
@@ -60,17 +60,17 @@ export const datasetsApi = {
      */
     uploadDataset: async (
         file: File,
-        display_name: string,
+        displayName: string,
         description: string
     ): Promise<CreateDatasetResponse> => {
-        const form_data = new FormData()
-        form_data.append('file', file)
-        form_data.append('display_name', display_name)
-        form_data.append('description', description)
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('display_name', displayName)
+        formData.append('description', description)
 
         const response = await apiClient.post<ApiResponse<CreateDatasetResponse>>(
             '/api/v1/datasets/upload',
-            form_data,
+            formData,
             {
                 headers: {
                     'Content-Type': 'multipart/form-data'

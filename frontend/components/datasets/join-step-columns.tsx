@@ -7,13 +7,13 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Columns, Check, X } from 'lucide-react'
-import { use_dataset_list } from '@/lib/hooks/queries/use-dataset-list'
+import { useDatasetList } from '@/lib/hooks/queries/use-dataset-list'
 import { useEffect, useState, useMemo } from 'react'
 
 interface JoinStepColumnsProps {
-    dataset_ids: string[]
-    selected_columns: string[]
-    on_change: (columns: string[]) => void
+    datasetIds: string[]
+    selectedColumns: string[]
+    onChange: (columns: string[]) => void
 }
 
 interface DatasetWithColumns {
@@ -26,18 +26,18 @@ interface DatasetWithColumns {
  * Allows users to select which columns to include in the join result (multi-table)
  */
 export function JoinStepColumns({
-    dataset_ids,
-    selected_columns,
-    on_change,
+    datasetIds,
+    selectedColumns,
+    onChange,
 }: JoinStepColumnsProps) {
-    const { data } = use_dataset_list(1, 100)
-    const [initialized, set_initialized] = useState(false)
+    const { data } = useDatasetList(1, 100)
+    const [initialized, setInitialized] = useState(false)
 
     // Get datasets with columns
-    const datasets_with_columns = useMemo<DatasetWithColumns[]>(() => {
+    const datasetsWithColumns = useMemo<DatasetWithColumns[]>(() => {
         if (!data?.datasets) return []
 
-        return dataset_ids
+        return datasetIds
             .map((id) => {
                 const dataset = data.datasets.find((d) => d.id === id)
                 if (!dataset) return null
@@ -47,22 +47,22 @@ export function JoinStepColumns({
                 }
             })
             .filter((d): d is DatasetWithColumns => d !== null)
-    }, [dataset_ids, data])
+    }, [datasetIds, data])
 
     // Get all column names
-    const all_column_names = useMemo(() => {
-        return datasets_with_columns.flatMap((d) => d.columns.map((c) => c.columnName))
-    }, [datasets_with_columns])
+    const allColumnNames = useMemo(() => {
+        return datasetsWithColumns.flatMap((d) => d.columns.map((c) => c.columnName))
+    }, [datasetsWithColumns])
 
     // Auto-select all columns on first load
     useEffect(() => {
-        if (!initialized && datasets_with_columns.length > 0 && selected_columns.length === 0) {
-            on_change(all_column_names)
-            set_initialized(true)
+        if (!initialized && datasetsWithColumns.length > 0 && selectedColumns.length === 0) {
+            onChange(allColumnNames)
+            setInitialized(true)
         }
-    }, [datasets_with_columns, initialized, selected_columns.length, all_column_names])
+    }, [datasetsWithColumns, initialized, selectedColumns.length, allColumnNames])
 
-    if (datasets_with_columns.length === 0) {
+    if (datasetsWithColumns.length === 0) {
         return (
             <Card>
                 <CardContent className="py-12 text-center">
@@ -74,40 +74,40 @@ export function JoinStepColumns({
         )
     }
 
-    const is_all_selected = selected_columns.length === all_column_names.length
+    const isAllSelected = selectedColumns.length === allColumnNames.length
 
-    const get_table_column_names = (dataset_index: number): string[] => {
-        return datasets_with_columns[dataset_index]?.columns.map((c) => c.columnName) || []
+    const getTableColumnNames = (datasetIndex: number): string[] => {
+        return datasetsWithColumns[datasetIndex]?.columns.map((c) => c.columnName) || []
     }
 
-    const is_table_all_selected = (dataset_index: number): boolean => {
-        const table_columns = get_table_column_names(dataset_index)
-        return table_columns.every((name) => selected_columns.includes(name))
+    const isTableAllSelected = (datasetIndex: number): boolean => {
+        const tableColumns = getTableColumnNames(datasetIndex)
+        return tableColumns.every((name) => selectedColumns.includes(name))
     }
 
-    const toggle_column = (column_name: string) => {
-        if (selected_columns.includes(column_name)) {
-            on_change(selected_columns.filter((c) => c !== column_name))
+    const toggleColumn = (columnName: string) => {
+        if (selectedColumns.includes(columnName)) {
+            onChange(selectedColumns.filter((c) => c !== columnName))
         } else {
-            on_change([...selected_columns, column_name])
+            onChange([...selectedColumns, columnName])
         }
     }
 
-    const toggle_all = () => {
-        if (is_all_selected) {
-            on_change([])
+    const toggleAll = () => {
+        if (isAllSelected) {
+            onChange([])
         } else {
-            on_change(all_column_names)
+            onChange(allColumnNames)
         }
     }
 
-    const toggle_table_all = (dataset_index: number) => {
-        const table_columns = get_table_column_names(dataset_index)
-        if (is_table_all_selected(dataset_index)) {
-            on_change(selected_columns.filter((c) => !table_columns.includes(c)))
+    const toggleTableAll = (datasetIndex: number) => {
+        const tableColumns = getTableColumnNames(datasetIndex)
+        if (isTableAllSelected(datasetIndex)) {
+            onChange(selectedColumns.filter((c) => !tableColumns.includes(c)))
         } else {
-            const new_selection = new Set([...selected_columns, ...table_columns])
-            on_change(Array.from(new_selection))
+            const newSelection = new Set([...selectedColumns, ...tableColumns])
+            onChange(Array.from(newSelection))
         }
     }
 
@@ -125,8 +125,8 @@ export function JoinStepColumns({
                                 Choose which columns to include in the join result
                             </CardDescription>
                         </div>
-                        <Button variant="outline" onClick={toggle_all}>
-                            {is_all_selected ? (
+                        <Button variant="outline" onClick={toggleAll}>
+                            {isAllSelected ? (
                                 <>
                                     <X className="h-4 w-4 mr-2" />
                                     Deselect All
@@ -141,32 +141,32 @@ export function JoinStepColumns({
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    {datasets_with_columns.map((dataset_with_cols, dataset_index) => {
-                        const { dataset, columns } = dataset_with_cols
-                        const is_base = dataset_index === 0
+                    {datasetsWithColumns.map((datasetWithCols, datasetIndex) => {
+                        const { dataset, columns } = datasetWithCols
+                        const isBase = datasetIndex === 0
 
                         return (
                             <div key={dataset.id} className="space-y-3">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <h3 className="font-semibold text-sm">
-                                            {is_base ? 'Base Table' : `Join Table ${dataset_index}`}
+                                            {isBase ? 'Base Table' : `Join Table ${datasetIndex}`}
                                         </h3>
                                         <Badge variant="outline">{dataset.displayName}</Badge>
                                     </div>
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        onClick={() => toggle_table_all(dataset_index)}
+                                        onClick={() => toggleTableAll(datasetIndex)}
                                     >
-                                        {is_table_all_selected(dataset_index)
+                                        {isTableAllSelected(datasetIndex)
                                             ? 'Deselect All'
                                             : 'Select All'}
                                     </Button>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {columns.map((col) => {
-                                        const is_checked = selected_columns.includes(col.columnName)
+                                        const isChecked = selectedColumns.includes(col.columnName)
                                         return (
                                             <div
                                                 key={col.id}
@@ -174,18 +174,18 @@ export function JoinStepColumns({
                                                     flex items-center space-x-2 p-3 rounded-md border cursor-pointer
                                                     transition-colors duration-200
                                                     ${
-                                                        is_checked
+                                                        isChecked
                                                             ? 'border-primary bg-primary/5'
                                                             : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                                                     }
                                                 `}
-                                                onClick={() => toggle_column(col.columnName)}
+                                                onClick={() => toggleColumn(col.columnName)}
                                             >
                                                 <Checkbox
                                                     id={`${dataset.id}-${col.columnName}`}
-                                                    checked={is_checked}
+                                                    checked={isChecked}
                                                     onCheckedChange={() =>
-                                                        toggle_column(col.columnName)
+                                                        toggleColumn(col.columnName)
                                                     }
                                                 />
                                                 <Label
@@ -215,10 +215,10 @@ export function JoinStepColumns({
                     <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600 dark:text-gray-400">Selected Columns</span>
                         <Badge variant="secondary">
-                            {selected_columns.length} / {all_column_names.length}
+                            {selectedColumns.length} / {allColumnNames.length}
                         </Badge>
                     </div>
-                    {selected_columns.length === 0 && (
+                    {selectedColumns.length === 0 && (
                         <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
                             Please select at least one column
                         </p>

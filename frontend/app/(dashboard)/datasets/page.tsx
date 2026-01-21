@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Upload, Database } from 'lucide-react'
-import { use_dataset_list } from '@/lib/hooks/queries/use-dataset-list'
+import { useDatasetList } from '@/lib/hooks/queries/use-dataset-list'
 import { DatasetCard } from '@/components/datasets/dataset-card'
 import { UploadDatasetDialog } from '@/components/datasets/upload-dataset-dialog'
 import { DeleteDatasetDialog } from '@/components/datasets/delete-dataset-dialog'
@@ -17,10 +17,10 @@ export default function DatasetsPage() {
     const router = useRouter()
     const [page, setPage] = useState(1)
     const [limit] = useState(12) // Grid layout: 3 columns x 4 rows
-    const [upload_dialog_open, setUploadDialogOpen] = useState(false)
-    const [delete_dialog_open, setDeleteDialogOpen] = useState(false)
-    const [selected_dataset, setSelectedDataset] = useState<{ id: string; name: string } | null>(null)
-    const [user_is_admin, setUserIsAdmin] = useState(false)
+    const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [selectedDataset, setSelectedDataset] = useState<{ id: string; name: string } | null>(null)
+    const [userIsAdmin, setUserIsAdmin] = useState(false)
 
     // Check admin role on mount
     useEffect(() => {
@@ -31,7 +31,7 @@ export default function DatasetsPage() {
     }, [])
 
     // Query hook for dataset list
-    const { data, isLoading } = use_dataset_list(page, limit)
+    const { data, isLoading } = useDatasetList(page, limit)
     const datasets = data?.datasets ?? []
     const total = data?.total ?? 0
 
@@ -48,7 +48,7 @@ export default function DatasetsPage() {
         setDeleteDialogOpen(true)
     }
 
-    const total_pages = Math.ceil(total / limit)
+    const totalPages = Math.ceil(total / limit)
 
     return (
         <>
@@ -59,7 +59,7 @@ export default function DatasetsPage() {
                             <Database className="h-6 w-6 text-blue-600" />
                             <CardTitle>Datasets</CardTitle>
                         </div>
-                        {user_is_admin && (
+                        {userIsAdmin && (
                             <Button
                                 onClick={() => setUploadDialogOpen(true)}
                                 className="gap-2"
@@ -85,11 +85,11 @@ export default function DatasetsPage() {
                                 No datasets yet
                             </h3>
                             <p className="text-gray-600 dark:text-gray-400 mb-4">
-                                {user_is_admin
+                                {userIsAdmin
                                     ? 'Upload your first CSV file to get started'
                                     : 'Contact an administrator to upload datasets'}
                             </p>
-                            {user_is_admin && (
+                            {userIsAdmin && (
                                 <Button onClick={() => setUploadDialogOpen(true)} className="gap-2">
                                     <Upload className="h-4 w-4" />
                                     Upload CSV
@@ -107,13 +107,13 @@ export default function DatasetsPage() {
                                         onView={handleView}
                                         onJoin={handleJoin}
                                         onDelete={(id) => handleDeleteClick(id, dataset.displayName)}
-                                        canDelete={user_is_admin}
+                                        canDelete={userIsAdmin}
                                     />
                                 ))}
                             </div>
 
                             {/* Pagination */}
-                            {total_pages > 1 && (
+                            {totalPages > 1 && (
                                 <div className="mt-6 flex justify-between items-center">
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
                                         Showing {(page - 1) * limit + 1} to {Math.min(page * limit, total)} of {total} datasets
@@ -127,12 +127,12 @@ export default function DatasetsPage() {
                                             Previous
                                         </Button>
                                         <span className="text-sm text-gray-600 dark:text-gray-400">
-                                            Page {page} of {total_pages}
+                                            Page {page} of {totalPages}
                                         </span>
                                         <Button
                                             variant="outline"
-                                            onClick={() => setPage(p => Math.min(total_pages, p + 1))}
-                                            disabled={page === total_pages}
+                                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                            disabled={page === totalPages}
                                         >
                                             Next
                                         </Button>
@@ -145,15 +145,15 @@ export default function DatasetsPage() {
             </Card>
 
             <UploadDatasetDialog
-                open={upload_dialog_open}
+                open={uploadDialogOpen}
                 onOpenChange={setUploadDialogOpen}
             />
 
             <DeleteDatasetDialog
-                open={delete_dialog_open}
+                open={deleteDialogOpen}
                 onOpenChange={setDeleteDialogOpen}
-                dataset_id={selected_dataset?.id ?? null}
-                dataset_name={selected_dataset?.name ?? ''}
+                datasetId={selectedDataset?.id ?? null}
+                datasetName={selectedDataset?.name ?? ''}
             />
         </>
     )

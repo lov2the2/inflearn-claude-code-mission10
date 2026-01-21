@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Search, UserPlus, Filter } from 'lucide-react'
 import { adminApi } from '@/lib/api/admin'
-import { use_user_list } from '@/lib/hooks/queries/use-user-list'
-import { use_update_role } from '@/lib/hooks/mutations/use-update-role'
-import { use_delete_user } from '@/lib/hooks/mutations/use-delete-user'
+import { useUserList } from '@/lib/hooks/queries/use-user-list'
+import { useUpdateRole } from '@/lib/hooks/mutations/use-update-role'
+import { useDeleteUser } from '@/lib/hooks/mutations/use-delete-user'
 import { UserListTable } from '@/components/admin/user-list-table'
 import { CSVImportDialog } from '@/components/admin/csv-import-dialog'
 import { CreateUserDialog } from '@/components/admin/create-user-dialog'
@@ -26,20 +26,20 @@ export default function AdminUsersPage() {
     const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
     // Query hook for user list with search and role filter
-    const { data, isLoading } = use_user_list(page, limit, search, role)
-    const users = data?.users ?? []
+    const { data, isLoading } = useUserList(page, limit, search, role)
+    const users = data?.data ?? []
     const total = data?.total ?? 0
 
     // Mutation hooks
-    const update_role_mutation = use_update_role()
-    const delete_user_mutation = use_delete_user()
+    const updateRoleMutation = useUpdateRole()
+    const deleteUserMutation = useDeleteUser()
 
     const handleRoleUpdate = async (userId: number, newRole: 'admin' | 'user') => {
-        update_role_mutation.mutate({ user_id: userId, new_role: newRole })
+        updateRoleMutation.mutate({ userId, newRole })
     }
 
     const handleDelete = async (userId: number) => {
-        delete_user_mutation.mutate(userId)
+        deleteUserMutation.mutate(userId)
     }
 
     const handleExport = async () => {

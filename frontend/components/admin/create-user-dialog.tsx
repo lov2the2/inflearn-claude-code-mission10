@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { use_create_user } from '@/lib/hooks/mutations/use-create-user'
+import { useCreateUser } from '@/lib/hooks/mutations/use-create-user'
 import {
     Dialog,
     DialogContent,
@@ -32,7 +32,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
-const create_user_schema = z.object({
+const createUserSchema = z.object({
     email: z.string().email('Invalid email address'),
     name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name too long'),
     password: z.string().optional(),
@@ -41,7 +41,7 @@ const create_user_schema = z.object({
     }),
 })
 
-type CreateUserFormData = z.infer<typeof create_user_schema>
+type CreateUserFormData = z.infer<typeof createUserSchema>
 
 interface CreateUserDialogProps {
     open: boolean
@@ -49,10 +49,10 @@ interface CreateUserDialogProps {
 }
 
 export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) {
-    const create_user_mutation = use_create_user()
+    const createUserMutation = useCreateUser()
 
     const form = useForm<CreateUserFormData>({
-        resolver: zodResolver(create_user_schema),
+        resolver: zodResolver(createUserSchema),
         defaultValues: {
             email: '',
             name: '',
@@ -63,7 +63,7 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
 
     const onSubmit = async (data: CreateUserFormData) => {
         try {
-            await create_user_mutation.mutateAsync(data)
+            await createUserMutation.mutateAsync(data)
             form.reset()
             onOpenChange(false)
         } catch (error) {
@@ -174,7 +174,7 @@ export function CreateUserDialog({ open, onOpenChange }: CreateUserDialogProps) 
                             </Button>
                             <Button
                                 type="submit"
-                                isLoading={create_user_mutation.isPending}
+                                isLoading={createUserMutation.isPending}
                                 loadingText="Creating..."
                             >
                                 Create User

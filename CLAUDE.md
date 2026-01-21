@@ -1,8 +1,8 @@
 # Developer Context - Go + Next.js Starter Kit
 
 > **Project**: Full-stack Starter Kit with Clean Architecture
-> **Version**: 1.5.0
-> **Last Updated**: 2026-01-13
+> **Version**: 1.5.1
+> **Last Updated**: 2026-01-22
 
 ---
 

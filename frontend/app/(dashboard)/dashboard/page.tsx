@@ -5,37 +5,37 @@ import { StatsCard } from '@/components/dashboard/stats-card'
 import { ActivityTable } from '@/components/dashboard/activity-table'
 import { AnalyticsSection } from '@/components/dashboard/analytics-section'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
-import { use_user_profile } from '@/lib/hooks/queries/use-user-profile'
-import { use_user_stats } from '@/lib/hooks/queries/use-user-stats'
-import { use_user_activity } from '@/lib/hooks/queries/use-user-activity'
+import { useUserProfile } from '@/lib/hooks/queries/use-user-profile'
+import { useUserStats } from '@/lib/hooks/queries/use-user-stats'
+import { useUserActivity } from '@/lib/hooks/queries/use-user-activity'
 import { Activity, Calendar, LogIn, Zap } from 'lucide-react'
 
 export default function DashboardPage() {
     const {
         data: profile,
-        isLoading: profile_loading,
-        isError: profile_error
-    } = use_user_profile()
+        isLoading: profileLoading,
+        isError: profileError
+    } = useUserProfile()
 
     const {
         data: stats,
-        isLoading: stats_loading,
-        isError: stats_error
-    } = use_user_stats()
+        isLoading: statsLoading,
+        isError: statsError
+    } = useUserStats()
 
     const {
-        data: activity_data,
-        isLoading: activity_loading,
-        isError: activity_error
-    } = use_user_activity(1, 10)
+        data: activityData,
+        isLoading: activityLoading,
+        isError: activityError
+    } = useUserActivity(1, 10)
 
     // Combine loading states
-    const is_loading = profile_loading || stats_loading || activity_loading
-    const has_error = profile_error || stats_error || activity_error
+    const isLoading = profileLoading || statsLoading || activityLoading
+    const hasError = profileError || statsError || activityError
 
-    const activity = activity_data?.data ?? []
+    const activity = activityData?.data ?? []
 
-    if (is_loading) {
+    if (isLoading) {
         return (
             <div className="space-y-8">
                 <div>
@@ -56,7 +56,7 @@ export default function DashboardPage() {
         )
     }
 
-    if (has_error) {
+    if (hasError) {
         return (
             <div className="space-y-6">
                 <div>

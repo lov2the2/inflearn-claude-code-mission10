@@ -13,7 +13,7 @@ export interface ListUsersParams {
 }
 
 export interface ListUsersResponse {
-    users: User[]
+    data: User[]
     total: number
     page: number
     limit: number

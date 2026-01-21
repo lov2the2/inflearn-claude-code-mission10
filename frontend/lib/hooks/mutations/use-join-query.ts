@@ -7,7 +7,7 @@ import { useApiMutation } from '@/lib/hooks/use-api-mutation'
  * Does not invalidate cache (read-only operation)
  * @returns Mutation object with mutate function and states
  */
-export function use_join_query() {
+export function useJoinQuery() {
     return useApiMutation({
         mutationFn: (request: JoinQueryRequest) =>
             datasetsApi.executeJoinQuery(request),
@@ -20,7 +20,7 @@ export function use_join_query() {
  * Downloads the result as CSV file
  * @returns Mutation object with mutate function and states
  */
-export function use_export_join_query() {
+export function useExportJoinQuery() {
     return useApiMutation({
         mutationFn: (request: JoinQueryRequest) =>
             datasetsApi.exportJoinQuery(request),

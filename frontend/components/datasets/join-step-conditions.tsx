@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2, Link, AlertCircle } from 'lucide-react'
-import { use_dataset_list } from '@/lib/hooks/queries/use-dataset-list'
+import { useDatasetList } from '@/lib/hooks/queries/use-dataset-list'
 import { useEffect, useState, useMemo } from 'react'
 
 interface JoinStepConditionsProps {
-    base_dataset_id: string | null
-    join_tables: JoinTableConfig[]
-    on_change: (join_tables: JoinTableConfig[]) => void
+    baseDatasetId: string | null
+    joinTables: JoinTableConfig[]
+    onChange: (joinTables: JoinTableConfig[]) => void
 }
 
 const OPERATORS = [
@@ -29,33 +29,33 @@ const OPERATORS = [
  * Allows users to define join conditions for each join table
  */
 export function JoinStepConditions({
-    base_dataset_id,
-    join_tables,
-    on_change,
+    baseDatasetId,
+    joinTables,
+    onChange,
 }: JoinStepConditionsProps) {
-    const { data } = use_dataset_list(1, 100)
+    const { data } = useDatasetList(1, 100)
 
     // Get dataset by ID
-    const get_dataset_by_id = (id: string | null): Dataset | null => {
+    const getDatasetById = (id: string | null): Dataset | null => {
         if (!id) return null
         return data?.datasets?.find((d) => d.id === id) || null
     }
 
     // Get all columns available for left side (base + previously joined tables)
-    const get_left_columns = (join_index: number): Dataset['columns'] => {
+    const getLeftColumns = (joinIndex: number): Dataset['columns'] => {
         const columns: Dataset['columns'] = []
 
         // Add base table columns
-        const base_dataset = get_dataset_by_id(base_dataset_id)
-        if (base_dataset) {
-            columns.push(...base_dataset.columns)
+        const baseDataset = getDatasetById(baseDatasetId)
+        if (baseDataset) {
+            columns.push(...baseDataset.columns)
         }
 
         // Add columns from previously joined tables
-        for (let i = 0; i < join_index; i++) {
-            const join_dataset = get_dataset_by_id(join_tables[i].dataset_id)
-            if (join_dataset) {
-                columns.push(...join_dataset.columns)
+        for (let i = 0; i < joinIndex; i++) {
+            const joinDataset = getDatasetById(joinTables[i].datasetId)
+            if (joinDataset) {
+                columns.push(...joinDataset.columns)
             }
         }
 
@@ -63,76 +63,76 @@ export function JoinStepConditions({
     }
 
     // Get columns for the right side (the current join table)
-    const get_right_columns = (join_index: number): Dataset['columns'] => {
-        const join_dataset = get_dataset_by_id(join_tables[join_index].dataset_id)
-        return join_dataset?.columns.sort((a, b) => a.columnOrder - b.columnOrder) || []
+    const getRightColumns = (joinIndex: number): Dataset['columns'] => {
+        const joinDataset = getDatasetById(joinTables[joinIndex].datasetId)
+        return joinDataset?.columns.sort((a, b) => a.columnOrder - b.columnOrder) || []
     }
 
-    const add_condition = (table_index: number) => {
-        const new_condition: JoinCondition = {
-            left_column: '',
+    const addCondition = (tableIndex: number) => {
+        const newCondition: JoinCondition = {
+            leftColumn: '',
             operator: '=',
-            right_column: '',
+            rightColumn: '',
         }
-        const updated = join_tables.map((table, i) =>
-            i === table_index
-                ? { ...table, conditions: [...table.conditions, new_condition] }
+        const updated = joinTables.map((table, i) =>
+            i === tableIndex
+                ? { ...table, conditions: [...table.conditions, newCondition] }
                 : table
         )
-        on_change(updated)
+        onChange(updated)
     }
 
-    const remove_condition = (table_index: number, condition_index: number) => {
-        const updated = join_tables.map((table, i) =>
-            i === table_index
+    const removeCondition = (tableIndex: number, conditionIndex: number) => {
+        const updated = joinTables.map((table, i) =>
+            i === tableIndex
                 ? {
                       ...table,
-                      conditions: table.conditions.filter((_, ci) => ci !== condition_index),
+                      conditions: table.conditions.filter((_, ci) => ci !== conditionIndex),
                   }
                 : table
         )
-        on_change(updated)
+        onChange(updated)
     }
 
-    const update_condition = (
-        table_index: number,
-        condition_index: number,
+    const updateCondition = (
+        tableIndex: number,
+        conditionIndex: number,
         field: keyof JoinCondition,
         value: string
     ) => {
-        const updated = join_tables.map((table, ti) =>
-            ti === table_index
+        const updated = joinTables.map((table, ti) =>
+            ti === tableIndex
                 ? {
                       ...table,
                       conditions: table.conditions.map((cond, ci) =>
-                          ci === condition_index ? { ...cond, [field]: value } : cond
+                          ci === conditionIndex ? { ...cond, [field]: value } : cond
                       ),
                   }
                 : table
         )
-        on_change(updated)
+        onChange(updated)
     }
 
     // Initialize with one empty condition for non-cross joins
     useEffect(() => {
-        const needs_init = join_tables.some(
-            (table) => table.join_type !== 'cross' && table.conditions.length === 0
+        const needsInit = joinTables.some(
+            (table) => table.joinType !== 'cross' && table.conditions.length === 0
         )
-        if (needs_init) {
-            const updated = join_tables.map((table) => {
-                if (table.join_type !== 'cross' && table.conditions.length === 0) {
+        if (needsInit) {
+            const updated = joinTables.map((table) => {
+                if (table.joinType !== 'cross' && table.conditions.length === 0) {
                     return {
                         ...table,
-                        conditions: [{ left_column: '', operator: '=' as const, right_column: '' }],
+                        conditions: [{ leftColumn: '', operator: '=' as const, rightColumn: '' }],
                     }
                 }
                 return table
             })
-            on_change(updated)
+            onChange(updated)
         }
-    }, [join_tables])
+    }, [joinTables])
 
-    if (join_tables.length === 0) {
+    if (joinTables.length === 0) {
         return (
             <Card>
                 <CardContent className="py-12 text-center">
@@ -144,27 +144,27 @@ export function JoinStepConditions({
 
     return (
         <div className="space-y-6">
-            {join_tables.map((join_table, table_index) => {
-                const is_cross_join = join_table.join_type === 'cross'
-                const left_columns = get_left_columns(table_index)
-                const right_columns = get_right_columns(table_index)
-                const join_dataset = get_dataset_by_id(join_table.dataset_id)
+            {joinTables.map((joinTable, tableIndex) => {
+                const isCrossJoin = joinTable.joinType === 'cross'
+                const leftColumns = getLeftColumns(tableIndex)
+                const rightColumns = getRightColumns(tableIndex)
+                const joinDataset = getDatasetById(joinTable.datasetId)
 
                 return (
-                    <Card key={table_index}>
+                    <Card key={tableIndex}>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Link className="h-5 w-5" />
-                                Join Table {table_index + 1}: {join_dataset?.displayName || 'Unknown'}
+                                Join Table {tableIndex + 1}: {joinDataset?.displayName || 'Unknown'}
                             </CardTitle>
                             <CardDescription>
-                                {is_cross_join
+                                {isCrossJoin
                                     ? 'CROSS JOIN - No conditions needed (Cartesian product)'
-                                    : `Define matching conditions for ${join_table.join_type.toUpperCase()} JOIN`}
+                                    : `Define matching conditions for ${joinTable.joinType.toUpperCase()} JOIN`}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {is_cross_join ? (
+                            {isCrossJoin ? (
                                 <div className="flex items-start gap-2 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-md">
                                     <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                                     <p className="text-sm text-blue-800 dark:text-blue-300">
@@ -174,9 +174,9 @@ export function JoinStepConditions({
                                 </div>
                             ) : (
                                 <>
-                                    {join_table.conditions.map((condition, cond_index) => (
-                                        <div key={cond_index} className="space-y-4">
-                                            {cond_index > 0 && (
+                                    {joinTable.conditions.map((condition, condIndex) => (
+                                        <div key={condIndex} className="space-y-4">
+                                            {condIndex > 0 && (
                                                 <div className="flex items-center justify-center py-2">
                                                     <span className="text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full">
                                                         AND
@@ -188,29 +188,29 @@ export function JoinStepConditions({
                                                 {/* Left Column */}
                                                 <div className="col-span-12 sm:col-span-4 space-y-2">
                                                     <Label
-                                                        htmlFor={`left-column-${table_index}-${cond_index}`}
+                                                        htmlFor={`left-column-${tableIndex}-${condIndex}`}
                                                         className="text-xs"
                                                     >
                                                         Left Side Column
                                                     </Label>
                                                     <Select
-                                                        value={condition.left_column}
+                                                        value={condition.leftColumn}
                                                         onValueChange={(value) =>
-                                                            update_condition(
-                                                                table_index,
-                                                                cond_index,
-                                                                'left_column',
+                                                            updateCondition(
+                                                                tableIndex,
+                                                                condIndex,
+                                                                'leftColumn',
                                                                 value
                                                             )
                                                         }
                                                     >
                                                         <SelectTrigger
-                                                            id={`left-column-${table_index}-${cond_index}`}
+                                                            id={`left-column-${tableIndex}-${condIndex}`}
                                                         >
                                                             <SelectValue placeholder="Select column" />
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            {left_columns.map((col) => (
+                                                            {leftColumns.map((col) => (
                                                                 <SelectItem
                                                                     key={col.id}
                                                                     value={col.columnName}
@@ -228,7 +228,7 @@ export function JoinStepConditions({
                                                 {/* Operator */}
                                                 <div className="col-span-12 sm:col-span-3 space-y-2">
                                                     <Label
-                                                        htmlFor={`operator-${table_index}-${cond_index}`}
+                                                        htmlFor={`operator-${tableIndex}-${condIndex}`}
                                                         className="text-xs"
                                                     >
                                                         Operator
@@ -236,16 +236,16 @@ export function JoinStepConditions({
                                                     <Select
                                                         value={condition.operator}
                                                         onValueChange={(value) =>
-                                                            update_condition(
-                                                                table_index,
-                                                                cond_index,
+                                                            updateCondition(
+                                                                tableIndex,
+                                                                condIndex,
                                                                 'operator',
                                                                 value as JoinCondition['operator']
                                                             )
                                                         }
                                                     >
                                                         <SelectTrigger
-                                                            id={`operator-${table_index}-${cond_index}`}
+                                                            id={`operator-${tableIndex}-${condIndex}`}
                                                         >
                                                             <SelectValue />
                                                         </SelectTrigger>
@@ -262,29 +262,29 @@ export function JoinStepConditions({
                                                 {/* Right Column */}
                                                 <div className="col-span-12 sm:col-span-4 space-y-2">
                                                     <Label
-                                                        htmlFor={`right-column-${table_index}-${cond_index}`}
+                                                        htmlFor={`right-column-${tableIndex}-${condIndex}`}
                                                         className="text-xs"
                                                     >
                                                         Join Table Column
                                                     </Label>
                                                     <Select
-                                                        value={condition.right_column}
+                                                        value={condition.rightColumn}
                                                         onValueChange={(value) =>
-                                                            update_condition(
-                                                                table_index,
-                                                                cond_index,
-                                                                'right_column',
+                                                            updateCondition(
+                                                                tableIndex,
+                                                                condIndex,
+                                                                'rightColumn',
                                                                 value
                                                             )
                                                         }
                                                     >
                                                         <SelectTrigger
-                                                            id={`right-column-${table_index}-${cond_index}`}
+                                                            id={`right-column-${tableIndex}-${condIndex}`}
                                                         >
                                                             <SelectValue placeholder="Select column" />
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            {right_columns.map((col) => (
+                                                            {rightColumns.map((col) => (
                                                                 <SelectItem
                                                                     key={col.id}
                                                                     value={col.columnName}
@@ -306,9 +306,9 @@ export function JoinStepConditions({
                                                         variant="ghost"
                                                         size="icon"
                                                         onClick={() =>
-                                                            remove_condition(table_index, cond_index)
+                                                            removeCondition(tableIndex, condIndex)
                                                         }
-                                                        disabled={join_table.conditions.length === 1}
+                                                        disabled={joinTable.conditions.length === 1}
                                                         className="w-full sm:w-auto"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
@@ -322,7 +322,7 @@ export function JoinStepConditions({
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        onClick={() => add_condition(table_index)}
+                                        onClick={() => addCondition(tableIndex)}
                                         className="w-full"
                                     >
                                         <Plus className="h-4 w-4 mr-2" />
@@ -330,8 +330,8 @@ export function JoinStepConditions({
                                     </Button>
 
                                     {/* Validation Messages */}
-                                    {join_table.conditions.some(
-                                        (c) => !c.left_column || !c.right_column
+                                    {joinTable.conditions.some(
+                                        (c) => !c.leftColumn || !c.rightColumn
                                     ) && (
                                         <div className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-md">
                                             Please fill in all condition fields before proceeding

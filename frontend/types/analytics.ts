@@ -4,8 +4,8 @@
  */
 export interface LoginTrendDataPoint {
     date: string          // ISO date string "2026-01-01"
-    display_date: string  // Display format "Jan 1"
-    day_of_week: string   // "Monday", "Tuesday", etc.
+    displayDate: string   // Display format "Jan 1"
+    dayOfWeek: string     // "Monday", "Tuesday", etc.
     logins: number        // Number of logins (0-5)
 }
 
@@ -26,10 +26,10 @@ export interface ActivityDistributionData {
  */
 export interface MonthlyStatData {
     month: string         // "Dec 2025", "Jan 2026", etc.
-    short_month: string   // "Dec", "Jan", etc. (for x-axis)
+    shortMonth: string    // "Dec", "Jan", etc. (for x-axis)
     logins: number        // Total logins in month
     actions: number       // Total actions in month
-    active_users: number  // Unique active users (placeholder: 1)
+    activeUsers: number   // Unique active users (placeholder: 1)
 }
 
 /**

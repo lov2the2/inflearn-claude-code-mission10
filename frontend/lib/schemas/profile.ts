@@ -11,10 +11,10 @@ export const profileEditSchema = z.object({
 export type ProfileEditFormData = z.infer<typeof profileEditSchema>
 
 export const passwordChangeSchema = z.object({
-    current_password: z
+    currentPassword: z
         .string()
         .min(1, 'Current password is required'),
-    new_password: z
+    newPassword: z
         .string()
         .min(8, 'Password must be at least 8 characters')
         .max(128, 'Password must not exceed 128 characters')
@@ -22,12 +22,12 @@ export const passwordChangeSchema = z.object({
             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
             'Password must contain uppercase, lowercase, and number'
         ),
-    confirm_password: z
+    confirmPassword: z
         .string()
         .min(1, 'Please confirm your password')
-}).refine((data) => data.new_password === data.confirm_password, {
+}).refine((data) => data.newPassword === data.confirmPassword, {
     message: 'Passwords do not match',
-    path: ['confirm_password']
+    path: ['confirmPassword']
 })
 
 export type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>

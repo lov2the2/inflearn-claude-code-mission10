@@ -1,10 +1,10 @@
 import { datasetsApi } from '@/lib/api/datasets'
-import { query_keys } from '@/lib/query/keys'
+import { queryKeys } from '@/lib/query/keys'
 import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 
 interface UploadDatasetParams {
     file: File
-    display_name: string
+    displayName: string
     description: string
 }
 
@@ -13,11 +13,11 @@ interface UploadDatasetParams {
  * Handles CSV file upload and automatic cache invalidation
  * @returns Mutation object with mutate function and states
  */
-export function use_upload_dataset() {
+export function useUploadDataset() {
     return useApiMutation({
-        mutationFn: ({ file, display_name, description }: UploadDatasetParams) =>
-            datasetsApi.uploadDataset(file, display_name, description),
-        invalidateKeys: query_keys.datasets.all,
+        mutationFn: ({ file, displayName, description }: UploadDatasetParams) =>
+            datasetsApi.uploadDataset(file, displayName, description),
+        invalidateKeys: queryKeys.datasets.all,
         successMessage: (result) =>
             `Dataset "${result.dataset.displayName}" created with ${result.rowsImported} rows`,
         errorMessage: 'Failed to upload dataset'

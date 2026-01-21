@@ -11,10 +11,10 @@ import { format } from 'date-fns'
 interface DynamicDataTableProps {
     columns: DatasetColumn[]
     rows: Record<string, any>[]
-    current_page: number
-    total_pages: number
-    on_page_change: (page: number) => void
-    is_loading?: boolean
+    currentPage: number
+    totalPages: number
+    onPageChange: (page: number) => void
+    isLoading?: boolean
 }
 
 /**
@@ -24,20 +24,20 @@ interface DynamicDataTableProps {
 export function DynamicDataTable({
     columns,
     rows,
-    current_page,
-    total_pages,
-    on_page_change,
-    is_loading = false,
+    currentPage,
+    totalPages,
+    onPageChange,
+    isLoading = false,
 }: DynamicDataTableProps) {
     /**
      * Format cell value based on column data type
      */
-    const format_cell_value = (value: any, data_type: string) => {
+    const formatCellValue = (value: any, dataType: string) => {
         if (value === null || value === undefined) {
             return <span className="text-gray-400 italic">NULL</span>
         }
 
-        switch (data_type) {
+        switch (dataType) {
             case 'boolean':
                 return value ? (
                     <Check className="h-4 w-4 text-green-600" />
@@ -72,20 +72,20 @@ export function DynamicDataTable({
     }
 
     /**
-     * Sort columns by column_order
+     * Sort columns by columnOrder
      */
-    const sorted_columns = useMemo(() => {
+    const sortedColumns = useMemo(() => {
         return [...columns].sort((a, b) => a.columnOrder - b.columnOrder)
     }, [columns])
 
-    if (is_loading) {
+    if (isLoading) {
         return (
             <div className="space-y-4">
                 <div className="rounded-md border">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                {sorted_columns.map((col) => (
+                                {sortedColumns.map((col) => (
                                     <TableHead key={col.id}>
                                         <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                                     </TableHead>
@@ -95,7 +95,7 @@ export function DynamicDataTable({
                         <TableBody>
                             {[...Array(5)].map((_, i) => (
                                 <TableRow key={i}>
-                                    {sorted_columns.map((col) => (
+                                    {sortedColumns.map((col) => (
                                         <TableCell key={col.id}>
                                             <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
                                         </TableCell>
@@ -116,7 +116,7 @@ export function DynamicDataTable({
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            {sorted_columns.map((col) => (
+                            {sortedColumns.map((col) => (
                                 <TableHead key={col.id} className="whitespace-nowrap">
                                     <div className="flex flex-col">
                                         <span className="font-semibold">{col.displayName}</span>
@@ -131,11 +131,11 @@ export function DynamicDataTable({
                     </TableHeader>
                     <TableBody>
                         {rows.length > 0 ? (
-                            rows.map((row, row_index) => (
-                                <TableRow key={row_index}>
-                                    {sorted_columns.map((col) => (
+                            rows.map((row, rowIndex) => (
+                                <TableRow key={rowIndex}>
+                                    {sortedColumns.map((col) => (
                                         <TableCell key={col.id} className="align-top">
-                                            {format_cell_value(row[col.columnName], col.dataType)}
+                                            {formatCellValue(row[col.columnName], col.dataType)}
                                         </TableCell>
                                     ))}
                                 </TableRow>
@@ -143,7 +143,7 @@ export function DynamicDataTable({
                         ) : (
                             <TableRow>
                                 <TableCell
-                                    colSpan={sorted_columns.length}
+                                    colSpan={sortedColumns.length}
                                     className="h-24 text-center text-gray-500 dark:text-gray-400"
                                 >
                                     No data available
@@ -155,25 +155,25 @@ export function DynamicDataTable({
             </div>
 
             {/* Pagination */}
-            {total_pages > 1 && (
+            {totalPages > 1 && (
                 <div className="flex items-center justify-between gap-4">
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Page {current_page} of {total_pages}
+                        Page {currentPage} of {totalPages}
                     </div>
                     <div className="flex items-center gap-2">
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => on_page_change(current_page - 1)}
-                            disabled={current_page === 1}
+                            onClick={() => onPageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
                         >
                             Previous
                         </Button>
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => on_page_change(current_page + 1)}
-                            disabled={current_page === total_pages}
+                            onClick={() => onPageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
                         >
                             Next
                         </Button>

@@ -12,11 +12,11 @@ import type {
 /**
  * Transform backend login trend data to frontend chart format
  */
-export function transform_login_trend(data: LoginTrendData[]): LoginTrendDataPoint[] {
+export function transformLoginTrend(data: LoginTrendData[]): LoginTrendDataPoint[] {
     return data.map(item => ({
         date: item.date,
-        display_date: format(parseISO(item.date), 'MMM d'),
-        day_of_week: format(parseISO(item.date), 'EEEE'),
+        displayDate: format(parseISO(item.date), 'MMM d'),
+        dayOfWeek: format(parseISO(item.date), 'EEEE'),
         logins: item.logins
     }))
 }
@@ -25,9 +25,9 @@ export function transform_login_trend(data: LoginTrendData[]): LoginTrendDataPoi
  * Transform backend activity distribution to frontend chart format
  * Maps backend action types to frontend categories
  */
-export function transform_activity_distribution(data: BackendDistribution[]): FrontendDistribution[] {
+export function transformActivityDistribution(data: BackendDistribution[]): FrontendDistribution[] {
     // Map backend actions to frontend types
-    const action_type_map: Record<string, keyof typeof ACTIVITY_TYPES> = {
+    const actionTypeMap: Record<string, keyof typeof ACTIVITY_TYPES> = {
         'login': 'LOGIN',
         'token_refresh': 'LOGIN',
         'profile_update': 'PROFILE_UPDATE',
@@ -45,7 +45,7 @@ export function transform_activity_distribution(data: BackendDistribution[]): Fr
     // Aggregate by frontend type
     const aggregated: Record<string, number> = {}
     data.forEach(item => {
-        const type = action_type_map[item.action] || 'OTHER'
+        const type = actionTypeMap[item.action] || 'OTHER'
         aggregated[type] = (aggregated[type] || 0) + item.count
     })
 
@@ -67,15 +67,15 @@ export function transform_activity_distribution(data: BackendDistribution[]): Fr
 /**
  * Transform backend monthly stats to frontend chart format
  */
-export function transform_monthly_stats(data: MonthlyStatsData[]): MonthlyStatData[] {
+export function transformMonthlyStats(data: MonthlyStatsData[]): MonthlyStatData[] {
     return data.map(item => {
         const date = new Date(item.month + '-01')
         return {
             month: format(date, 'MMM yyyy'),
-            short_month: format(date, 'MMM'),
+            shortMonth: format(date, 'MMM'),
             logins: item.logins,
             actions: item.actions,
-            active_users: 1, // Single user context
+            activeUsers: 1, // Single user context
         }
     })
 }

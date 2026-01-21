@@ -1,10 +1,10 @@
 import { adminApi } from '@/lib/api/admin'
-import { query_keys } from '@/lib/query/keys'
+import { queryKeys } from '@/lib/query/keys'
 import { useApiMutation } from '@/lib/hooks/use-api-mutation'
 
 interface UpdateRoleParams {
-    user_id: number
-    new_role: 'admin' | 'user'
+    userId: number
+    newRole: 'admin' | 'user'
 }
 
 /**
@@ -12,13 +12,13 @@ interface UpdateRoleParams {
  * Automatically invalidates user list cache on success
  * @returns Mutation object with mutate function and states
  */
-export function use_update_role() {
+export function useUpdateRole() {
     return useApiMutation({
-        mutationFn: ({ user_id, new_role }: UpdateRoleParams) =>
-            adminApi.updateUserRole(user_id, new_role),
-        invalidateKeys: query_keys.admin.users.all(),
+        mutationFn: ({ userId, newRole }: UpdateRoleParams) =>
+            adminApi.updateUserRole(userId, newRole),
+        invalidateKeys: queryKeys.admin.users.all(),
         successMessage: (_, variables) =>
-            `User role updated to ${variables.new_role} successfully`,
+            `User role updated to ${variables.newRole} successfully`,
         errorMessage: 'Failed to update user role'
     })
 }

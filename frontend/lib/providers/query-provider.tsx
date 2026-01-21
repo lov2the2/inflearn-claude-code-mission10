@@ -3,7 +3,7 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useState } from 'react'
-import { create_query_client } from '@/lib/query/client'
+import { createQueryClient } from '@/lib/query/client'
 
 /**
  * React Query Provider wrapper
@@ -11,10 +11,10 @@ import { create_query_client } from '@/lib/query/client'
  */
 export function QueryProvider({ children }: { children: React.ReactNode }) {
     // Create client once per mount (not global singleton for SSR safety)
-    const [query_client] = useState(() => create_query_client())
+    const [queryClientInstance] = useState(() => createQueryClient())
 
     return (
-        <QueryClientProvider client={query_client}>
+        <QueryClientProvider client={queryClientInstance}>
             {children}
             {/* Devtools only in development */}
             {process.env.NODE_ENV === 'development' && (

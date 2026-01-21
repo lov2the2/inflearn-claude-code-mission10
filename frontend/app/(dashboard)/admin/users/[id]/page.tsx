@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Mail, User, Shield, Calendar, Clock } from 'lucide-react'
 import { adminApi } from '@/lib/api/admin'
-import { query_keys } from '@/lib/query/keys'
+import { queryKeys } from '@/lib/query/keys'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -18,12 +18,12 @@ interface UserDetailPageProps {
 export default function UserDetailPage({ params }: UserDetailPageProps) {
     const router = useRouter()
     const { id } = use(params)
-    const user_id = parseInt(id)
+    const userId = parseInt(id)
 
     const { data: user, isLoading, error } = useQuery({
-        queryKey: query_keys.admin.users.detail(user_id),
-        queryFn: () => adminApi.getUser(user_id),
-        enabled: !isNaN(user_id),
+        queryKey: queryKeys.admin.users.detail(userId),
+        queryFn: () => adminApi.getUser(userId),
+        enabled: !isNaN(userId),
     })
 
     if (isLoading) {
