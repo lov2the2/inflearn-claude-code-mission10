@@ -135,10 +135,10 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                             <div className="flex-1">
                                 <p className="text-sm font-medium text-gray-500">Created At</p>
                                 <p className="mt-1 text-base font-medium">
-                                    {format(new Date(user.created_at), 'PPP')}
+                                    {format(new Date(user.createdAt), 'PPP')}
                                 </p>
                                 <p className="text-sm text-gray-500">
-                                    {format(new Date(user.created_at), 'p')}
+                                    {format(new Date(user.createdAt), 'p')}
                                 </p>
                             </div>
                         </div>
@@ -151,10 +151,10 @@ export default function UserDetailPage({ params }: UserDetailPageProps) {
                             <div className="flex-1">
                                 <p className="text-sm font-medium text-gray-500">Updated At</p>
                                 <p className="mt-1 text-base font-medium">
-                                    {format(new Date(user.updated_at), 'PPP')}
+                                    {format(new Date(user.updatedAt), 'PPP')}
                                 </p>
                                 <p className="text-sm text-gray-500">
-                                    {format(new Date(user.updated_at), 'p')}
+                                    {format(new Date(user.updatedAt), 'p')}
                                 </p>
                             </div>
                         </div>

@@ -16,7 +16,7 @@ interface DatasetCardProps {
 }
 
 export function DatasetCard({ dataset, onDelete, onView, onJoin, canDelete = false }: DatasetCardProps) {
-    const file_size_mb = (dataset.file_size_bytes / (1024 * 1024)).toFixed(2)
+    const file_size_mb = (dataset.fileSizeBytes / (1024 * 1024)).toFixed(2)
 
     return (
         <Card className="hover:shadow-lg transition-shadow">
@@ -24,7 +24,7 @@ export function DatasetCard({ dataset, onDelete, onView, onJoin, canDelete = fal
                 <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-2">
                         <Database className="h-5 w-5 text-blue-600" />
-                        <CardTitle className="text-lg">{dataset.display_name}</CardTitle>
+                        <CardTitle className="text-lg">{dataset.displayName}</CardTitle>
                     </div>
                     {canDelete && onDelete && (
                         <Button
@@ -49,13 +49,13 @@ export function DatasetCard({ dataset, onDelete, onView, onJoin, canDelete = fal
                         <FileText className="h-4 w-4 mr-2" />
                         <span>{dataset.columns.length} columns</span>
                         <span className="mx-2">•</span>
-                        <span>{dataset.row_count.toLocaleString()} rows</span>
+                        <span>{dataset.rowCount.toLocaleString()} rows</span>
                     </div>
 
                     <div className="flex items-center text-gray-600 dark:text-gray-400">
                         <Calendar className="h-4 w-4 mr-2" />
                         <span>
-                            Updated {formatDistanceToNow(new Date(dataset.updated_at), { addSuffix: true })}
+                            Updated {formatDistanceToNow(new Date(dataset.updatedAt), { addSuffix: true })}
                         </span>
                     </div>
                 </div>

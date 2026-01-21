@@ -43,7 +43,7 @@ export function JoinStepColumns({
                 if (!dataset) return null
                 return {
                     dataset,
-                    columns: dataset.columns.sort((a, b) => a.column_order - b.column_order),
+                    columns: dataset.columns.sort((a, b) => a.columnOrder - b.columnOrder),
                 }
             })
             .filter((d): d is DatasetWithColumns => d !== null)
@@ -51,7 +51,7 @@ export function JoinStepColumns({
 
     // Get all column names
     const all_column_names = useMemo(() => {
-        return datasets_with_columns.flatMap((d) => d.columns.map((c) => c.column_name))
+        return datasets_with_columns.flatMap((d) => d.columns.map((c) => c.columnName))
     }, [datasets_with_columns])
 
     // Auto-select all columns on first load
@@ -77,7 +77,7 @@ export function JoinStepColumns({
     const is_all_selected = selected_columns.length === all_column_names.length
 
     const get_table_column_names = (dataset_index: number): string[] => {
-        return datasets_with_columns[dataset_index]?.columns.map((c) => c.column_name) || []
+        return datasets_with_columns[dataset_index]?.columns.map((c) => c.columnName) || []
     }
 
     const is_table_all_selected = (dataset_index: number): boolean => {
@@ -152,7 +152,7 @@ export function JoinStepColumns({
                                         <h3 className="font-semibold text-sm">
                                             {is_base ? 'Base Table' : `Join Table ${dataset_index}`}
                                         </h3>
-                                        <Badge variant="outline">{dataset.display_name}</Badge>
+                                        <Badge variant="outline">{dataset.displayName}</Badge>
                                     </div>
                                     <Button
                                         variant="ghost"
@@ -166,7 +166,7 @@ export function JoinStepColumns({
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                     {columns.map((col) => {
-                                        const is_checked = selected_columns.includes(col.column_name)
+                                        const is_checked = selected_columns.includes(col.columnName)
                                         return (
                                             <div
                                                 key={col.id}
@@ -179,24 +179,24 @@ export function JoinStepColumns({
                                                             : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                                                     }
                                                 `}
-                                                onClick={() => toggle_column(col.column_name)}
+                                                onClick={() => toggle_column(col.columnName)}
                                             >
                                                 <Checkbox
-                                                    id={`${dataset.id}-${col.column_name}`}
+                                                    id={`${dataset.id}-${col.columnName}`}
                                                     checked={is_checked}
                                                     onCheckedChange={() =>
-                                                        toggle_column(col.column_name)
+                                                        toggle_column(col.columnName)
                                                     }
                                                 />
                                                 <Label
-                                                    htmlFor={`${dataset.id}-${col.column_name}`}
+                                                    htmlFor={`${dataset.id}-${col.columnName}`}
                                                     className="flex-1 cursor-pointer"
                                                 >
                                                     <div className="font-medium text-sm">
-                                                        {col.display_name}
+                                                        {col.displayName}
                                                     </div>
                                                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                        {col.data_type}
+                                                        {col.dataType}
                                                     </div>
                                                 </Label>
                                             </div>

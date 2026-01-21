@@ -57,7 +57,7 @@ export default function DatasetDetailPage() {
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.download = `${dataset?.display_name || 'dataset'}_${format(new Date(), 'yyyyMMdd_HHmmss')}.csv`
+            link.download = `${dataset?.displayName || 'dataset'}_${format(new Date(), 'yyyyMMdd_HHmmss')}.csv`
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
@@ -117,7 +117,7 @@ export default function DatasetDetailPage() {
         return null
     }
 
-    const file_size_mb = (dataset.file_size_bytes / (1024 * 1024)).toFixed(2)
+    const file_size_mb = (dataset.fileSizeBytes / (1024 * 1024)).toFixed(2)
 
     return (
         <div className="space-y-6">
@@ -132,7 +132,7 @@ export default function DatasetDetailPage() {
                         <Database className="h-8 w-8 text-blue-600" />
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                {dataset.display_name}
+                                {dataset.displayName}
                             </h1>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
                                 {dataset.description || 'No description'}
@@ -168,7 +168,7 @@ export default function DatasetDetailPage() {
                             <div>
                                 <p className="text-gray-600 dark:text-gray-400">Table Name</p>
                                 <p className="font-mono text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded mt-1">
-                                    {dataset.table_name}
+                                    {dataset.tableName}
                                 </p>
                             </div>
                             <div>
@@ -177,7 +177,7 @@ export default function DatasetDetailPage() {
                             </div>
                             <div>
                                 <p className="text-gray-600 dark:text-gray-400">Total Rows</p>
-                                <p className="font-semibold mt-1">{dataset.row_count.toLocaleString()}</p>
+                                <p className="font-semibold mt-1">{dataset.rowCount.toLocaleString()}</p>
                             </div>
                             <div>
                                 <p className="text-gray-600 dark:text-gray-400">Total Columns</p>
@@ -188,11 +188,11 @@ export default function DatasetDetailPage() {
                         <div className="pt-4 border-t space-y-2">
                             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                                 <Calendar className="h-4 w-4 mr-2" />
-                                <span>Created: {format(new Date(dataset.created_at), 'PPp')}</span>
+                                <span>Created: {format(new Date(dataset.createdAt), 'PPp')}</span>
                             </div>
                             <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                                 <Calendar className="h-4 w-4 mr-2" />
-                                <span>Updated: {format(new Date(dataset.updated_at), 'PPp')}</span>
+                                <span>Updated: {format(new Date(dataset.updatedAt), 'PPp')}</span>
                             </div>
                         </div>
                     </CardContent>
@@ -209,21 +209,21 @@ export default function DatasetDetailPage() {
                     <CardContent>
                         <div className="space-y-2 max-h-[300px] overflow-y-auto">
                             {dataset.columns
-                                .sort((a, b) => a.column_order - b.column_order)
+                                .sort((a, b) => a.columnOrder - b.columnOrder)
                                 .map((col) => (
                                     <div
                                         key={col.id}
                                         className="flex items-center justify-between p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-800"
                                     >
                                         <div className="flex-1">
-                                            <p className="font-medium text-sm">{col.display_name}</p>
+                                            <p className="font-medium text-sm">{col.displayName}</p>
                                             <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">
-                                                {col.column_name}
+                                                {col.columnName}
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Badge variant="secondary" className="text-xs">
-                                                {col.data_type}
+                                                {col.dataType}
                                             </Badge>
                                             {!col.nullable && (
                                                 <Badge variant="outline" className="text-xs">

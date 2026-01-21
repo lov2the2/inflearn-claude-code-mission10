@@ -19,7 +19,7 @@ export function use_upload_dataset() {
             datasetsApi.uploadDataset(file, display_name, description),
         invalidateKeys: query_keys.datasets.all,
         successMessage: (result) =>
-            `Dataset "${result.dataset.display_name}" created with ${result.rows_imported} rows`,
+            `Dataset "${result.dataset.displayName}" created with ${result.rowsImported} rows`,
         errorMessage: 'Failed to upload dataset'
     })
 }

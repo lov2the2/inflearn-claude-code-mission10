@@ -59,13 +59,13 @@ export function JoinStepConditions({
             }
         }
 
-        return columns.sort((a, b) => a.column_order - b.column_order)
+        return columns.sort((a, b) => a.columnOrder - b.columnOrder)
     }
 
     // Get columns for the right side (the current join table)
     const get_right_columns = (join_index: number): Dataset['columns'] => {
         const join_dataset = get_dataset_by_id(join_tables[join_index].dataset_id)
-        return join_dataset?.columns.sort((a, b) => a.column_order - b.column_order) || []
+        return join_dataset?.columns.sort((a, b) => a.columnOrder - b.columnOrder) || []
     }
 
     const add_condition = (table_index: number) => {
@@ -155,7 +155,7 @@ export function JoinStepConditions({
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Link className="h-5 w-5" />
-                                Join Table {table_index + 1}: {join_dataset?.display_name || 'Unknown'}
+                                Join Table {table_index + 1}: {join_dataset?.displayName || 'Unknown'}
                             </CardTitle>
                             <CardDescription>
                                 {is_cross_join
@@ -213,11 +213,11 @@ export function JoinStepConditions({
                                                             {left_columns.map((col) => (
                                                                 <SelectItem
                                                                     key={col.id}
-                                                                    value={col.column_name}
+                                                                    value={col.columnName}
                                                                 >
-                                                                    {col.display_name}
+                                                                    {col.displayName}
                                                                     <span className="ml-1 text-xs text-gray-500">
-                                                                        ({col.data_type})
+                                                                        ({col.dataType})
                                                                     </span>
                                                                 </SelectItem>
                                                             ))}
@@ -287,11 +287,11 @@ export function JoinStepConditions({
                                                             {right_columns.map((col) => (
                                                                 <SelectItem
                                                                     key={col.id}
-                                                                    value={col.column_name}
+                                                                    value={col.columnName}
                                                                 >
-                                                                    {col.display_name}
+                                                                    {col.displayName}
                                                                     <span className="ml-1 text-xs text-gray-500">
-                                                                        ({col.data_type})
+                                                                        ({col.dataType})
                                                                     </span>
                                                                 </SelectItem>
                                                             ))}

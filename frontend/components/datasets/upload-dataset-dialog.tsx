@@ -154,8 +154,8 @@ export function UploadDatasetDialog({ open, onOpenChange }: UploadDatasetDialogP
                         ✓ Dataset created successfully!
                     </p>
                     <div className="space-y-1 text-sm text-green-700 dark:text-green-400">
-                        <p>Name: {upload_mutation.data.dataset.display_name}</p>
-                        <p>Rows imported: {upload_mutation.data.rows_imported.toLocaleString()}</p>
+                        <p>Name: {upload_mutation.data.dataset.displayName}</p>
+                        <p>Rows imported: {upload_mutation.data.rowsImported.toLocaleString()}</p>
                         <p>Columns: {upload_mutation.data.dataset.columns.length}</p>
                     </div>
                 </div>

@@ -129,7 +129,7 @@ export function JoinStepTables({
                                     .filter((d) => !selected_ids.has(d.id) || d.id === base_dataset_id)
                                     .map((dataset) => (
                                         <SelectItem key={dataset.id} value={dataset.id}>
-                                            {dataset.display_name} ({dataset.row_count} rows)
+                                            {dataset.displayName} ({dataset.rowCount} rows)
                                         </SelectItem>
                                     ))}
                             </SelectContent>
@@ -150,12 +150,12 @@ export function JoinStepTables({
                                 </p>
                                 <div className="flex flex-wrap gap-2">
                                     {base_dataset.columns
-                                        .sort((a, b) => a.column_order - b.column_order)
+                                        .sort((a, b) => a.columnOrder - b.columnOrder)
                                         .map((col) => (
                                             <Badge key={col.id} variant="secondary" className="text-xs">
-                                                {col.display_name}
+                                                {col.displayName}
                                                 <span className="ml-1 text-gray-500">
-                                                    ({col.data_type})
+                                                    ({col.dataType})
                                                 </span>
                                             </Badge>
                                         ))}
@@ -223,7 +223,7 @@ export function JoinStepTables({
                                             )
                                             .map((ds) => (
                                                 <SelectItem key={ds.id} value={ds.id}>
-                                                    {ds.display_name} ({ds.row_count} rows)
+                                                    {ds.displayName} ({ds.rowCount} rows)
                                                 </SelectItem>
                                             ))}
                                     </SelectContent>
@@ -244,16 +244,16 @@ export function JoinStepTables({
                                         </p>
                                         <div className="flex flex-wrap gap-2">
                                             {dataset.columns
-                                                .sort((a, b) => a.column_order - b.column_order)
+                                                .sort((a, b) => a.columnOrder - b.columnOrder)
                                                 .map((col) => (
                                                     <Badge
                                                         key={col.id}
                                                         variant="secondary"
                                                         className="text-xs"
                                                     >
-                                                        {col.display_name}
+                                                        {col.displayName}
                                                         <span className="ml-1 text-gray-500">
-                                                            ({col.data_type})
+                                                            ({col.dataType})
                                                         </span>
                                                     </Badge>
                                                 ))}

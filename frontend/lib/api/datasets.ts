@@ -39,11 +39,11 @@ export const datasetsApi = {
         id: string,
         params: DatasetDataParams = {}
     ): Promise<DatasetDataResponse> => {
-        const { page = 1, limit = 50, sort_by, sort_order, filters } = params
+        const { page = 1, limit = 50, sortBy, sortOrder, filters } = params
 
         const query_params: Record<string, any> = { page, limit }
-        if (sort_by) query_params.sort_by = sort_by
-        if (sort_order) query_params.sort_order = sort_order
+        if (sortBy) query_params.sort_by = sortBy
+        if (sortOrder) query_params.sort_order = sortOrder
         if (filters && filters.length > 0) {
             query_params.filters = JSON.stringify(filters)
         }

@@ -36,7 +36,7 @@ export function CSVImportDialog({ open, onOpenChange }: CSVImportDialogProps) {
 
         import_mutation.mutate(file, {
             onSuccess: (result) => {
-                if (result.failure_count === 0) {
+                if (result.failureCount === 0) {
                     // All succeeded, close dialog after delay
                     setTimeout(() => {
                         onOpenChange(false)
@@ -99,29 +99,29 @@ export function CSVImportDialog({ open, onOpenChange }: CSVImportDialogProps) {
                                 <div className="bg-green-50 p-3 rounded">
                                     <p className="text-sm text-gray-600">Success</p>
                                     <p className="text-2xl font-bold text-green-600">
-                                        {import_mutation.data.success_count}
+                                        {import_mutation.data.successCount}
                                     </p>
                                 </div>
                                 <div className="bg-red-50 p-3 rounded">
                                     <p className="text-sm text-gray-600">Failed</p>
                                     <p className="text-2xl font-bold text-red-600">
-                                        {import_mutation.data.failure_count}
+                                        {import_mutation.data.failureCount}
                                     </p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 text-sm">
-                                <p>Created: <span className="font-medium">{import_mutation.data.created_count}</span></p>
-                                <p>Updated: <span className="font-medium">{import_mutation.data.updated_count}</span></p>
+                                <p>Created: <span className="font-medium">{import_mutation.data.createdCount}</span></p>
+                                <p>Updated: <span className="font-medium">{import_mutation.data.updatedCount}</span></p>
                             </div>
 
-                            {import_mutation.data.default_password && (
+                            {import_mutation.data.defaultPassword && (
                                 <div className="bg-yellow-50 border border-yellow-200 p-3 rounded">
                                     <p className="text-sm font-medium text-yellow-800 mb-1">
                                         Default Password for New Users:
                                     </p>
                                     <code className="text-sm bg-white px-2 py-1 rounded border">
-                                        {import_mutation.data.default_password}
+                                        {import_mutation.data.defaultPassword}
                                     </code>
                                     <p className="text-xs text-yellow-700 mt-1">
                                         Save this password! Users should change it on first login.

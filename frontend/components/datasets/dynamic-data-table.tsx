@@ -75,7 +75,7 @@ export function DynamicDataTable({
      * Sort columns by column_order
      */
     const sorted_columns = useMemo(() => {
-        return [...columns].sort((a, b) => a.column_order - b.column_order)
+        return [...columns].sort((a, b) => a.columnOrder - b.columnOrder)
     }, [columns])
 
     if (is_loading) {
@@ -119,9 +119,9 @@ export function DynamicDataTable({
                             {sorted_columns.map((col) => (
                                 <TableHead key={col.id} className="whitespace-nowrap">
                                     <div className="flex flex-col">
-                                        <span className="font-semibold">{col.display_name}</span>
+                                        <span className="font-semibold">{col.displayName}</span>
                                         <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
-                                            {col.data_type}
+                                            {col.dataType}
                                             {!col.nullable && ' (NOT NULL)'}
                                         </span>
                                     </div>
@@ -135,7 +135,7 @@ export function DynamicDataTable({
                                 <TableRow key={row_index}>
                                     {sorted_columns.map((col) => (
                                         <TableCell key={col.id} className="align-top">
-                                            {format_cell_value(row[col.column_name], col.data_type)}
+                                            {format_cell_value(row[col.columnName], col.dataType)}
                                         </TableCell>
                                     ))}
                                 </TableRow>

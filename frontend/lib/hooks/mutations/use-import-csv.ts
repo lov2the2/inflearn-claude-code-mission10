@@ -14,15 +14,15 @@ export function use_import_csv() {
         mutationFn: (file: File) => adminApi.importCSV(file),
         invalidateKeys: query_keys.admin.users.all(),
         successMessage: (result: CSVImportResult) =>
-            result.failure_count === 0
-                ? `Successfully imported ${result.success_count} users`
+            result.failureCount === 0
+                ? `Successfully imported ${result.successCount} users`
                 : '', // Empty string to prevent default success toast
         errorMessage: 'Failed to import CSV',
         onSuccess: (result: CSVImportResult) => {
             // Show warning toast for partial failures
-            if (result.failure_count > 0) {
+            if (result.failureCount > 0) {
                 toast.warning(
-                    `Imported ${result.success_count} users with ${result.failure_count} failures`
+                    `Imported ${result.successCount} users with ${result.failureCount} failures`
                 )
             }
         }

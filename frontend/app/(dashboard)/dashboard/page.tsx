@@ -82,25 +82,25 @@ export default function DashboardPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <StatsCard
                     title="Total Logins"
-                    value={stats?.total_logins ?? 0}
+                    value={stats?.totalLogins ?? 0}
                     icon={LogIn}
                     description="All-time logins"
                 />
                 <StatsCard
                     title="Account Age"
-                    value={`${stats?.account_age_in_days ?? 0} days`}
+                    value={`${stats?.accountAgeInDays ?? 0} days`}
                     icon={Calendar}
                     description="Since registration"
                 />
                 <StatsCard
                     title="Total Actions"
-                    value={stats?.total_actions ?? 0}
+                    value={stats?.totalActions ?? 0}
                     icon={Zap}
                     description="Activities performed"
                 />
                 <StatsCard
                     title="Last Login"
-                    value={stats?.last_login_at ? new Date(stats.last_login_at).toLocaleDateString() : 'N/A'}
+                    value={stats?.lastLoginAt ? new Date(stats.lastLoginAt).toLocaleDateString() : 'N/A'}
                     icon={Activity}
                     description="Most recent access"
                 />
@@ -131,7 +131,7 @@ export default function DashboardPage() {
                     <div className="flex justify-between">
                         <span className="text-sm font-medium">Member Since:</span>
                         <span className="text-sm text-muted-foreground">
-                            {profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'N/A'}
+                            {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A'}
                         </span>
                     </div>
                 </CardContent>

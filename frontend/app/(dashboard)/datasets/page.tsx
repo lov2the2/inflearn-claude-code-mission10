@@ -106,7 +106,7 @@ export default function DatasetsPage() {
                                         dataset={dataset}
                                         onView={handleView}
                                         onJoin={handleJoin}
-                                        onDelete={(id) => handleDeleteClick(id, dataset.display_name)}
+                                        onDelete={(id) => handleDeleteClick(id, dataset.displayName)}
                                         canDelete={user_is_admin}
                                     />
                                 ))}
