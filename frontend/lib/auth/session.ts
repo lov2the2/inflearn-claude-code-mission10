@@ -1,4 +1,4 @@
-import { AuthResponse, User } from '@/types/auth'
+import { User } from '@/types/auth'
 
 /**
  * Safe JSON parser with error recovery
@@ -22,14 +22,14 @@ function safeJsonParse<T>(value: string | null, fallback: T): T {
  * Set user session data
  * With cookie-based auth, only stores non-sensitive user info (not tokens)
  * Tokens are managed by HttpOnly cookies on the backend
- * @param authResponse - Authentication response from API
+ * @param user - User object from authentication response
  * @throws Error if localStorage is unavailable or quota exceeded
  */
-export const setSession = (authResponse: AuthResponse): void => {
+export const setSession = (user: User): void => {
     if (typeof window !== 'undefined') {
         try {
             // Only store user information (no tokens - handled by HttpOnly cookies)
-            localStorage.setItem('user', JSON.stringify(authResponse.user))
+            localStorage.setItem('user', JSON.stringify(user))
         } catch (error) {
             console.error('Failed to save session:', error)
             throw new Error('Unable to save session. Please check browser storage settings.')
