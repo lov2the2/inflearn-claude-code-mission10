@@ -58,7 +58,7 @@ make migrate-up
 air  # OR: go run cmd/api/main.go
 ```
 
-서버는 `http://localhost:8080`에서 실행됩니다.
+서버는 기본적으로 `http://localhost:8080`에서 실행됩니다 (`.env`의 `PORT` 변수로 변경 가능).
 
 ## 환경 변수
 
@@ -74,7 +74,7 @@ DB_SSLMODE=disable                 # SSL mode
 JWT_SECRET=your-secret-key         # JWT signing key
 JWT_ACCESS_EXPIRY=15m              # Access token expiry
 JWT_REFRESH_EXPIRY=168h            # Refresh token expiry (7 days)
-ALLOWED_ORIGINS=http://localhost:3000  # CORS allowed origins
+ALLOWED_ORIGINS=http://localhost:3000  # CORS allowed origins (match frontend port)
 ```
 
 ## API 엔드포인트

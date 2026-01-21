@@ -53,7 +53,7 @@ frontend/
 
 - Node.js 18+
 - npm 또는 yarn
-- 8080 포트에서 실행 중인 백엔드 서버
+- 실행 중인 백엔드 서버 (기본 포트: 8080, `.env`에서 변경 가능)
 
 ### 설치
 
@@ -70,13 +70,13 @@ cp .env.local.example .env.local
 npm run dev
 ```
 
-프론트엔드는 `http://localhost:3000`에서 실행됩니다
+프론트엔드는 기본적으로 `http://localhost:3000`에서 실행됩니다 (`.env.local`의 포트 변경 가능).
 
 ## 환경 변수
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8080    # 클라이언트 사이드 API URL
-API_URL=http://localhost:8080                # 서버 사이드 API URL
+NEXT_PUBLIC_API_URL=http://localhost:8080    # 클라이언트 사이드 API URL (백엔드 포트와 일치)
+API_URL=http://localhost:8080                # 서버 사이드 API URL (백엔드 포트와 일치)
 ```
 
 **환경변수 용도:**

@@ -158,10 +158,14 @@ make dev-frontend
 ```
 
 5. **애플리케이션 접속**
+
+기본 포트 (`.env`에서 변경 가능):
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080
 - Swagger Docs: http://localhost:8080/swagger/index.html
 - Health Check: http://localhost:8080/health
+
+**참고**: `make start` 실행 시 출력되는 "Services" 섹션에서 실제 사용 중인 포트를 확인할 수 있습니다.
 
 ## 환경 변수
 
@@ -265,15 +269,19 @@ make start
 
 ### 접속 주소
 
-**Instance 1**:
+**Instance 1** (기본 포트):
 - Frontend: http://localhost:3000
 - Backend: http://localhost:8080
 - Swagger: http://localhost:8080/swagger/index.html
+- Health: http://localhost:8080/health
 
-**Instance 2**:
+**Instance 2** (수정된 포트):
 - Frontend: http://localhost:3001
 - Backend: http://localhost:8081
 - Swagger: http://localhost:8081/swagger/index.html
+- Health: http://localhost:8081/health
+
+**참고**: 각 인스턴스에서 `make start` 실행 시 실제 사용 중인 포트가 출력됩니다.
 
 ### 주의사항
 
@@ -703,12 +711,12 @@ curl -X POST http://localhost:8080/api/v1/auth/refresh \
 # → 재로그인 필요
 ```
 
-#### 로그인 실패
+#### 로그인 실패 / CORS 에러
 
-**문제**: 올바른 자격 증명으로도 로그인이 되지 않습니다.
+**문제**: 올바른 자격 증명으로도 로그인이 되지 않거나, 브라우저 콘솔에 CORS 에러가 표시됩니다.
 
 **원인**:
-- CORS 설정 문제
+- CORS 설정 문제 (프론트엔드 포트와 불일치)
 - 백엔드 서버가 시작되지 않음
 - 데이터베이스에 사용자가 없음
 
@@ -722,6 +730,15 @@ curl http://localhost:8080/health
 
 # CORS 설정 확인 (backend/.env)
 cat backend/.env | grep ALLOWED_ORIGINS
+
+# CORS 설정이 프론트엔드 포트와 다른 경우
+# Root .env의 FRONTEND_PORT와 backend/.env의 ALLOWED_ORIGINS가 일치해야 함
+cat .env | grep FRONTEND_PORT
+cat backend/.env | grep ALLOWED_ORIGINS
+
+# 포트가 다른 경우 수정
+vi backend/.env
+# ALLOWED_ORIGINS=http://localhost:3000 (FRONTEND_PORT와 동일하게)
 
 # 사용자 생성 테스트
 curl -X POST http://localhost:8080/api/v1/auth/register \

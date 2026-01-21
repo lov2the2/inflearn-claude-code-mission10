@@ -232,11 +232,11 @@ frontend/
 ```
 starter-kit-mission/
 ├── scripts/                           # Server management scripts
-│   ├── start-all.sh                  # Start all services
+│   ├── start-all.sh                  # Start all services (uses env variables)
 │   ├── stop-all.sh                   # Stop all services
-│   ├── start-db.sh                   # DB only
-│   ├── start-backend.sh              # Backend only
-│   ├── start-frontend.sh             # Frontend only
+│   ├── start-db.sh                   # DB only (uses DB_PORT)
+│   ├── start-backend.sh              # Backend only (uses BACKEND_PORT)
+│   ├── start-frontend.sh             # Frontend only (uses FRONTEND_PORT)
 │   ├── backup-db.sh                  # Database backup
 │   ├── restore-db.sh                 # Database restore
 │   ├── list-backups.sh               # List available backups
@@ -541,6 +541,9 @@ make clean
 | `scripts/list-backups.sh` | List available backup files |
 | `scripts/setup-auto-backup.sh` | Auto-backup scheduler (launchd/cron) |
 | `scripts/lib/backup.sh` | Backup utility functions and retention policy |
+| `scripts/lib/common.sh` | Shared functions (loads `.env` variables) |
+
+**Note**: All scripts in `scripts/` directory source environment variables from root `.env` via `scripts/lib/common.sh`.
 
 ---
 
@@ -618,8 +621,10 @@ make start
 ```
 
 **Access URLs**:
-- Instance 1: Frontend (3000), Backend (8080), Swagger (8080/swagger)
-- Instance 2: Frontend (3001), Backend (8081), Swagger (8081/swagger)
+- Instance 1: Frontend (3000), Backend (8080), Swagger (8080/swagger), Health (8080/health)
+- Instance 2: Frontend (3001), Backend (8081), Swagger (8081/swagger), Health (8081/health)
+
+**Note**: Scripts use environment variables from `.env` file to display correct URLs. The `make start` command shows the actual running ports.
 
 **Important Notes**:
 - Each instance requires unique `PROJECT_NAME` (prevents Docker container conflicts)
@@ -640,6 +645,17 @@ make start
 2. `docker-compose.yml` reads `.env` for container configuration
 3. `backend/.env` inherits ports from root `.env` (must match)
 4. `frontend/.env.local` references backend port from root `.env`
+5. **All management scripts** (`scripts/*.sh`) source root `.env` via `scripts/lib/common.sh`
+   - `start-frontend.sh`: Uses `BACKEND_PORT` and `FRONTEND_PORT` for health checks and startup
+   - `start-backend.sh`: Uses `BACKEND_PORT` for health check endpoint
+   - `start-db.sh`: Uses `DB_PORT` for PostgreSQL startup
+   - `start-all.sh`: Displays service URLs with actual configured ports
+
+**Environment Variable Usage in Scripts**:
+- Scripts read `.env` automatically through `scripts/lib/common.sh`
+- No hardcoded ports in scripts - all port references use variables
+- CORS configuration in `backend/.env` must match `FRONTEND_PORT` from root `.env`
+- This design ensures multi-instance support without script modifications
 
 ---
 
@@ -713,6 +729,13 @@ Follow semantic versioning (MAJOR.MINOR.PATCH):
 3. Import shared components
 4. Test authentication flow
 
+**Add new management script**:
+1. Create in `scripts/` directory
+2. Source environment variables: `source "$(dirname "$0")/lib/common.sh"`
+3. Use variables from `.env`: `$DB_PORT`, `$BACKEND_PORT`, `$FRONTEND_PORT`
+4. Never hardcode ports or URLs
+5. Test with multiple port configurations
+
 ---
 
 ## Development Standards
@@ -733,9 +756,12 @@ This project follows system-wide standards defined in `~/.claude/CLAUDE.md`:
 - **Root README**: `README.md` - User-facing documentation (Korean)
 - **PRD Document**: `docs/prd.md` - Product Requirements Document (English)
 - **Cookie Auth Migration**: `frontend/COOKIE_AUTH_MIGRATION.md` - HttpOnly cookie migration guide (English)
-- **Swagger UI**: http://localhost:8080/swagger/index.html (when running)
-- **API Base URL**: http://localhost:8080/api/v1
-- **Frontend Dev**: http://localhost:3000
+- **Swagger UI**: `http://localhost:${BACKEND_PORT}/swagger/index.html` (when running)
+- **API Base URL**: `http://localhost:${BACKEND_PORT}/api/v1`
+- **Frontend Dev**: `http://localhost:${FRONTEND_PORT}`
+- **Health Check**: `http://localhost:${BACKEND_PORT}/health`
+
+**Note**: Actual URLs depend on port configuration in `.env` file. Default ports are 8080 (backend) and 3000 (frontend).
 
 ---
 
