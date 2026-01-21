@@ -19,8 +19,8 @@ type UserDetailResponse struct {
     Email     string    `json:"email"`
     Name      string    `json:"name"`
     Role      string    `json:"role"`
-    CreatedAt time.Time `json:"created_at"`
-    UpdatedAt time.Time `json:"updated_at"`
+    CreatedAt time.Time `json:"createdAt"`
+    UpdatedAt time.Time `json:"updatedAt"`
 }
 
 // UpdateUserRoleRequest represents the request body for updating user role
@@ -38,6 +38,6 @@ type CreateUserRequest struct {
 
 // CreateUserResponse represents the response for creating a new user
 type CreateUserResponse struct {
-    User            UserResponse `json:"user"`
-    GeneratedPassword string     `json:"generated_password,omitempty"`
+    User              UserResponse `json:"user"`
+    GeneratedPassword string       `json:"generatedPassword,omitempty"`
 }

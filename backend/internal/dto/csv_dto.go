@@ -7,12 +7,12 @@ type CSVImportUserRecord struct {
 }
 
 type CSVImportResponse struct {
-    SuccessCount    int              `json:"success_count"`
-    FailureCount    int              `json:"failure_count"`
-    CreatedCount    int              `json:"created_count"`
-    UpdatedCount    int              `json:"updated_count"`
-    TotalRows       int              `json:"total_rows"`
-    DefaultPassword string           `json:"default_password,omitempty"`
+    SuccessCount    int              `json:"successCount"`
+    FailureCount    int              `json:"failureCount"`
+    CreatedCount    int              `json:"createdCount"`
+    UpdatedCount    int              `json:"updatedCount"`
+    TotalRows       int              `json:"totalRows"`
+    DefaultPassword string           `json:"defaultPassword,omitempty"`
     Errors          []CSVImportError `json:"errors,omitempty"`
 }
 

@@ -12,12 +12,12 @@ type LoginRequest struct {
 }
 
 type RefreshTokenRequest struct {
-    RefreshToken string `json:"refresh_token" binding:"required"`
+    RefreshToken string `json:"refreshToken" binding:"required"`
 }
 
 type AuthResponse struct {
-    AccessToken  string       `json:"access_token"`
-    RefreshToken string       `json:"refresh_token,omitempty"`
+    AccessToken  string       `json:"accessToken"`
+    RefreshToken string       `json:"refreshToken,omitempty"`
     User         UserResponse `json:"user"`
 }
 

@@ -12,31 +12,31 @@ import (
 
 // CreateDatasetRequest represents CSV upload metadata
 type CreateDatasetRequest struct {
-    DisplayName string `json:"display_name" binding:"required,min=2,max=100"`
+    DisplayName string `json:"displayName" binding:"required,min=2,max=100"`
     Description string `json:"description" binding:"omitempty,max=500"`
 }
 
 // DatasetColumnInfo represents column metadata
 type DatasetColumnInfo struct {
-    ColumnName  string `json:"column_name"`
-    DisplayName string `json:"display_name"`
-    DataType    string `json:"data_type"`
-    ColumnOrder int    `json:"column_order"`
+    ColumnName  string `json:"columnName"`
+    DisplayName string `json:"displayName"`
+    DataType    string `json:"dataType"`
+    ColumnOrder int    `json:"columnOrder"`
     Nullable    bool   `json:"nullable"`
 }
 
 // DatasetResponse represents dataset metadata
 type DatasetResponse struct {
     ID            uuid.UUID           `json:"id"`
-    UserID        uint                `json:"user_id"`
-    TableName     string              `json:"table_name"`
-    DisplayName   string              `json:"display_name"`
+    UserID        uint                `json:"userId"`
+    TableName     string              `json:"tableName"`
+    DisplayName   string              `json:"displayName"`
     Description   string              `json:"description"`
-    RowCount      int                 `json:"row_count"`
-    FileSizeBytes int64               `json:"file_size_bytes"`
+    RowCount      int                 `json:"rowCount"`
+    FileSizeBytes int64               `json:"fileSizeBytes"`
     Columns       []DatasetColumnInfo `json:"columns"`
-    CreatedAt     time.Time           `json:"created_at"`
-    UpdatedAt     time.Time           `json:"updated_at"`
+    CreatedAt     time.Time           `json:"createdAt"`
+    UpdatedAt     time.Time           `json:"updatedAt"`
 }
 
 // ====================
@@ -52,12 +52,12 @@ type DatasetListRequest struct {
 // DatasetListItem represents a dataset in list view
 type DatasetListItem struct {
     ID            uuid.UUID `json:"id"`
-    DisplayName   string    `json:"display_name"`
+    DisplayName   string    `json:"displayName"`
     Description   string    `json:"description"`
-    RowCount      int       `json:"row_count"`
-    FileSizeBytes int64     `json:"file_size_bytes"`
-    ColumnCount   int       `json:"column_count"`
-    CreatedAt     time.Time `json:"created_at"`
+    RowCount      int       `json:"rowCount"`
+    FileSizeBytes int64     `json:"fileSizeBytes"`
+    ColumnCount   int       `json:"columnCount"`
+    CreatedAt     time.Time `json:"createdAt"`
 }
 
 // DatasetListResponse represents paginated datasets
@@ -78,8 +78,8 @@ type FilterCondition struct {
 type DatasetDataRequest struct {
     Page      int    `form:"page,default=1" binding:"omitempty,min=1"`
     Limit     int    `form:"limit,default=50" binding:"omitempty,min=1,max=1000"`
-    SortBy    string `form:"sort_by" binding:"omitempty"`
-    SortOrder string `form:"sort_order" binding:"omitempty,oneof=asc desc"`
+    SortBy    string `form:"sortBy" binding:"omitempty"`
+    SortOrder string `form:"sortOrder" binding:"omitempty,oneof=asc desc"`
     Filters   string `form:"filters" binding:"omitempty"` // JSON encoded []FilterCondition
 }
 
@@ -98,24 +98,24 @@ type DatasetDataResponse struct {
 
 // JoinCondition represents a join condition between two columns
 type JoinCondition struct {
-    LeftColumn  string `json:"left_column" binding:"required"`
+    LeftColumn  string `json:"leftColumn" binding:"required"`
     Operator    string `json:"operator" binding:"required,oneof== != < > <= >="`
-    RightColumn string `json:"right_column" binding:"required"`
+    RightColumn string `json:"rightColumn" binding:"required"`
 }
 
 // JoinTableConfig represents configuration for joining a single table
 type JoinTableConfig struct {
-    DatasetID  string          `json:"dataset_id" binding:"required,uuid"`
-    JoinType   string          `json:"join_type" binding:"required,oneof=inner left right full cross"`
+    DatasetID  string          `json:"datasetId" binding:"required,uuid"`
+    JoinType   string          `json:"joinType" binding:"required,oneof=inner left right full cross"`
     Conditions []JoinCondition `json:"conditions" binding:"dive"` // Empty for CROSS JOIN
 }
 
 // JoinQueryRequest represents a request to execute a multi-table join query
 // Supports up to 5 tables (1 base + 4 join tables)
 type JoinQueryRequest struct {
-    BaseDatasetID string            `json:"base_dataset_id" binding:"required,uuid"`
-    JoinTables    []JoinTableConfig `json:"join_tables" binding:"required,min=1,max=4,dive"`
-    SelectColumns []string          `json:"select_columns" binding:"required,min=1"`
+    BaseDatasetID string            `json:"baseDatasetId" binding:"required,uuid"`
+    JoinTables    []JoinTableConfig `json:"joinTables" binding:"required,min=1,max=4,dive"`
+    SelectColumns []string          `json:"selectColumns" binding:"required,min=1"`
     Page          int               `json:"page" binding:"omitempty,min=1"`
     Limit         int               `json:"limit" binding:"omitempty,min=1,max=100"`
 }
@@ -127,5 +127,5 @@ type JoinQueryResponse struct {
     Total       int64                    `json:"total"`
     Page        int                      `json:"page"`
     Limit       int                      `json:"limit"`
-    QueryTimeMs int64                    `json:"query_time_ms"`
+    QueryTimeMs int64                    `json:"queryTimeMs"`
 }

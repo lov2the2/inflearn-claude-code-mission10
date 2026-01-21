@@ -12,7 +12,7 @@ type UserProfileResponse struct {
     Email     string    `json:"email"`
     Name      string    `json:"name"`
     Role      string    `json:"role"`
-    CreatedAt time.Time `json:"created_at"`
+    CreatedAt time.Time `json:"createdAt"`
 }
 
 // ====================
@@ -25,7 +25,7 @@ type UserActivityItem struct {
     Action      string    `json:"action"`
     Description string    `json:"description"`
     Timestamp   time.Time `json:"timestamp"`
-    IPAddress   string    `json:"ip_address"`
+    IPAddress   string    `json:"ipAddress"`
 }
 
 // UserActivityRequest represents query parameters for activity logs
@@ -48,10 +48,10 @@ type UserActivityResponse struct {
 
 // UserStatsResponse represents user statistics
 type UserStatsResponse struct {
-    TotalLogins      int       `json:"total_logins"`
-    LastLoginAt      time.Time `json:"last_login_at"`
-    AccountAgeInDays int       `json:"account_age_in_days"`
-    TotalActions     int       `json:"total_actions"`
+    TotalLogins      int       `json:"totalLogins"`
+    LastLoginAt      time.Time `json:"lastLoginAt"`
+    AccountAgeInDays int       `json:"accountAgeInDays"`
+    TotalActions     int       `json:"totalActions"`
 }
 
 // ====================
@@ -65,9 +65,9 @@ type UpdateProfileRequest struct {
 
 // UpdatePasswordRequest represents password change payload
 type UpdatePasswordRequest struct {
-    CurrentPassword string `json:"current_password" binding:"required,min=1"`
-    NewPassword     string `json:"new_password" binding:"required,min=8,max=128"`
-    ConfirmPassword string `json:"confirm_password" binding:"required,eqfield=NewPassword"`
+    CurrentPassword string `json:"currentPassword" binding:"required,min=1"`
+    NewPassword     string `json:"newPassword" binding:"required,min=8,max=128"`
+    ConfirmPassword string `json:"confirmPassword" binding:"required,eqfield=NewPassword"`
 }
 
 // UpdateProfileResponse represents successful profile update

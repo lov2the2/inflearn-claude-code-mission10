@@ -8,11 +8,11 @@ import (
 
 type SessionResponse struct {
     ID        uuid.UUID `json:"id"`
-    UserAgent string    `json:"user_agent"`
-    IPAddress string    `json:"ip_address"`
-    ExpiresAt time.Time `json:"expires_at"`
-    CreatedAt time.Time `json:"created_at"`
-    IsCurrent bool      `json:"is_current"`
+    UserAgent string    `json:"userAgent"`
+    IPAddress string    `json:"ipAddress"`
+    ExpiresAt time.Time `json:"expiresAt"`
+    CreatedAt time.Time `json:"createdAt"`
+    IsCurrent bool      `json:"isCurrent"`
 }
 
 type SessionListResponse struct {
@@ -20,5 +20,5 @@ type SessionListResponse struct {
 }
 
 type RevokeSessionRequest struct {
-    SessionID string `json:"session_id" binding:"required,uuid"`
+    SessionID string `json:"sessionId" binding:"required,uuid"`
 }
