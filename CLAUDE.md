@@ -51,6 +51,15 @@ Production-ready full-stack starter kit combining:
 - Pre-restore backup for safety
 - Cross-platform support (macOS launchd, Linux cron)
 
+**Frontend Naming Convention Refactoring (v1.5.1)**:
+- Migrated all frontend code from snake_case to camelCase naming conventions
+- Updated React hooks: `use_user_profile` → `useUserProfile`
+- Updated mutation hooks: `use_create_user` → `useCreateUser`
+- Updated query keys: `query_keys` → `queryKeys`
+- Consistent camelCase for all variable names, function names, and type fields
+- Maintained API compatibility (backend already uses camelCase for JSON fields)
+- All tests passed successfully with zero breaking changes
+
 ---
 
 ## Architecture
@@ -198,15 +207,18 @@ frontend/
 │   │   └── ...
 │   ├── hooks/                         # Custom React hooks
 │   │   ├── useAuth.ts                # Authentication hook
-│   │   ├── use-api-mutation.ts       # Generic API mutation hook
+│   │   ├── useApiMutation.ts         # Generic API mutation hook
 │   │   ├── queries/                  # React Query hooks
-│   │   │   ├── use-dataset-list.ts   # Dataset list query
-│   │   │   ├── use-dataset-detail.ts # Dataset detail query
-│   │   │   └── use-dataset-data.ts   # Dataset data query
+│   │   │   ├── useDatasetList.ts     # Dataset list query
+│   │   │   ├── useDatasetDetail.ts   # Dataset detail query
+│   │   │   ├── useDatasetData.ts     # Dataset data query
+│   │   │   └── useUserProfile.ts     # User profile query
 │   │   └── mutations/                # Mutation hooks
-│   │       ├── use-upload-dataset.ts # Dataset upload mutation
-│   │       ├── use-delete-dataset.ts # Dataset delete mutation
-│   │       ├── use-create-user.ts    # User creation mutation
+│   │       ├── useUploadDataset.ts   # Dataset upload mutation
+│   │       ├── useDeleteDataset.ts   # Dataset delete mutation
+│   │       ├── useCreateUser.ts      # User creation mutation
+│   │       ├── useDeleteUser.ts      # User deletion mutation
+│   │       ├── useUpdateUserRole.ts  # Role update mutation
 │   │       └── ...
 │   ├── schemas/                       # Zod validation schemas
 │   │   ├── auth.ts                   # Auth form schemas
@@ -532,10 +544,16 @@ make clean
 | `lib/api/datasets.ts` | Dataset API client | Upload, list, detail, query, delete operations |
 | `lib/api/admin.ts` | Admin API client | User management, role updates, CSV import/export |
 | `lib/hooks/useAuth.ts` | Authentication hook | Login/logout state management |
-| `lib/hooks/use-api-mutation.ts` | Generic mutation hook | Reusable API mutation with error handling and toast |
-| `lib/hooks/queries/use-dataset-*.ts` | Dataset query hooks | React Query hooks for dataset operations |
-| `lib/hooks/mutations/use-*-dataset.ts` | Dataset mutation hooks | Upload and delete mutations |
-| `lib/hooks/mutations/use-create-user.ts` | User creation hook | Admin user creation mutation |
+| `lib/hooks/useApiMutation.ts` | Generic mutation hook | Reusable API mutation with error handling and toast |
+| `lib/hooks/queries/useDatasetList.ts` | Dataset list query | React Query hook for fetching dataset list |
+| `lib/hooks/queries/useDatasetDetail.ts` | Dataset detail query | React Query hook for dataset metadata |
+| `lib/hooks/queries/useDatasetData.ts` | Dataset data query | React Query hook for dataset table data |
+| `lib/hooks/queries/useUserProfile.ts` | User profile query | React Query hook for user profile data |
+| `lib/hooks/mutations/useUploadDataset.ts` | Dataset upload mutation | Upload CSV and create dataset |
+| `lib/hooks/mutations/useDeleteDataset.ts` | Dataset delete mutation | Delete dataset and table |
+| `lib/hooks/mutations/useCreateUser.ts` | User creation mutation | Admin user creation |
+| `lib/hooks/mutations/useDeleteUser.ts` | User deletion mutation | Admin user deletion |
+| `lib/hooks/mutations/useUpdateUserRole.ts` | Role update mutation | Admin role update |
 | `lib/schemas/auth.ts` | Zod validation | Login/register form validation |
 | `lib/schemas/dataset.ts` | Zod validation | Dataset upload and join query validation |
 | `app/(auth)/login/page.tsx` | Login page | Form submission, error handling |
@@ -716,10 +734,23 @@ make start
 
 ### Code Style
 
+**Backend (Go)**:
 - **Naming**: snake_case for variables/functions, UPPER_SNAKE_CASE for constants
+- **JSON Tags**: camelCase for API responses (e.g., `json:"createdAt"`)
 - **Indentation**: 4 spaces (not tabs)
 - **Language**: English for all code, comments, and commit messages
+
+**Frontend (TypeScript/React)**:
+- **Naming**: camelCase for variables/functions, UPPER_SNAKE_CASE for constants
+- **React Hooks**: camelCase with `use` prefix (e.g., `useUserProfile`, `useCreateUser`)
+- **Query Keys**: camelCase (e.g., `queryKeys.user.profile`)
+- **Type Fields**: camelCase to match API responses (e.g., `createdAt`, `ipAddress`)
+- **Indentation**: 4 spaces (not tabs)
+- **Language**: English for all code, comments, and commit messages
+
+**Common Standards**:
 - **Readability**: Use descriptive names, avoid abbreviations
+- **Consistency**: Frontend types must match backend JSON field names (camelCase)
 
 ### API Naming Conventions and Type Consistency
 
@@ -862,4 +893,4 @@ This project follows system-wide standards defined in `~/.claude/CLAUDE.md`:
 ---
 
 **Maintained by**: Claude Code
-**Last Updated**: 2026-01-12
+**Last Updated**: 2026-01-22
